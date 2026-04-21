@@ -1,0 +1,20 @@
+name: Initialize new repo
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  init-repo:
+    runs-on: ubuntu-latest
+    # Only run once — when the repo has just 1 commit
+    if: github.run_number == 1
+    steps:
+      - name: Enable discussions
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ADMIN_PAT }}
+          script: |
+            const { owner, repo } = context.repo;
+            await github.rest.repos.update({ owner, repo, has_discussions: true });
+            console.log('Discussions enabled');
