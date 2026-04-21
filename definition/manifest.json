@@ -1,7 +1,20 @@
 {
-  "connector_id": "REPLACE-WITH-UUID",
-  "connector_name": "REPLACE",
-  "slug": "REPLACE",
+  "connector_name": "sevdesk",
+  "slug": "sevdesk",
   "version": "1.0.0",
-  "endpoints": []
+  "placeholders": [
+    {
+      "name": "api_token",
+      "source": "user_defined"
+    }
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/CheckAccountTransaction",
+      "method": "GET",
+      "version": 1,
+      "file": "definition/endpoints/get_check_account_transactions.json",
+      "placeholders": []
+    }
+  ]
 }

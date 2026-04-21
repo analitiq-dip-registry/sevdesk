@@ -1,6 +1,7 @@
 # Changelog
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2026-04-04
 
 ### Added
-- Initial connector definition
+- Initial connector definition with api_key authentication
+- Added `getCheckAccountTransactions` endpoint (`GET /CheckAccountTransaction`)

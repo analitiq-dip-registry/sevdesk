@@ -1,0 +1,228 @@
+{
+  "endpoint": "/CheckAccountTransaction",
+  "method": "POST",
+  "version": 1,
+  "endpoint_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "CheckAccountTransaction",
+    "description": "Check account transaction model. Responsible for the transactions on payment accounts.",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The check account transaction id"
+        },
+        "objectName": {
+          "type": "string",
+          "description": "The check account transaction object name"
+        },
+        "create": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date of check account transaction creation"
+        },
+        "update": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date of last check account transaction update"
+        },
+        "sevClient": {
+          "type": "object",
+          "description": "Client to which check account transaction belongs",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the client"
+            },
+            "objectName": {
+              "type": "string",
+              "description": "Model name, which is 'SevClient'"
+            }
+          }
+        },
+        "valueDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date the check account transaction was imported"
+        },
+        "entryDate": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Date the check account transaction was booked"
+        },
+        "paymtPurpose": {
+          "type": "string",
+          "nullable": true,
+          "description": "The purpose of the transaction"
+        },
+        "amount": {
+          "type": "string",
+          "description": "Amount of the transaction"
+        },
+        "payeePayerName": {
+          "type": "string",
+          "nullable": true,
+          "description": "Name of the other party"
+        },
+        "payeePayerAcctNo": {
+          "type": "string",
+          "nullable": true,
+          "description": "IBAN or account number of the other party"
+        },
+        "payeePayerBankCode": {
+          "type": "string",
+          "nullable": true,
+          "description": "BIC or bank code of the other party"
+        },
+        "gvCode": {
+          "type": "string",
+          "nullable": true,
+          "description": "ZKA business transaction code (finAPI accounts)"
+        },
+        "entryText": {
+          "type": "string",
+          "nullable": true,
+          "description": "Transaction type according to bank (finAPI accounts)"
+        },
+        "primaNotaNo": {
+          "type": "string",
+          "nullable": true,
+          "description": "Transaction primanota (finAPI accounts)"
+        },
+        "checkAccount": {
+          "type": "object",
+          "description": "The check account to which the transaction belongs",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the check account"
+            },
+            "objectName": {
+              "type": "string",
+              "description": "Model name, which is 'CheckAccount'"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the transaction. 100=Created, 200=Linked, 300=Private, 350=Auto-booked, 400=Booked"
+        },
+        "sourceTransaction": {
+          "type": "object",
+          "nullable": true,
+          "description": "The check account transaction serving as source of a money transit",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the check account transaction"
+            },
+            "objectName": {
+              "type": "string",
+              "description": "Model name, which is 'CheckAccountTransaction'"
+            }
+          }
+        },
+        "targetTransaction": {
+          "type": "object",
+          "nullable": true,
+          "description": "The check account transaction serving as target of a money transit",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the check account transaction"
+            },
+            "objectName": {
+              "type": "string",
+              "description": "Model name, which is 'CheckAccountTransaction'"
+            }
+          }
+        },
+        "enshrined": {
+          "type": "string",
+          "format": "date-time",
+          "nullable": true,
+          "description": "Timepoint when the transaction was enshrined"
+        }
+      }
+    }
+  },
+  "response_wrapper": "objects",
+  "filters": {
+    "checkAccount[id]": {
+      "description": "Retrieve all transactions on this check account. Must be provided with checkAccount[objectName]",
+      "type": "integer",
+      "operators": ["eq"],
+      "required": false
+    },
+    "checkAccount[objectName]": {
+      "description": "Only required if checkAccount[id] was provided. 'CheckAccount' should be used as value.",
+      "type": "string",
+      "operators": ["eq"],
+      "required": false
+    },
+    "isBooked": {
+      "description": "Only retrieve booked transactions",
+      "type": "boolean",
+      "operators": ["eq"],
+      "required": false
+    },
+    "paymtPurpose": {
+      "description": "Only retrieve transactions with this payment purpose",
+      "type": "string",
+      "operators": ["eq"],
+      "required": false
+    },
+    "startDate": {
+      "description": "Only retrieve transactions from this date on",
+      "type": "string",
+      "operators": ["gte"],
+      "required": false
+    },
+    "endDate": {
+      "description": "Only retrieve transactions up to this date",
+      "type": "string",
+      "operators": ["lte"],
+      "required": false
+    },
+    "payeePayerName": {
+      "description": "Only retrieve transactions with this payee / payer",
+      "type": "string",
+      "operators": ["eq"],
+      "required": false
+    },
+    "onlyCredit": {
+      "description": "Only retrieve credit transactions",
+      "type": "boolean",
+      "operators": ["eq"],
+      "required": false
+    },
+    "onlyDebit": {
+      "description": "Only retrieve debit transactions",
+      "type": "boolean",
+      "operators": ["eq"],
+      "required": false
+    }
+  },
+  "pagination": {
+    "type": "offset",
+    "params": {
+      "limit_param": "limit",
+      "offset_param": "offset",
+      "max_limit": 1000,
+      "cursor_param": null,
+      "next_cursor_field": null,
+      "page_param": null,
+      "uses_link_header": false,
+      "time_window_params": {
+        "start_param": null,
+        "end_param": null
+      }
+    }
+  },
+  "replication_filter_mapping": {
+    "update": "startDate"
+  }
+}
