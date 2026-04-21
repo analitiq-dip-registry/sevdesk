@@ -1,9 +1,9 @@
 {
-  "connector_name": "REPLACE",
+  "connector_name": "sevdesk",
   "connector_type": "api",
-  "connector_descr": "REPLACE with a short description",
-  "slug": "REPLACE",
-  "base_url": "https://api.example.com/v1/",
+  "connector_descr": "Cloud-based accounting and invoicing platform for small businesses and freelancers",
+  "slug": "sevdesk",
+  "base_url": "https://my.sevdesk.de/api/v1/",
   "client_required": false,
   "auth": {
     "type": "api_key"
@@ -11,12 +11,12 @@
   "headers": {
     "Accept": "application/json",
     "Content-Type": "application/json",
-    "Authorization": "Bearer ${api_key}"
+    "Authorization": "${api_token}"
   },
   "form_fields": [
     {
-      "name": "api_key",
-      "label": "API Key",
+      "name": "api_token",
+      "label": "API Token",
       "type": "password",
       "required": true,
       "secret": true
@@ -24,7 +24,8 @@
   ],
   "timeout": 30,
   "requests_per_second": {
-    "max_requests": 60,
-    "time_window_seconds": 60
-  }
+    "max_requests": null,
+    "time_window_seconds": null
+  },
+  "api_doc_url": "https://api.sevdesk.de/"
 }
