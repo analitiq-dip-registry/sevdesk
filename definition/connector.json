@@ -3,7 +3,7 @@
   "connector_type": "api",
   "connector_descr": "Cloud-based accounting and invoicing platform for small businesses and freelancers",
   "slug": "sevdesk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "base_url": "https://my.sevdesk.de/api/v1/",
   "client_required": false,
   "auth": {
