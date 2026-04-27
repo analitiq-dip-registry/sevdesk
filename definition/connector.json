@@ -3,6 +3,7 @@
   "connector_type": "api",
   "connector_descr": "Cloud-based accounting and invoicing platform for small businesses and freelancers",
   "slug": "sevdesk",
+  "version": "0.0.1",
   "base_url": "https://my.sevdesk.de/api/v1/",
   "client_required": false,
   "auth": {
@@ -20,6 +21,21 @@
       "type": "password",
       "required": true,
       "secret": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "api_token",
+      "source": "user_defined"
+    }
+  ],
+  "endpoints": [
+    {
+      "endpoint": "/CheckAccountTransaction",
+      "method": "GET",
+      "version": 1,
+      "file": "definition/endpoints/get_check_account_transactions.json",
+      "placeholders": []
     }
   ],
   "timeout": 30,
