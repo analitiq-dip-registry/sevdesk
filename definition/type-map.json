@@ -1,0 +1,11 @@
+[
+  { "match": "exact", "native": "BOOLEAN",          "canonical": "Boolean" },
+  { "match": "exact", "native": "INTEGER",          "canonical": "Int64" },
+  { "match": "exact", "native": "NUMBER",           "canonical": "Float64" },
+  { "match": "exact", "native": "STRING:DATE-TIME", "canonical": "Timestamp(MICROSECOND, UTC)" },
+  { "match": "exact", "native": "STRING:DATE",      "canonical": "Date32" },
+  { "match": "exact", "native": "STRING:TIME",      "canonical": "Time64(MICROSECOND)" },
+  { "match": "regex", "native": "^STRING(:.+)?$",   "canonical": "Utf8" },
+  { "match": "exact", "native": "OBJECT",           "canonical": "Utf8" },
+  { "match": "exact", "native": "ARRAY",            "canonical": "Utf8" }
+]
