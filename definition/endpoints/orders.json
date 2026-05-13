@@ -1,0 +1,941 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Orders",
+  "description": "Quotations and order confirmations.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/Order",
+        "query": {
+          "status": {
+            "from_param": "status"
+          },
+          "orderNumber": {
+            "from_param": "orderNumber"
+          },
+          "startDate": {
+            "from_param": "startDate"
+          },
+          "endDate": {
+            "from_param": "endDate"
+          },
+          "contact[id]": {
+            "from_param": "contact[id]"
+          },
+          "contact[objectName]": {
+            "from_param": "contact[objectName]"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by status."
+        },
+        "orderNumber": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by orderNumber."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by startDate."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by endDate."
+        },
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by contact[id]."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'Contact'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "orderNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "contact": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "orderDate": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time"
+                  },
+                  "status": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "orderType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Order type (AN=quotation, AB=order confirmation, etc.)."
+                  },
+                  "header": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "headText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "footText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "addressName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "addressStreet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "addressZip": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "addressCity": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "addressCountry": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "currency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "sumNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "taxRate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "taxRule": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "taxText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "taxType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "showNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "deliveryTerms": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "paymentTerms": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "deliveryDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time"
+                  },
+                  "deliveryDateUntil": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time"
+                  },
+                  "version": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "native_type": "integer",
+                    "arrow_type": "Int32"
+                  },
+                  "smallSettlement": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/Order",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "contactPerson": {
+              "from_input": "contactPerson"
+            },
+            "orderDate": {
+              "from_input": "orderDate"
+            },
+            "orderNumber": {
+              "from_input": "orderNumber"
+            },
+            "status": {
+              "from_input": "status"
+            },
+            "orderType": {
+              "from_input": "orderType"
+            },
+            "header": {
+              "from_input": "header"
+            },
+            "headText": {
+              "from_input": "headText"
+            },
+            "footText": {
+              "from_input": "footText"
+            },
+            "currency": {
+              "from_input": "currency"
+            },
+            "taxRate": {
+              "from_input": "taxRate"
+            },
+            "taxRule": {
+              "from_input": "taxRule"
+            },
+            "taxText": {
+              "from_input": "taxText"
+            },
+            "taxType": {
+              "from_input": "taxType"
+            },
+            "showNet": {
+              "from_input": "showNet"
+            },
+            "deliveryDate": {
+              "from_input": "deliveryDate"
+            },
+            "deliveryDateUntil": {
+              "from_input": "deliveryDateUntil"
+            },
+            "smallSettlement": {
+              "from_input": "smallSettlement"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "contactPerson": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "SevUser"
+                  }
+                }
+              },
+              "orderDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "orderNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "orderType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "header": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "headText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "footText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxRate": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "taxRule": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "TaxRule"
+                  }
+                }
+              },
+              "taxText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "showNet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deliveryDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "deliveryDateUntil": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "smallSettlement": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contact",
+              "contactPerson",
+              "orderDate",
+              "currency",
+              "taxRule",
+              "taxText"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/Order/{orderId}",
+          "path_params": {
+            "orderId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "contactPerson": {
+              "from_input": "contactPerson"
+            },
+            "orderDate": {
+              "from_input": "orderDate"
+            },
+            "orderNumber": {
+              "from_input": "orderNumber"
+            },
+            "status": {
+              "from_input": "status"
+            },
+            "orderType": {
+              "from_input": "orderType"
+            },
+            "header": {
+              "from_input": "header"
+            },
+            "headText": {
+              "from_input": "headText"
+            },
+            "footText": {
+              "from_input": "footText"
+            },
+            "currency": {
+              "from_input": "currency"
+            },
+            "taxRate": {
+              "from_input": "taxRate"
+            },
+            "taxRule": {
+              "from_input": "taxRule"
+            },
+            "taxText": {
+              "from_input": "taxText"
+            },
+            "taxType": {
+              "from_input": "taxType"
+            },
+            "showNet": {
+              "from_input": "showNet"
+            },
+            "deliveryDate": {
+              "from_input": "deliveryDate"
+            },
+            "deliveryDateUntil": {
+              "from_input": "deliveryDateUntil"
+            },
+            "smallSettlement": {
+              "from_input": "smallSettlement"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "contactPerson": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "SevUser"
+                  }
+                }
+              },
+              "orderDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "orderNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "orderType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "header": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "headText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "footText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxRate": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "taxRule": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "TaxRule"
+                  }
+                }
+              },
+              "taxText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "showNet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deliveryDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "deliveryDateUntil": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "smallSettlement": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "orders"
+}

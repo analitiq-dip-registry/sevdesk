@@ -1,0 +1,608 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Credit Note Positions",
+  "description": "Line items belonging to credit notes.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/CreditNotePos",
+        "query": {
+          "creditNote[id]": {
+            "from_param": "creditNote[id]"
+          },
+          "creditNote[objectName]": {
+            "from_param": "creditNote[objectName]"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "creditNote[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by creditNote[id]."
+        },
+        "creditNote[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'CreditNote'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "creditNote": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "part": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "price": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "positionNumber": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "native_type": "integer",
+                    "arrow_type": "Int32"
+                  },
+                  "text": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "discount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "taxRate": {
+                    "type": "string",
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "unity": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "sumNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/CreditNotePos",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "creditNote": {
+              "from_input": "creditNote"
+            },
+            "part": {
+              "from_input": "part"
+            },
+            "quantity": {
+              "from_input": "quantity"
+            },
+            "price": {
+              "from_input": "price"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "unity": {
+              "from_input": "unity"
+            },
+            "positionNumber": {
+              "from_input": "positionNumber"
+            },
+            "taxRate": {
+              "from_input": "taxRate"
+            },
+            "text": {
+              "from_input": "text"
+            },
+            "discount": {
+              "from_input": "discount"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "creditNote": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CreditNote"
+                  }
+                }
+              },
+              "part": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Part"
+                  }
+                }
+              },
+              "quantity": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "price": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unity": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Unity"
+                  }
+                }
+              },
+              "positionNumber": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "taxRate": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "discount": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "creditNote",
+              "quantity",
+              "name",
+              "unity",
+              "taxRate"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/CreditNotePos/{creditNotePosId}",
+          "path_params": {
+            "creditNotePosId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "creditNote": {
+              "from_input": "creditNote"
+            },
+            "part": {
+              "from_input": "part"
+            },
+            "quantity": {
+              "from_input": "quantity"
+            },
+            "price": {
+              "from_input": "price"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "unity": {
+              "from_input": "unity"
+            },
+            "positionNumber": {
+              "from_input": "positionNumber"
+            },
+            "taxRate": {
+              "from_input": "taxRate"
+            },
+            "text": {
+              "from_input": "text"
+            },
+            "discount": {
+              "from_input": "discount"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "creditNote": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CreditNote"
+                  }
+                }
+              },
+              "part": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Part"
+                  }
+                }
+              },
+              "quantity": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "price": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unity": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Unity"
+                  }
+                }
+              },
+              "positionNumber": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "taxRate": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "discount": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "credit_note_positions"
+}

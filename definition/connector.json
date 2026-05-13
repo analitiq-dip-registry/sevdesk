@@ -2,18 +2,20 @@
   "$schema": "https://schemas.analitiq.ai/connector/latest.json",
   "kind": "api",
   "display_name": "sevdesk",
-  "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers",
+  "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
   "documentation_url": "https://api.sevdesk.de/",
-  "version": "0.0.2",
+  "version": "1.1.0",
   "default_transport": "api",
   "transports": {
     "api": {
       "transport_type": "http",
-      "base_url": "https://my.sevdesk.de/api/v1/",
+      "base_url": "https://my.sevdesk.de/api/v1",
       "headers": {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": { "template": "${secrets.api_token}" }
+        "Authorization": {
+          "template": "${secrets.api_token}"
+        }
       },
       "timeout_seconds": 30
     }
@@ -32,9 +34,13 @@
         "secret": true,
         "ui": {
           "label": "API Token",
-          "widget": "password"
+          "widget": "password",
+          "help_text": "32-character hexadecimal token from my.sevdesk.de under Settings > Users."
         }
       }
-    }
+    },
+    "required_for_activation": [
+      "secrets.api_token"
+    ]
   }
 }

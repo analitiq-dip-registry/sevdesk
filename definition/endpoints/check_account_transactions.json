@@ -1,0 +1,687 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Check Account Transactions",
+  "description": "Bank/cash/register transactions on payment accounts.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/CheckAccountTransaction",
+        "query": {
+          "checkAccount[id]": {
+            "from_param": "checkAccount[id]"
+          },
+          "checkAccount[objectName]": {
+            "from_param": "checkAccount[objectName]"
+          },
+          "isBooked": {
+            "from_param": "isBooked"
+          },
+          "paymtPurpose": {
+            "from_param": "paymtPurpose"
+          },
+          "startDate": {
+            "from_param": "startDate"
+          },
+          "endDate": {
+            "from_param": "endDate"
+          },
+          "payeePayerName": {
+            "from_param": "payeePayerName"
+          },
+          "onlyCredit": {
+            "from_param": "onlyCredit"
+          },
+          "onlyDebit": {
+            "from_param": "onlyDebit"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "checkAccount[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by check account id."
+        },
+        "checkAccount[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'CheckAccount'."
+        },
+        "isBooked": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only return booked transactions."
+        },
+        "paymtPurpose": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by payment purpose."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter from this value date (date-time)."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter to this value date (date-time)."
+        },
+        "payeePayerName": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by payee/payer name."
+        },
+        "onlyCredit": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by onlyCredit."
+        },
+        "onlyDebit": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by onlyDebit."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Check account transaction id."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "valueDate": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date the transaction was imported."
+                  },
+                  "entryDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date the transaction was booked."
+                  },
+                  "paymtPurpose": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "amount": {
+                    "type": "string",
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "payeePayerName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "payeePayerAcctNo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "payeePayerBankCode": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "gvCode": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "entryText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "primaNotaNo": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "checkAccount": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "status": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Status: 100=Created, 200=Linked, 300=Private, 350=Auto-booked, 400=Booked."
+                  },
+                  "sourceTransaction": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "targetTransaction": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "enshrined": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/CheckAccountTransaction",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "valueDate": {
+              "from_input": "valueDate"
+            },
+            "entryDate": {
+              "from_input": "entryDate"
+            },
+            "paymtPurpose": {
+              "from_input": "paymtPurpose"
+            },
+            "amount": {
+              "from_input": "amount"
+            },
+            "payeePayerName": {
+              "from_input": "payeePayerName"
+            },
+            "payeePayerAcctNo": {
+              "from_input": "payeePayerAcctNo"
+            },
+            "payeePayerBankCode": {
+              "from_input": "payeePayerBankCode"
+            },
+            "gvCode": {
+              "from_input": "gvCode"
+            },
+            "entryText": {
+              "from_input": "entryText"
+            },
+            "primaNotaNo": {
+              "from_input": "primaNotaNo"
+            },
+            "checkAccount": {
+              "from_input": "checkAccount"
+            },
+            "status": {
+              "from_input": "status"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "valueDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "entryDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "paymtPurpose": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "amount": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "payeePayerName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payeePayerAcctNo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payeePayerBankCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gvCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entryText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "primaNotaNo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "checkAccount": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CheckAccount"
+                  }
+                }
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "valueDate",
+              "amount",
+              "checkAccount",
+              "status"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/CheckAccountTransaction/{transactionId}",
+          "path_params": {
+            "transactionId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "valueDate": {
+              "from_input": "valueDate"
+            },
+            "entryDate": {
+              "from_input": "entryDate"
+            },
+            "paymtPurpose": {
+              "from_input": "paymtPurpose"
+            },
+            "amount": {
+              "from_input": "amount"
+            },
+            "payeePayerName": {
+              "from_input": "payeePayerName"
+            },
+            "payeePayerAcctNo": {
+              "from_input": "payeePayerAcctNo"
+            },
+            "payeePayerBankCode": {
+              "from_input": "payeePayerBankCode"
+            },
+            "gvCode": {
+              "from_input": "gvCode"
+            },
+            "entryText": {
+              "from_input": "entryText"
+            },
+            "primaNotaNo": {
+              "from_input": "primaNotaNo"
+            },
+            "checkAccount": {
+              "from_input": "checkAccount"
+            },
+            "status": {
+              "from_input": "status"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "valueDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "entryDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "paymtPurpose": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "amount": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "payeePayerName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payeePayerAcctNo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payeePayerBankCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gvCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "entryText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "primaNotaNo": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "checkAccount": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CheckAccount"
+                  }
+                }
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "check_account_transactions"
+}
