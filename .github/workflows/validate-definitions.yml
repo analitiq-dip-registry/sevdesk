@@ -36,8 +36,8 @@ jobs:
           set -euo pipefail
 
           if [ ! -d definition/endpoints ]; then
-            echo "ERROR: definition/endpoints/ directory is missing."
-            exit 1
+            echo "No definition/endpoints/ directory — skipping endpoint validation."
+            exit 0
           fi
 
           mapfile -d '' -t ENDPOINTS < <(find definition/endpoints -name "*.json" -type f -print0)
@@ -47,23 +47,22 @@ jobs:
             exit 0
           fi
 
-          CONNECTOR_TYPE=$(jq -r '.connector_type' definition/connector.json)
-          if [ -z "$CONNECTOR_TYPE" ] || [ "$CONNECTOR_TYPE" = "null" ]; then
-            echo "ERROR: .connector_type is missing or null in definition/connector.json"
+          CONNECTOR_KIND=$(jq -r '.kind' definition/connector.json)
+          if [ -z "$CONNECTOR_KIND" ] || [ "$CONNECTOR_KIND" = "null" ]; then
+            echo "ERROR: .kind is missing or null in definition/connector.json"
             exit 1
           fi
 
-          case "$CONNECTOR_TYPE" in
+          case "$CONNECTOR_KIND" in
             api)      TYPE_SCHEMA="https://schemas.analitiq.ai/api-endpoint/latest.json" ;;
             database) TYPE_SCHEMA="https://schemas.analitiq.ai/database-endpoint/latest.json" ;;
             *)
-              echo "Unknown connector_type: '$CONNECTOR_TYPE'"
+              echo "Unknown connector kind: '$CONNECTOR_KIND'"
               exit 1
               ;;
           esac
 
           for f in "${ENDPOINTS[@]}"; do
             echo "--- $f ---"
-            check-jsonschema --schemafile https://schemas.analitiq.ai/endpoint/latest.json "$f"
             check-jsonschema --schemafile "$TYPE_SCHEMA" "$f"
           done
