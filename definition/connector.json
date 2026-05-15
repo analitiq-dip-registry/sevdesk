@@ -4,7 +4,7 @@
   "display_name": "sevdesk",
   "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
   "documentation_url": "https://api.sevdesk.de/",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "default_transport": "api",
   "transports": {
     "api": {

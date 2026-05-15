@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] - 2026-05-15
+
+### Fixed
+- bug: retrigger version-bump to retest webhook after connector.json migration (#5)
+
 ## [1.1.0] - 2026-05-08
 
 ### Added
