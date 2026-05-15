@@ -1,47 +1,46 @@
 {
-  "connector_name": "sevdesk",
-  "connector_type": "api",
-  "connector_descr": "Cloud-based accounting and invoicing platform for small businesses and freelancers",
-  "slug": "sevdesk",
-  "version": "0.0.3",
-  "base_url": "https://my.sevdesk.de/api/v1/",
-  "client_required": false,
+  "$schema": "https://schemas.analitiq.ai/connector/latest.json",
+  "kind": "api",
+  "display_name": "sevdesk",
+  "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
+  "documentation_url": "https://api.sevdesk.de/",
+  "version": "1.1.0",
+  "default_transport": "api",
+  "transports": {
+    "api": {
+      "transport_type": "http",
+      "base_url": "https://my.sevdesk.de/api/v1",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": {
+          "template": "${secrets.api_token}"
+        }
+      },
+      "timeout_seconds": 30
+    }
+  },
   "auth": {
     "type": "api_key"
   },
-  "headers": {
-    "Accept": "application/json",
-    "Content-Type": "application/json",
-    "Authorization": "${api_token}"
-  },
-  "form_fields": [
-    {
-      "name": "api_token",
-      "label": "API Token",
-      "type": "password",
-      "required": true,
-      "secret": true
-    }
-  ],
-  "placeholders": [
-    {
-      "name": "api_token",
-      "source": "user_defined"
-    }
-  ],
-  "endpoints": [
-    {
-      "endpoint": "/CheckAccountTransaction",
-      "method": "GET",
-      "version": 1,
-      "file": "definition/endpoints/get_check_account_transactions.json",
-      "placeholders": []
-    }
-  ],
-  "timeout": 30,
-  "requests_per_second": {
-    "max_requests": null,
-    "time_window_seconds": null
-  },
-  "api_doc_url": "https://api.sevdesk.de/"
+  "connection_contract": {
+    "inputs": {
+      "api_token": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "secrets",
+        "type": "string",
+        "required": true,
+        "secret": true,
+        "ui": {
+          "label": "API Token",
+          "widget": "password",
+          "help_text": "32-character hexadecimal token from my.sevdesk.de under Settings > Users."
+        }
+      }
+    },
+    "required_for_activation": [
+      "secrets.api_token"
+    ]
+  }
 }

@@ -1,0 +1,590 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Contact Addresses",
+  "description": "Postal addresses associated with contacts.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/ContactAddress",
+        "query": {
+          "contact[id]": {
+            "from_param": "contact[id]"
+          },
+          "contact[objectName]": {
+            "from_param": "contact[objectName]"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by contact id."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'Contact'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Contact address id."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Contact relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "street": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "zip": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "city": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "country": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Country relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "category": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Address category.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Optional address name (e.g. Billing)."
+                  },
+                  "name2": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "name3": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "name4": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/ContactAddress",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "country": {
+              "from_input": "country"
+            },
+            "category": {
+              "from_input": "category"
+            },
+            "street": {
+              "from_input": "street"
+            },
+            "zip": {
+              "from_input": "zip"
+            },
+            "city": {
+              "from_input": "city"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "name2": {
+              "from_input": "name2"
+            },
+            "name3": {
+              "from_input": "name3"
+            },
+            "name4": {
+              "from_input": "name4"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "country": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "StaticCountry"
+                  }
+                }
+              },
+              "category": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Category"
+                  }
+                }
+              },
+              "street": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "zip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "city": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name2": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name3": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name4": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contact",
+              "country"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/ContactAddress/{contactAddressId}",
+          "path_params": {
+            "contactAddressId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "country": {
+              "from_input": "country"
+            },
+            "category": {
+              "from_input": "category"
+            },
+            "street": {
+              "from_input": "street"
+            },
+            "zip": {
+              "from_input": "zip"
+            },
+            "city": {
+              "from_input": "city"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "name2": {
+              "from_input": "name2"
+            },
+            "name3": {
+              "from_input": "name3"
+            },
+            "name4": {
+              "from_input": "name4"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "country": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "StaticCountry"
+                  }
+                }
+              },
+              "category": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Category"
+                  }
+                }
+              },
+              "street": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "zip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "city": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name2": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name3": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name4": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "contact_addresses"
+}

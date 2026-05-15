@@ -1,0 +1,754 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Contacts",
+  "description": "Customers, suppliers, partners, and prospects.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/Contact",
+        "query": {
+          "depth": {
+            "from_param": "depth"
+          },
+          "customerNumber": {
+            "from_param": "customer_number"
+          },
+          "country[id]": {
+            "from_param": "country_id"
+          },
+          "country[objectName]": {
+            "from_param": "country_object_name"
+          },
+          "category[id]": {
+            "from_param": "category_id"
+          },
+          "category[objectName]": {
+            "from_param": "category_object_name"
+          },
+          "embed": {
+            "from_param": "embed"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "depth": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Include nested resources (0 or 1)."
+        },
+        "customer_number": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter contacts by customer number."
+        },
+        "country_id": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Country id filter (use with country_object_name)."
+        },
+        "country_object_name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Object name of the country relation. Use 'StaticCountry'."
+        },
+        "category_id": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Category id filter (use with category_object_name)."
+        },
+        "category_object_name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Object name of the category relation. Use 'Category'."
+        },
+        "embed": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Comma-separated list of nested resources to embed."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Contact id."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "format": "date-time",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)"
+                  },
+                  "update": {
+                    "type": "string",
+                    "format": "date-time",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)"
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Organization name."
+                  },
+                  "surename": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "First name (individual)."
+                  },
+                  "familyname": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Family name (individual)."
+                  },
+                  "category": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Category relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "parent": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "customerNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "taxNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "vatNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "bankAccount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "bankNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "defaultCashbackTime": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "native_type": "integer",
+                    "arrow_type": "Int32"
+                  },
+                  "defaultCashbackPercent": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "defaultTimeToPay": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "native_type": "integer",
+                    "arrow_type": "Int32"
+                  },
+                  "gender": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "birthday": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date",
+                    "native_type": "date",
+                    "arrow_type": "Date32"
+                  },
+                  "excemptVat": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "taxType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/Contact",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "category": {
+              "from_input": "category"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "surename": {
+              "from_input": "surename"
+            },
+            "familyname": {
+              "from_input": "familyname"
+            },
+            "customerNumber": {
+              "from_input": "customerNumber"
+            },
+            "taxNumber": {
+              "from_input": "taxNumber"
+            },
+            "vatNumber": {
+              "from_input": "vatNumber"
+            },
+            "bankAccount": {
+              "from_input": "bankAccount"
+            },
+            "bankNumber": {
+              "from_input": "bankNumber"
+            },
+            "defaultCashbackTime": {
+              "from_input": "defaultCashbackTime"
+            },
+            "defaultCashbackPercent": {
+              "from_input": "defaultCashbackPercent"
+            },
+            "defaultTimeToPay": {
+              "from_input": "defaultTimeToPay"
+            },
+            "gender": {
+              "from_input": "gender"
+            },
+            "birthday": {
+              "from_input": "birthday"
+            },
+            "parent": {
+              "from_input": "parent"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "category"
+            ],
+            "properties": {
+              "category": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Category"
+                  }
+                }
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "surename": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "familyname": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customerNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "vatNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bankAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bankNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "defaultCashbackTime": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "defaultCashbackPercent": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "defaultTimeToPay": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "birthday": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "parent": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/Contact/{contactId}",
+          "path_params": {
+            "contactId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "category": {
+              "from_input": "category"
+            },
+            "name": {
+              "from_input": "name"
+            },
+            "surename": {
+              "from_input": "surename"
+            },
+            "familyname": {
+              "from_input": "familyname"
+            },
+            "customerNumber": {
+              "from_input": "customerNumber"
+            },
+            "taxNumber": {
+              "from_input": "taxNumber"
+            },
+            "vatNumber": {
+              "from_input": "vatNumber"
+            },
+            "bankAccount": {
+              "from_input": "bankAccount"
+            },
+            "bankNumber": {
+              "from_input": "bankNumber"
+            },
+            "defaultCashbackTime": {
+              "from_input": "defaultCashbackTime"
+            },
+            "defaultCashbackPercent": {
+              "from_input": "defaultCashbackPercent"
+            },
+            "defaultTimeToPay": {
+              "from_input": "defaultTimeToPay"
+            },
+            "gender": {
+              "from_input": "gender"
+            },
+            "birthday": {
+              "from_input": "birthday"
+            },
+            "parent": {
+              "from_input": "parent"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "category": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Category"
+                  }
+                }
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "surename": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "familyname": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customerNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "taxNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "vatNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bankAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bankNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "defaultCashbackTime": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "defaultCashbackPercent": {
+                "type": [
+                  "string",
+                  "number",
+                  "null"
+                ]
+              },
+              "defaultTimeToPay": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "birthday": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "parent": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "contacts"
+}

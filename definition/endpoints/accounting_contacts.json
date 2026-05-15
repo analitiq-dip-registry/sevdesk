@@ -1,0 +1,323 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Accounting Contacts",
+  "description": "Accounting-specific debitor/creditor numbers per contact.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/AccountingContact",
+        "query": {
+          "contact[id]": {
+            "from_param": "contact[id]"
+          },
+          "contact[objectName]": {
+            "from_param": "contact[objectName]"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by contact id."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'Contact'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Contact relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "debitorNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "creditorNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/AccountingContact",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "debitorNumber": {
+              "from_input": "debitorNumber"
+            },
+            "creditorNumber": {
+              "from_input": "creditorNumber"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "debitorNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "creditorNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contact"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/AccountingContact/{accountingContactId}",
+          "path_params": {
+            "accountingContactId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "debitorNumber": {
+              "from_input": "debitorNumber"
+            },
+            "creditorNumber": {
+              "from_input": "creditorNumber"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "debitorNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "creditorNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "accounting_contacts"
+}

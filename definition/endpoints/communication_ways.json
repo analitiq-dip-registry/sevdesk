@@ -1,0 +1,439 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Communication Ways",
+  "description": "Phone, email, web, and other communication channels for contacts.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/CommunicationWay",
+        "query": {
+          "contact[id]": {
+            "from_param": "contact[id]"
+          },
+          "contact[objectName]": {
+            "from_param": "contact[objectName]"
+          },
+          "type": {
+            "from_param": "type"
+          },
+          "main": {
+            "from_param": "main"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by contact id."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Use 'Contact'."
+        },
+        "type": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Type filter (EMAIL, PHONE, WEB, MOBILE)."
+        },
+        "main": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter to main communication way (1)."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Contact relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "type": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Communication way type (EMAIL, PHONE, WEB, MOBILE)."
+                  },
+                  "value": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "key": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Communication way key relation.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "main": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Indicates main communication way ('0' or '1')."
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/CommunicationWay",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "type": {
+              "from_input": "type"
+            },
+            "value": {
+              "from_input": "value"
+            },
+            "key": {
+              "from_input": "key"
+            },
+            "main": {
+              "from_input": "main"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CommunicationWayKey"
+                  }
+                }
+              },
+              "main": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "contact",
+              "type",
+              "value",
+              "key"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/CommunicationWay/{communicationWayId}",
+          "path_params": {
+            "communicationWayId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "contact": {
+              "from_input": "contact"
+            },
+            "type": {
+              "from_input": "type"
+            },
+            "value": {
+              "from_input": "value"
+            },
+            "key": {
+              "from_input": "key"
+            },
+            "main": {
+              "from_input": "main"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "contact": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Contact"
+                  }
+                }
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CommunicationWayKey"
+                  }
+                }
+              },
+              "main": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "communication_ways"
+}

@@ -1,0 +1,451 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "display_name": "Check Accounts",
+  "description": "Bank, cash, and register accounts used for bookkeeping.",
+  "operations": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/CheckAccount",
+        "query": {
+          "status": {
+            "from_param": "status"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
+        }
+      },
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by status."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "limit": {
+          "param": "limit",
+          "default": {
+            "ref": "runtime.batch_size"
+          },
+          "max": 1000
+        },
+        "offset": {
+          "param": "offset",
+          "initial": 0
+        },
+        "stop_when": {
+          "empty": {
+            "ref": "response.body.objects"
+          }
+        }
+      },
+      "response": {
+        "records": {
+          "ref": "response.body.objects"
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "create": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Create timestamp."
+                  },
+                  "update": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Last update timestamp."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "sevdesk client.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "type": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "online | offline | register."
+                  },
+                  "importType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "currency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "defaultAccount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "iban": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "bankServer": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "status": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "0=archived, 100=active."
+                  },
+                  "autoMapTransactions": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "accountingNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
+                  "lastBalance": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "balance": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)"
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "write": {
+      "insert": {
+        "request": {
+          "method": "POST",
+          "path": "/CheckAccount",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": {
+              "from_input": "name"
+            },
+            "type": {
+              "from_input": "type"
+            },
+            "importType": {
+              "from_input": "importType"
+            },
+            "currency": {
+              "from_input": "currency"
+            },
+            "defaultAccount": {
+              "from_input": "defaultAccount"
+            },
+            "iban": {
+              "from_input": "iban"
+            },
+            "status": {
+              "from_input": "status"
+            },
+            "autoMapTransactions": {
+              "from_input": "autoMapTransactions"
+            },
+            "accountingNumber": {
+              "from_input": "accountingNumber"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "importType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "defaultAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "iban": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "autoMapTransactions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "accountingNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "currency"
+            ]
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      },
+      "upsert": {
+        "request": {
+          "method": "PUT",
+          "path": "/CheckAccount/{checkAccountId}",
+          "path_params": {
+            "checkAccountId": {
+              "from_input": "id"
+            }
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": {
+              "from_input": "name"
+            },
+            "type": {
+              "from_input": "type"
+            },
+            "importType": {
+              "from_input": "importType"
+            },
+            "currency": {
+              "from_input": "currency"
+            },
+            "defaultAccount": {
+              "from_input": "defaultAccount"
+            },
+            "iban": {
+              "from_input": "iban"
+            },
+            "status": {
+              "from_input": "status"
+            },
+            "autoMapTransactions": {
+              "from_input": "autoMapTransactions"
+            },
+            "accountingNumber": {
+              "from_input": "accountingNumber"
+            }
+          }
+        },
+        "input": {
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "importType": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "defaultAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "iban": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "autoMapTransactions": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "accountingNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "response": {
+          "generated_keys": {
+            "ref": "response.body.objects.id"
+          }
+        }
+      }
+    }
+  },
+  "endpoint_id": "check_accounts"
+}
