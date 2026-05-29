@@ -1,4 +1,6 @@
 ![Status: Unverified](https://img.shields.io/badge/status-unverified-yellow)
+[![Latest release](https://img.shields.io/github/v/release/analitiq-dip-registry/sevdesk)](https://github.com/analitiq-dip-registry/sevdesk/releases)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
 # sevdesk
 
