@@ -1,5 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/connector/latest.json",
+  "connector_id": "sevdesk",
   "kind": "api",
   "display_name": "sevdesk",
   "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
