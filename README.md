@@ -91,3 +91,4 @@ All connectors in this registry are community-maintained and live at [github.com
 - [sevdesk API News](https://tech.sevdesk.com/api_news/)
 - [Analitiq Cloud](https://analitiq-app.com)
 - [Analitiq Engine (open source)](https://github.com/analitiq-dip-registry/analitiq-engine)
+
