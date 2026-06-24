@@ -24,9 +24,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .schemas
-          curl -sSfL https://schemas.analitiq.ai/connector/latest.json      -o .schemas/connector.json
-          curl -sSfL https://schemas.analitiq.ai/api-endpoint/latest.json   -o .schemas/api-endpoint.json
+          curl -sSfL https://schemas.analitiq.ai/connector/latest.json         -o .schemas/connector.json
+          curl -sSfL https://schemas.analitiq.ai/api-endpoint/latest.json      -o .schemas/api-endpoint.json
           curl -sSfL https://schemas.analitiq.ai/database-endpoint/latest.json -o .schemas/database-endpoint.json
+          curl -sSfL https://schemas.analitiq.ai/type-map-read/latest.json     -o .schemas/type-map-read.json
           for f in .schemas/*.json; do
             ACTUAL_ID=$(jq -r '."$id"' "$f")
             EXPECTED_ID="https://schemas.analitiq.ai/$(basename "$f" .json)/latest.json"
@@ -35,6 +36,15 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Validate type-map-read.json
+        run: |
+          set -euo pipefail
+          if [ -f definition/type-map-read.json ]; then
+            check-jsonschema \
+              --schemafile .schemas/type-map-read.json \
+              definition/type-map-read.json
+          fi
 
       - name: Validate connector.json
         run: |
