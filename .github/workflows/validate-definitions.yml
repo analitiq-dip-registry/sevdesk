@@ -40,11 +40,13 @@ jobs:
       - name: Validate type-map-read.json
         run: |
           set -euo pipefail
-          if [ -f definition/type-map-read.json ]; then
-            check-jsonschema \
-              --schemafile .schemas/type-map-read.json \
-              definition/type-map-read.json
+          if [ ! -f definition/type-map-read.json ]; then
+            echo "ERROR: definition/type-map-read.json is missing."
+            exit 1
           fi
+          check-jsonschema \
+            --schemafile .schemas/type-map-read.json \
+            definition/type-map-read.json
 
       - name: Validate connector.json
         run: |
