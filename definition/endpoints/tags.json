@@ -84,6 +84,12 @@
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
+                  "additionalInformation": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Additional free-form information stored on the tag."
+                  },
                   "create": {
                     "type": "string",
                     "native_type": "datetime",
@@ -206,6 +212,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

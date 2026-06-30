@@ -1,5 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "credit_note_positions",
   "display_name": "Credit Note Positions",
   "description": "Line items belonging to credit notes.",
   "operations": {
@@ -164,20 +165,52 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Price of the article/part. Gross or net depending on the sevdesk account setting."
+                  },
+                  "priceNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net price of the part."
+                  },
+                  "priceTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax on the price of the part."
+                  },
+                  "priceGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross price of the part."
                   },
                   "name": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
                   "positionNumber": {
                     "type": [
-                      "integer",
+                      "string",
                       "null"
                     ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Position number of the position."
                   },
                   "text": {
                     "type": [
@@ -194,6 +227,15 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "optional": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Defines if the position is optional."
                   },
                   "taxRate": {
                     "type": "string",
@@ -212,6 +254,15 @@
                         "type": "string"
                       }
                     }
+                  },
+                  "sumDiscount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Discount sum of the position."
                   },
                   "sumNet": {
                     "type": [
@@ -596,6 +647,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"
@@ -603,6 +657,5 @@
         }
       }
     }
-  },
-  "endpoint_id": "credit_note_positions"
+  }
 }

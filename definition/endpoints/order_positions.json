@@ -166,18 +166,49 @@
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
                   },
+                  "priceNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net price of the part."
+                  },
+                  "priceTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax on the price of the part."
+                  },
+                  "priceGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross price of the part."
+                  },
                   "name": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
                   "positionNumber": {
                     "type": [
-                      "integer",
+                      "string",
                       "null"
                     ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Position number used to order multiple positions. Returned as a string by the API."
                   },
                   "text": {
                     "type": [
@@ -194,6 +225,15 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "optional": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Defines if the position is optional."
                   },
                   "taxRate": {
                     "type": "string",
@@ -236,6 +276,15 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumDiscount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Discount sum of the position."
                   }
                 },
                 "required": [
@@ -596,6 +645,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

@@ -15,7 +15,7 @@ sevdesk is a cloud-based accounting and invoicing platform for small businesses 
 - Client app required: no
 - Header format: `Authorization: ${api_token}` (raw token, no Bearer prefix)
 - Token is a 32-character hexadecimal string with infinite lifetime
-- Obtained from my.sevdesk.de under Settings > Users > specific user
+- Obtained from my.sevdesk.de under Extensions (Erweiterungen) > API (reveal with your account password)
 
 ## Post-Auth Steps
 
@@ -29,7 +29,7 @@ All endpoints expose `read` (GET list) plus `write.insert` (POST) and `write.ups
 - `contacts` — `/Contact` — read, insert, upsert
 - `contact_addresses` — `/ContactAddress` — read, insert, upsert
 - `communication_ways` — `/CommunicationWay` — read, insert, upsert
-- `contact_fields` — `/ContactField` — read, insert, upsert
+- `contact_custom_fields` — `/ContactCustomField` — read, insert, upsert
 - `accounting_contacts` — `/AccountingContact` — read, insert, upsert
 
 ### Sales documents

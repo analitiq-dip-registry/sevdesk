@@ -129,7 +129,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Import type for online accounts not connected to a data provider: CSV | MT940 | null."
                   },
                   "currency": {
                     "type": [
@@ -145,7 +146,20 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Defines if this check account is the default account."
+                  },
+                  "baseAccount": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "1 if the account is your base account that comes with every sevdesk setup."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Defines the sorting of accounts; highest is first."
                   },
                   "iban": {
                     "type": [
@@ -154,6 +168,15 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "bic": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The BIC of the bank this account belongs to."
                   },
                   "bankServer": {
                     "type": [
@@ -180,6 +203,19 @@
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
+                  "autoSyncTransactions": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "If 1, the account is automatically updated through PayPal or finAPI. Only for connected online accounts."
+                  },
+                  "lastSync": {
+                    "type": "string",
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Timepoint of the last payment import through PayPal or finAPI."
+                  },
                   "accountingNumber": {
                     "type": [
                       "string",
@@ -202,7 +238,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Account balance as reported by PayPal or finAPI. Not set for other account types."
                   }
                 },
                 "required": [
@@ -439,6 +476,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

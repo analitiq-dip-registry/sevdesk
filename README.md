@@ -32,7 +32,7 @@ The `analitiq-plugin-dataflow` plugin will automatically fetch the required conn
 ## Prerequisites
 
 - A sevdesk account at [my.sevdesk.de](https://my.sevdesk.de)
-- An API token (32-character hexadecimal string) generated from Settings > Users > select a user
+- An API token (32-character hexadecimal string) generated from Extensions (Erweiterungen) > API
 
 ## Authentication
 
@@ -41,8 +41,8 @@ sevdesk uses a **Personal API Token** for authentication. The token is sent as-i
 ### How to get your credentials
 
 1. Log in to your account at [my.sevdesk.de](https://my.sevdesk.de)
-2. Navigate to **Settings > Users**
-3. Select the user whose API token you want to use
+2. Navigate to **Extensions (Erweiterungen) > API**
+3. Click **Show** and enter your account password to reveal the token
 4. Copy the 32-character hexadecimal API token
 5. Paste the token into the "API Token" field when creating a connection
 

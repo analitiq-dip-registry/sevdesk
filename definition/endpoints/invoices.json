@@ -1,5 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "invoices",
   "display_name": "Invoices",
   "description": "Outbound invoices including drafts, open, paid, and cancelled.",
   "operations": {
@@ -8,30 +9,14 @@
         "method": "GET",
         "path": "/Invoice",
         "query": {
-          "status": {
-            "from_param": "status"
-          },
-          "invoiceNumber": {
-            "from_param": "invoiceNumber"
-          },
-          "startDate": {
-            "from_param": "startDate"
-          },
-          "endDate": {
-            "from_param": "endDate"
-          },
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
+          "status": { "from_param": "status" },
+          "invoiceNumber": { "from_param": "invoiceNumber" },
+          "startDate": { "from_param": "startDate" },
+          "endDate": { "from_param": "endDate" },
+          "contact[id]": { "from_param": "contact[id]" },
+          "contact[objectName]": { "from_param": "contact[objectName]" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
         }
       },
       "params": {
@@ -39,54 +24,42 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Filter by status."
         },
         "invoiceNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Filter by invoice number."
         },
         "startDate": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Filter invoices from this invoice date."
         },
         "endDate": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Filter invoices up to this invoice date."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Filter by contact id."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Use 'Contact'."
         },
         "limit": {
@@ -106,9 +79,7 @@
         "type": "offset",
         "limit": {
           "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
+          "default": { "ref": "runtime.batch_size" },
           "max": 1000
         },
         "offset": {
@@ -116,15 +87,11 @@
           "initial": 0
         },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
@@ -134,478 +101,134 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
+                  "id": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
+                  "objectName": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
+                  "create": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Create timestamp." },
+                  "update": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Last update timestamp." },
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
                     "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "invoiceNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
+                  "invoiceNumber": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
                     "description": "Customer relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
                     "description": "sevdesk user creating the invoice.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "invoiceDate": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                  "createUser": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "User who created the invoice. Filled automatically by sevdesk.",
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "header": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "headText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "footText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "timeToPay": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32"
-                  },
-                  "discountTime": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32"
-                  },
-                  "discount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "addressName": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressStreet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressZip": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressCity": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
+                  "invoiceDate": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "header": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "headText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "footText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "timeToPay": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
+                  "discountTime": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
+                  "discount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "addressName": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "addressStreet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "addressZip": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "addressCity": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
                   "addressCountry": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "payDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDateUntil": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "status": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Invoice status (100=Draft, 200=Open, 1000=Paid)."
-                  },
-                  "smallSettlement": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "taxRate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
+                  "payDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "deliveryDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "deliveryDateUntil": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "status": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Invoice status (50=Draft via factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid)." },
+                  "smallSettlement": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether the small-settlement scheme applies (wire value '0'/'1')." },
+                  "taxRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
                   "taxRule": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "taxText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                  "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "taxType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "taxSet": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom').",
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "taxType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                  "dunningLevel": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Number of reminders already sent for the invoice." },
+                  "paymentMethod": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Payment method relation.",
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "sendDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                  "costCentre": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Cost centre relation.",
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "invoiceType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Type (RE, MA, ER, KS, AR, etc.)."
+                  "sendDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "origin": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Origin object of the invoice (e.g. an Order).",
+                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
-                  "currency": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumNetForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumTaxForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumGrossForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumDiscounts": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumDiscountsForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumNetAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumTaxAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumGrossAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "paidAmount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "showNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "enshrined": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "sendType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "deliveryTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "paymentTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "originId": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "customerInternalNote": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "address": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "currencyExchangeRate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "currencyExchangeRateDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "sendPaymentReceivedNotificationDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  }
+                  "invoiceType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Type (RE, WKR, SR, MA, TR, AR, ER)." },
+                  "accountIntervall": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Recurring-invoice interval as ISO-8601 duration." },
+                  "accountNextInvoice": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Timestamp (epoch seconds, as string) of the next recurring invoice." },
+                  "reminderTotal": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Total reminder amount." },
+                  "reminderDebit": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Debit of the reminder." },
+                  "reminderDeadline": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Deadline of the reminder." },
+                  "reminderCharge": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Additional reminder charge." },
+                  "currency": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
+                  "sumNet": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumTax": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumGross": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumNetForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumTaxForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumGrossForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumDiscounts": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumDiscountsForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumNetAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumTaxAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "sumGrossAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "paidAmount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "showNet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether net amounts are shown per position (wire value '0'/'1')." },
+                  "enshrined": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "sendType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "deliveryTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "paymentTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "originId": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "customerInternalNote": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "address": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "currencyExchangeRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "currencyExchangeRateDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "datevConnectOnline": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Internal attribute." },
+                  "sendPaymentReceivedNotificationDate": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal attribute (wire value is a plain string, e.g. '0')." }
                 },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                "required": ["id", "objectName"]
               }
             }
           }
@@ -617,91 +240,35 @@
         "request": {
           "method": "POST",
           "path": "/Invoice",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "headers": { "Content-Type": "application/json" },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactPerson": {
-              "from_input": "contactPerson"
-            },
-            "invoiceDate": {
-              "from_input": "invoiceDate"
-            },
-            "invoiceNumber": {
-              "from_input": "invoiceNumber"
-            },
-            "header": {
-              "from_input": "header"
-            },
-            "headText": {
-              "from_input": "headText"
-            },
-            "footText": {
-              "from_input": "footText"
-            },
-            "timeToPay": {
-              "from_input": "timeToPay"
-            },
-            "discount": {
-              "from_input": "discount"
-            },
-            "addressName": {
-              "from_input": "addressName"
-            },
-            "addressStreet": {
-              "from_input": "addressStreet"
-            },
-            "addressZip": {
-              "from_input": "addressZip"
-            },
-            "addressCity": {
-              "from_input": "addressCity"
-            },
-            "addressCountry": {
-              "from_input": "addressCountry"
-            },
-            "invoiceType": {
-              "from_input": "invoiceType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "taxRule": {
-              "from_input": "taxRule"
-            },
-            "taxText": {
-              "from_input": "taxText"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            },
-            "smallSettlement": {
-              "from_input": "smallSettlement"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "paymentTerms": {
-              "from_input": "paymentTerms"
-            },
-            "deliveryTerms": {
-              "from_input": "deliveryTerms"
-            }
+            "contact": { "from_input": "contact" },
+            "contactPerson": { "from_input": "contactPerson" },
+            "invoiceDate": { "from_input": "invoiceDate" },
+            "invoiceNumber": { "from_input": "invoiceNumber" },
+            "header": { "from_input": "header" },
+            "headText": { "from_input": "headText" },
+            "footText": { "from_input": "footText" },
+            "timeToPay": { "from_input": "timeToPay" },
+            "discount": { "from_input": "discount" },
+            "addressName": { "from_input": "addressName" },
+            "addressStreet": { "from_input": "addressStreet" },
+            "addressZip": { "from_input": "addressZip" },
+            "addressCity": { "from_input": "addressCity" },
+            "addressCountry": { "from_input": "addressCountry" },
+            "invoiceType": { "from_input": "invoiceType" },
+            "currency": { "from_input": "currency" },
+            "status": { "from_input": "status" },
+            "taxRate": { "from_input": "taxRate" },
+            "taxRule": { "from_input": "taxRule" },
+            "taxText": { "from_input": "taxText" },
+            "taxType": { "from_input": "taxType" },
+            "deliveryDate": { "from_input": "deliveryDate" },
+            "deliveryDateUntil": { "from_input": "deliveryDateUntil" },
+            "smallSettlement": { "from_input": "smallSettlement" },
+            "showNet": { "from_input": "showNet" },
+            "paymentTerms": { "from_input": "paymentTerms" },
+            "deliveryTerms": { "from_input": "deliveryTerms" }
           }
         },
         "input": {
@@ -710,605 +277,176 @@
             "type": "object",
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "SevUser" }
                 }
               },
-              "invoiceDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "invoiceNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "timeToPay": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "discount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "addressName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressStreet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressZip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressCity": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
+              "invoiceNumber": { "type": ["string", "null"] },
+              "header": { "type": ["string", "null"] },
+              "headText": { "type": ["string", "null"] },
+              "footText": { "type": ["string", "null"] },
+              "timeToPay": { "type": ["integer", "null"] },
+              "discount": { "type": ["string", "number", "null"] },
+              "addressName": { "type": ["string", "null"] },
+              "addressStreet": { "type": ["string", "null"] },
+              "addressZip": { "type": ["string", "null"] },
+              "addressCity": { "type": ["string", "null"] },
               "addressCountry": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "StaticCountry" }
                 }
               },
-              "invoiceType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
+              "invoiceType": { "type": ["string", "null"] },
+              "currency": { "type": ["string", "null"] },
+              "status": { "type": ["string", "null"] },
+              "taxRate": { "type": ["string", "number", "null"] },
               "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "TaxRule" }
                 }
               },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "paymentTerms": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryTerms": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+              "taxText": { "type": ["string", "null"] },
+              "taxType": { "type": ["string", "null"] },
+              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
+              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
+              "smallSettlement": { "type": ["string", "null"] },
+              "showNet": { "type": ["string", "null"] },
+              "paymentTerms": { "type": ["string", "null"] },
+              "deliveryTerms": { "type": ["string", "null"] }
             },
-            "required": [
-              "contact",
-              "contactPerson",
-              "invoiceDate",
-              "invoiceType",
-              "currency",
-              "taxRule",
-              "taxText"
-            ]
+            "required": ["contact", "contactPerson", "invoiceDate", "invoiceType", "currency", "taxRule", "taxText"]
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.objects.id" }
         }
       },
       "upsert": {
+        "conflict_keys": ["id"],
         "request": {
           "method": "PUT",
           "path": "/Invoice/{invoiceId}",
           "path_params": {
-            "invoiceId": {
-              "from_input": "id"
-            }
+            "invoiceId": { "from_input": "id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "headers": { "Content-Type": "application/json" },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactPerson": {
-              "from_input": "contactPerson"
-            },
-            "invoiceDate": {
-              "from_input": "invoiceDate"
-            },
-            "invoiceNumber": {
-              "from_input": "invoiceNumber"
-            },
-            "header": {
-              "from_input": "header"
-            },
-            "headText": {
-              "from_input": "headText"
-            },
-            "footText": {
-              "from_input": "footText"
-            },
-            "timeToPay": {
-              "from_input": "timeToPay"
-            },
-            "discount": {
-              "from_input": "discount"
-            },
-            "addressName": {
-              "from_input": "addressName"
-            },
-            "addressStreet": {
-              "from_input": "addressStreet"
-            },
-            "addressZip": {
-              "from_input": "addressZip"
-            },
-            "addressCity": {
-              "from_input": "addressCity"
-            },
-            "addressCountry": {
-              "from_input": "addressCountry"
-            },
-            "invoiceType": {
-              "from_input": "invoiceType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "taxRule": {
-              "from_input": "taxRule"
-            },
-            "taxText": {
-              "from_input": "taxText"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            },
-            "smallSettlement": {
-              "from_input": "smallSettlement"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "paymentTerms": {
-              "from_input": "paymentTerms"
-            },
-            "deliveryTerms": {
-              "from_input": "deliveryTerms"
-            }
+            "contact": { "from_input": "contact" },
+            "contactPerson": { "from_input": "contactPerson" },
+            "invoiceDate": { "from_input": "invoiceDate" },
+            "invoiceNumber": { "from_input": "invoiceNumber" },
+            "header": { "from_input": "header" },
+            "headText": { "from_input": "headText" },
+            "footText": { "from_input": "footText" },
+            "timeToPay": { "from_input": "timeToPay" },
+            "discount": { "from_input": "discount" },
+            "addressName": { "from_input": "addressName" },
+            "addressStreet": { "from_input": "addressStreet" },
+            "addressZip": { "from_input": "addressZip" },
+            "addressCity": { "from_input": "addressCity" },
+            "addressCountry": { "from_input": "addressCountry" },
+            "invoiceType": { "from_input": "invoiceType" },
+            "currency": { "from_input": "currency" },
+            "status": { "from_input": "status" },
+            "taxRate": { "from_input": "taxRate" },
+            "taxRule": { "from_input": "taxRule" },
+            "taxText": { "from_input": "taxText" },
+            "taxType": { "from_input": "taxType" },
+            "deliveryDate": { "from_input": "deliveryDate" },
+            "deliveryDateUntil": { "from_input": "deliveryDateUntil" },
+            "smallSettlement": { "from_input": "smallSettlement" },
+            "showNet": { "from_input": "showNet" },
+            "paymentTerms": { "from_input": "paymentTerms" },
+            "deliveryTerms": { "from_input": "deliveryTerms" }
           }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "required": ["id"],
             "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
+              "id": { "type": ["string", "integer"] },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "SevUser" }
                 }
               },
-              "invoiceDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "invoiceNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "timeToPay": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "discount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "addressName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressStreet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressZip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressCity": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
+              "invoiceNumber": { "type": ["string", "null"] },
+              "header": { "type": ["string", "null"] },
+              "headText": { "type": ["string", "null"] },
+              "footText": { "type": ["string", "null"] },
+              "timeToPay": { "type": ["integer", "null"] },
+              "discount": { "type": ["string", "number", "null"] },
+              "addressName": { "type": ["string", "null"] },
+              "addressStreet": { "type": ["string", "null"] },
+              "addressZip": { "type": ["string", "null"] },
+              "addressCity": { "type": ["string", "null"] },
               "addressCountry": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "StaticCountry" }
                 }
               },
-              "invoiceType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
+              "invoiceType": { "type": ["string", "null"] },
+              "currency": { "type": ["string", "null"] },
+              "status": { "type": ["string", "null"] },
+              "taxRate": { "type": ["string", "number", "null"] },
               "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
+                  "id": { "type": ["string", "integer"] },
+                  "objectName": { "type": "string", "const": "TaxRule" }
                 }
               },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "paymentTerms": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryTerms": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+              "taxText": { "type": ["string", "null"] },
+              "taxType": { "type": ["string", "null"] },
+              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
+              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
+              "smallSettlement": { "type": ["string", "null"] },
+              "showNet": { "type": ["string", "null"] },
+              "paymentTerms": { "type": ["string", "null"] },
+              "deliveryTerms": { "type": ["string", "null"] }
             }
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.objects.id" }
         }
       }
     }
-  },
-  "endpoint_id": "invoices"
+  }
 }

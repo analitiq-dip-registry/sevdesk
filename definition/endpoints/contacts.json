@@ -161,18 +161,21 @@
                     "type": "string",
                     "format": "date-time",
                     "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)"
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of contact creation."
                   },
                   "update": {
                     "type": "string",
                     "format": "date-time",
                     "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)"
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last contact update."
                   },
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "Client (SevClient) the contact belongs to.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -189,7 +192,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Organization name."
+                    "description": "Organization name. If set, the contact is treated as an organization."
+                  },
+                  "status": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Status of the contact: 100 = Lead, 500 = Pending, 1000 = Active."
                   },
                   "surename": {
                     "type": [
@@ -208,6 +220,33 @@
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Family name (individual)."
+                  },
+                  "titel": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Non-academic title (individuals only)."
+                  },
+                  "academicTitle": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Academic title (individuals only)."
+                  },
+                  "name2": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Second name (individuals only)."
                   },
                   "category": {
                     "type": "object",
@@ -230,6 +269,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "Parent contact (must be an organization).",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -238,6 +278,15 @@
                         "type": "string"
                       }
                     }
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Free-text description for the contact."
                   },
                   "customerNumber": {
                     "type": [
@@ -254,6 +303,15 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "taxOffice": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax office of the contact (Greek customers only)."
                   },
                   "vatNumber": {
                     "type": [
@@ -285,7 +343,8 @@
                       "null"
                     ],
                     "native_type": "integer",
-                    "arrow_type": "Int32"
+                    "arrow_type": "Int32",
+                    "description": "Absolute time in days within which the contact must pay to receive a cashback."
                   },
                   "defaultCashbackPercent": {
                     "type": [
@@ -293,7 +352,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Percentage of the invoice sum returned if invoices are paid in time."
                   },
                   "defaultTimeToPay": {
                     "type": [
@@ -301,7 +361,26 @@
                       "null"
                     ],
                     "native_type": "integer",
-                    "arrow_type": "Int32"
+                    "arrow_type": "Int32",
+                    "description": "Default payment goal in days set on every invoice of the contact."
+                  },
+                  "defaultDiscountAmount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Default discount applied to every invoice (percent or absolute, per defaultDiscountPercentage)."
+                  },
+                  "defaultDiscountPercentage": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the default discount is a percentage ('true') or an absolute value ('false')."
                   },
                   "gender": {
                     "type": [
@@ -318,15 +397,17 @@
                     ],
                     "format": "date",
                     "native_type": "date",
-                    "arrow_type": "Date32"
+                    "arrow_type": "Date32",
+                    "description": "Birthday of the contact (individuals only)."
                   },
-                  "excemptVat": {
+                  "exemptVat": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Whether the contact is exempt from paying VAT ('true'/'false')."
                   },
                   "taxType": {
                     "type": [
@@ -335,6 +416,34 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "buyerReference": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Buyer reference of the contact."
+                  },
+                  "governmentAgency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the contact is a government agency ('true'/'false')."
+                  },
+                  "additionalInformation": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Additional information stored for the contact (deprecated).",
+                    "deprecated": true
                   }
                 },
                 "required": [
@@ -742,6 +851,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

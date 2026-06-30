@@ -1,12 +1,12 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "display_name": "Contact Custom Fields",
-  "description": "User-defined custom fields attached to contacts.",
+  "description": "Custom field values attached to contacts; replaces the legacy ContactField resource.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/ContactField",
+        "path": "/ContactCustomField",
         "query": {
           "contact[id]": {
             "from_param": "contact[id]"
@@ -89,12 +89,14 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Unique identifier of the contact custom field."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Internal object name, which is 'ContactCustomField'."
                   },
                   "create": {
                     "type": "string",
@@ -114,7 +116,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
+                    "description": "sevdesk client the custom field belongs to (filled automatically).",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -145,7 +147,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Custom field setting.",
+                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting').",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -161,7 +163,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The value of the contact custom field."
                   }
                 },
                 "required": [
@@ -178,7 +181,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/ContactField",
+          "path": "/ContactCustomField",
           "headers": {
             "Content-Type": "application/json"
           },
@@ -200,10 +203,7 @@
             "type": "object",
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": "object",
                 "required": [
                   "id",
                   "objectName"
@@ -222,10 +222,7 @@
                 }
               },
               "contactCustomFieldSetting": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": "object",
                 "required": [
                   "id",
                   "objectName"
@@ -244,15 +241,13 @@
                 }
               },
               "value": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string"
               }
             },
             "required": [
               "contact",
-              "contactCustomFieldSetting"
+              "contactCustomFieldSetting",
+              "value"
             ]
           }
         },
@@ -263,11 +258,14 @@
         }
       },
       "upsert": {
+        "conflict_keys": [
+          "id"
+        ],
         "request": {
           "method": "PUT",
-          "path": "/ContactField/{contactFieldId}",
+          "path": "/ContactCustomField/{contactCustomFieldId}",
           "path_params": {
-            "contactFieldId": {
+            "contactCustomFieldId": {
               "from_input": "id"
             }
           },
@@ -291,7 +289,10 @@
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "required": [
-              "id"
+              "id",
+              "contact",
+              "contactCustomFieldSetting",
+              "value"
             ],
             "properties": {
               "id": {
@@ -301,10 +302,7 @@
                 ]
               },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": "object",
                 "required": [
                   "id",
                   "objectName"
@@ -323,10 +321,7 @@
                 }
               },
               "contactCustomFieldSetting": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": "object",
                 "required": [
                   "id",
                   "objectName"
@@ -345,10 +340,7 @@
                 }
               },
               "value": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string"
               }
             }
           }
@@ -361,5 +353,5 @@
       }
     }
   },
-  "endpoint_id": "contact_fields"
+  "endpoint_id": "contact_custom_fields"
 }
