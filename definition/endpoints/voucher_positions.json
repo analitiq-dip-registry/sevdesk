@@ -89,12 +89,14 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The voucher position id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The voucher position object name."
                   },
                   "create": {
                     "type": "string",
@@ -128,9 +130,24 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "The voucher to which the position belongs.",
                     "properties": {
                       "id": {
                         "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "accountDatev": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0 (replaces accountingType).",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
                       },
                       "objectName": {
                         "type": "string"
@@ -141,6 +158,21 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "The accounting type (booking account) to which the position belongs.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "estimatedAccountingType": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The accounting type estimated by sevdesk voucher recognition.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -153,7 +185,8 @@
                   "taxRate": {
                     "type": "string",
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax rate of the voucher position."
                   },
                   "net": {
                     "type": [
@@ -161,7 +194,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Determines whether 'sumNet' or 'sumGross' is regarded."
                   },
                   "isAsset": {
                     "type": [
@@ -169,7 +203,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Determines whether the position is regarded as a depreciable asset."
                   },
                   "sumNet": {
                     "type": [
@@ -177,7 +212,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net sum of the voucher position."
                   },
                   "sumTax": {
                     "type": [
@@ -185,7 +221,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax sum of the voucher position."
                   },
                   "sumGross": {
                     "type": [
@@ -193,7 +230,35 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross sum of the voucher position."
+                  },
+                  "sumNetAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net accounting sum. Is equal to sumNet."
+                  },
+                  "sumTaxAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax accounting sum. Is equal to sumTax."
+                  },
+                  "sumGrossAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross accounting sum. Is equal to sumGross."
                   },
                   "comment": {
                     "type": [
@@ -201,7 +266,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Comment for the voucher position."
                   }
                 },
                 "required": [
@@ -471,6 +537,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

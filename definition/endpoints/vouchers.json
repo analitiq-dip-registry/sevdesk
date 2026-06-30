@@ -1,7 +1,7 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "display_name": "Vouchers",
-  "description": "Inbound documents \u2014 receipts, supplier invoices, expense reports.",
+  "description": "Inbound documents — receipts, supplier invoices, expense reports.",
   "operations": {
     "read": {
       "request": {
@@ -184,6 +184,20 @@
                       }
                     }
                   },
+                  "createUser": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "User who created the voucher (objectName 'SevUser').",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
                   "voucherDate": {
                     "type": [
                       "string",
@@ -225,6 +239,23 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "document": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Attached document of the voucher (objectName 'Document').",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
                   },
                   "documentType": {
                     "type": [
@@ -321,6 +352,20 @@
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
                   },
+                  "taxRule": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule').",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
                   "taxType": {
                     "type": [
                       "string",
@@ -337,6 +382,23 @@
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "C (credit) or D (debit)."
+                  },
+                  "costCentre": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Cost centre for the voucher (objectName 'CostCentre').",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
                   },
                   "voucherType": {
                     "type": [
@@ -368,6 +430,55 @@
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
                   },
+                  "recurringInterval": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "DateInterval for recurring vouchers (e.g. P0Y1M0W)."
+                  },
+                  "recurringStartDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date recurring vouchers start being generated."
+                  },
+                  "recurringNextVoucher": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date the next recurring voucher is generated."
+                  },
+                  "recurringLastVoucher": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date the last recurring voucher was generated."
+                  },
+                  "recurringEndDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date recurring vouchers end being generated."
+                  },
                   "deliveryDate": {
                     "type": [
                       "string",
@@ -394,6 +505,23 @@
                     "native_type": "datetime",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time"
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet').",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
                   },
                   "showNet": {
                     "type": [
@@ -786,6 +914,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

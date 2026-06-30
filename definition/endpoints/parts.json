@@ -89,12 +89,14 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The part id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The part object name."
                   },
                   "create": {
                     "type": "string",
@@ -127,7 +129,8 @@
                   "name": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the part."
                   },
                   "partNumber": {
                     "type": [
@@ -135,7 +138,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The part number."
                   },
                   "text": {
                     "type": [
@@ -143,7 +147,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "A text describing the part."
                   },
                   "category": {
                     "type": [
@@ -152,6 +157,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "Category of the part.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -167,7 +173,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "The stock of the part."
                   },
                   "stockEnabled": {
                     "type": [
@@ -175,12 +182,14 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Defines if the stock should be enabled."
                   },
                   "unity": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "description": "The unit in which the part is measured.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -196,7 +205,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net price for which the part is sold."
                   },
                   "priceNet": {
                     "type": [
@@ -204,7 +214,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net price for which the part is sold."
                   },
                   "priceGross": {
                     "type": [
@@ -212,7 +223,8 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross price for which the part is sold."
                   },
                   "pricePurchase": {
                     "type": [
@@ -220,12 +232,14 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Purchase price of the part."
                   },
                   "taxRate": {
                     "type": "string",
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax rate of the part."
                   },
                   "status": {
                     "type": [
@@ -233,7 +247,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Status of the part. 50 = Inactive, 100 = Active."
                   },
                   "internalComment": {
                     "type": [
@@ -241,7 +256,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "An internal comment for the part. Does not appear on invoices and orders."
                   }
                 },
                 "required": [
@@ -644,6 +660,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

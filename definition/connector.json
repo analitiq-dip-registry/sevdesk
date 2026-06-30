@@ -36,7 +36,7 @@
         "ui": {
           "label": "API Token",
           "widget": "password",
-          "help_text": "32-character hexadecimal token from my.sevdesk.de under Settings > Users."
+          "help_text": "32-character hexadecimal token from my.sevdesk.de under Extensions > API (reveal with your account password)."
         }
       }
     },

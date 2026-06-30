@@ -150,6 +150,24 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "paymentPurpose": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The payment purpose of transactions to match."
+                  },
+                  "counterpartName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The counterpart name of transactions to match."
                   }
                 },
                 "required": [
@@ -309,6 +327,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"

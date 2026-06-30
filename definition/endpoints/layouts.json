@@ -237,6 +237,9 @@
         }
       },
       "upsert": {
+        "conflict_keys": [
+          "id"
+        ],
         "request": {
           "method": "PUT",
           "path": "/Layout/{layoutId}",

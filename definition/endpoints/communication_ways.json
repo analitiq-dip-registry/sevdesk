@@ -1,5 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "communication_ways",
   "display_name": "Communication Ways",
   "description": "Phone, email, web, and other communication channels for contacts.",
   "operations": {
@@ -166,6 +167,12 @@
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
+                    "enum": [
+                      "EMAIL",
+                      "PHONE",
+                      "WEB",
+                      "MOBILE"
+                    ],
                     "description": "Communication way type (EMAIL, PHONE, WEB, MOBILE)."
                   },
                   "value": {
@@ -427,6 +434,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"
@@ -434,6 +444,5 @@
         }
       }
     }
-  },
-  "endpoint_id": "communication_ways"
+  }
 }

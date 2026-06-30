@@ -207,6 +207,9 @@
         }
       },
       "upsert": {
+        "conflict_keys": [
+          "id"
+        ],
         "request": {
           "method": "PUT",
           "path": "/Category/{categoryId}",

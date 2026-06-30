@@ -172,6 +172,20 @@
                       }
                     }
                   },
+                  "createUser": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "User who created the credit note. Filled automatically.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
                   "creditNoteNumber": {
                     "type": [
                       "string",
@@ -292,6 +306,15 @@
                       }
                     }
                   },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Complete recipient address (name, street, city, zip, country)."
+                  },
                   "creditNoteType": {
                     "type": [
                       "string",
@@ -329,6 +352,51 @@
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
                   },
+                  "sumDiscounts": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Sum of all discounts in the credit note."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Net sum in the foreign currency."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Tax sum in the foreign currency."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Gross sum in the foreign currency."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Discounts sum in the foreign currency."
+                  },
                   "taxRate": {
                     "type": [
                       "string",
@@ -344,6 +412,23 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -376,6 +461,43 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
+                  },
+                  "smallSettlement": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the small settlement scheme applies (returned as a string flag)."
+                  },
+                  "customerInternalNote": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Internal customer note (Referenz/Bestellnummer)."
+                  },
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Type used to send the credit note (VPR, VPDF, VM, VP)."
+                  },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date the credit note was sent to the customer."
                   },
                   "enshrined": {
                     "type": [
@@ -991,6 +1113,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"
