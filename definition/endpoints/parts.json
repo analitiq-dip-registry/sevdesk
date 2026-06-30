@@ -206,7 +206,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net price for which the part is sold."
+                    "description": "Price for which the part is sold. Gross or net depending on the sevdesk account setting."
                   },
                   "priceNet": {
                     "type": [

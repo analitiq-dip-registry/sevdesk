@@ -240,13 +240,19 @@
                     "description": "Status code of the order (100, 200, 300, 500, 750, 1000)."
                   },
                   "orderType": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Type of the order (AN=quotation, AB=order confirmation, LI=delivery note)."
                   },
                   "header": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Header, normally prefix plus the order number."
@@ -334,55 +340,82 @@
                     "description": "Currency code (ISO-4217)."
                   },
                   "sumNet": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Net sum of the order."
                   },
                   "sumTax": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Tax sum of the order."
                   },
                   "sumGross": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Gross sum of the order."
                   },
                   "sumDiscounts": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Sum of all discounts in the order."
                   },
                   "sumNetForeignCurrency": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Net sum of the order in the foreign currency."
                   },
                   "sumTaxForeignCurrency": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Tax sum of the order in the foreign currency."
                   },
                   "sumGrossForeignCurrency": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Gross sum of the order in the foreign currency."
                   },
                   "sumDiscountsForeignCurrency": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Discounts sum of the order in the foreign currency."
                   },
                   "taxRate": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
                     "description": "Deprecated. Use the taxRate of the individual positions instead."
@@ -419,25 +452,37 @@
                     }
                   },
                   "taxText": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
                   },
                   "taxType": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Tax type (sevdesk-Update 1.0)."
                   },
                   "showNet": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "If true, the net amount of each position is shown; otherwise gross."
                   },
                   "smallSettlement": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Whether the client uses the small settlement scheme."

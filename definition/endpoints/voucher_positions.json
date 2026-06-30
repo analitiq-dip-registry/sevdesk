@@ -147,7 +147,7 @@
                     "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0 (replaces accountingType).",
                     "properties": {
                       "id": {
-                        "type": "integer"
+                        "type": "string"
                       },
                       "objectName": {
                         "type": "string"

@@ -172,7 +172,10 @@
                     "description": "Price of the article/part. Gross or net depending on account setting."
                   },
                   "name": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Name of the article/part."

@@ -194,7 +194,10 @@
                     "description": "Gross price of the part."
                   },
                   "name": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
