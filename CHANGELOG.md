@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.0] - 2026-06-30
+
+### Added
+- Update sevdesk connector to latest contract schemas (#9)
+
 ## [1.1.2] - 2026-06-22
 
 ### Fixed
