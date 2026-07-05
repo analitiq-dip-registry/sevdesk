@@ -138,7 +138,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -152,7 +152,7 @@
                   "contact": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Contact relation.",
                     "properties": {
                       "id": {
@@ -186,7 +186,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Communication way key relation.",
                     "properties": {
                       "id": {

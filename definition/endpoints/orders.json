@@ -164,7 +164,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Client to which the order belongs. Filled automatically.",
                     "properties": {
                       "id": {
@@ -178,7 +178,7 @@
                   "createUser": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "User who created the order. Filled automatically.",
                     "properties": {
                       "id": {
@@ -201,7 +201,7 @@
                   "contact": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "The contact used in the order.",
                     "properties": {
                       "id": {
@@ -215,7 +215,7 @@
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "The user who acts as a contact person for the order.",
                     "properties": {
                       "id": {
@@ -322,7 +322,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Country of the address.",
                     "properties": {
                       "id": {
@@ -423,7 +423,7 @@
                   "taxRule": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "VAT rule (sevdesk-Update 2.0).",
                     "properties": {
                       "id": {
@@ -440,7 +440,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Tax set of the order (sevdesk-Update 1.0).",
                     "properties": {
                       "id": {
@@ -511,7 +511,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Object from which the order was created.",
                     "properties": {
                       "id": {

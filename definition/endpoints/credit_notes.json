@@ -161,7 +161,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -175,7 +175,7 @@
                   "createUser": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "User who created the credit note. Filled automatically.",
                     "properties": {
                       "id": {
@@ -200,7 +200,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -213,7 +213,7 @@
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -296,7 +296,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -411,7 +411,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -427,7 +427,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
                     "properties": {
                       "id": {
