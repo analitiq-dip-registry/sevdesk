@@ -438,6 +438,23 @@
                       }
                     }
                   },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Object",
+                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
                   "taxText": {
                     "type": [
                       "string",
