@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2026-07-05
+
+### Fixed
+- fix: conform sevdesk relation fields to the Object marker rule (#10)
+
 ## [1.2.0] - 2026-06-30
 
 ### Added
