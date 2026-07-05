@@ -115,7 +115,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -156,7 +156,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Category of the part.",
                     "properties": {
                       "id": {
@@ -188,7 +188,7 @@
                   "unity": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "The unit in which the part is measured.",
                     "properties": {
                       "id": {

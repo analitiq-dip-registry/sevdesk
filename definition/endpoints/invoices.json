@@ -108,7 +108,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk client.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
@@ -116,21 +116,21 @@
                   "contact": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Customer relation.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk user creating the invoice.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "createUser": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "User who created the invoice. Filled automatically by sevdesk.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
@@ -148,7 +148,7 @@
                   "addressCountry": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "payDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
@@ -160,7 +160,7 @@
                   "taxRule": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
@@ -168,7 +168,7 @@
                   "taxSet": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom').",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
@@ -176,14 +176,14 @@
                   "paymentMethod": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Payment method relation.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
                   "costCentre": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Cost centre relation.",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },
@@ -191,7 +191,7 @@
                   "origin": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "Origin object of the invoice (e.g. an Order).",
                     "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
                   },

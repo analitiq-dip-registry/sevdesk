@@ -125,7 +125,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -139,7 +139,7 @@
                   "tag": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -152,7 +152,7 @@
                   "object": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
+                    "arrow_type": "Object",
                     "description": "The tagged object (any sevdesk resource).",
                     "properties": {
                       "id": {
