@@ -465,51 +465,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "category": {
-              "from_input": "category"
-            },
-            "name": {
-              "from_input": "name"
-            },
-            "surename": {
-              "from_input": "surename"
-            },
-            "familyname": {
-              "from_input": "familyname"
-            },
-            "customerNumber": {
-              "from_input": "customerNumber"
-            },
-            "taxNumber": {
-              "from_input": "taxNumber"
-            },
-            "vatNumber": {
-              "from_input": "vatNumber"
-            },
-            "bankAccount": {
-              "from_input": "bankAccount"
-            },
-            "bankNumber": {
-              "from_input": "bankNumber"
-            },
-            "defaultCashbackTime": {
-              "from_input": "defaultCashbackTime"
-            },
-            "defaultCashbackPercent": {
-              "from_input": "defaultCashbackPercent"
-            },
-            "defaultTimeToPay": {
-              "from_input": "defaultTimeToPay"
-            },
-            "gender": {
-              "from_input": "gender"
-            },
-            "birthday": {
-              "from_input": "birthday"
-            },
-            "parent": {
-              "from_input": "parent"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -651,63 +607,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Contact/{contactId}",
+          "path": "/Contact/{id}",
           "path_params": {
-            "contactId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "category": {
-              "from_input": "category"
-            },
-            "name": {
-              "from_input": "name"
-            },
-            "surename": {
-              "from_input": "surename"
-            },
-            "familyname": {
-              "from_input": "familyname"
-            },
-            "customerNumber": {
-              "from_input": "customerNumber"
-            },
-            "taxNumber": {
-              "from_input": "taxNumber"
-            },
-            "vatNumber": {
-              "from_input": "vatNumber"
-            },
-            "bankAccount": {
-              "from_input": "bankAccount"
-            },
-            "bankNumber": {
-              "from_input": "bankNumber"
-            },
-            "defaultCashbackTime": {
-              "from_input": "defaultCashbackTime"
-            },
-            "defaultCashbackPercent": {
-              "from_input": "defaultCashbackPercent"
-            },
-            "defaultTimeToPay": {
-              "from_input": "defaultTimeToPay"
-            },
-            "gender": {
-              "from_input": "gender"
-            },
-            "birthday": {
-              "from_input": "birthday"
-            },
-            "parent": {
-              "from_input": "parent"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -862,5 +781,5 @@
       }
     }
   },
-  "endpoint_id": "contacts"
+  "endpoint_id": "contact"
 }

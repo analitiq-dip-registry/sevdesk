@@ -1,6 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "endpoint_id": "invoices",
+  "endpoint_id": "invoice",
   "display_name": "Invoices",
   "description": "Outbound invoices including drafts, open, paid, and cancelled.",
   "operations": {
@@ -242,33 +242,7 @@
           "path": "/Invoice",
           "headers": { "Content-Type": "application/json" },
           "body": {
-            "contact": { "from_input": "contact" },
-            "contactPerson": { "from_input": "contactPerson" },
-            "invoiceDate": { "from_input": "invoiceDate" },
-            "invoiceNumber": { "from_input": "invoiceNumber" },
-            "header": { "from_input": "header" },
-            "headText": { "from_input": "headText" },
-            "footText": { "from_input": "footText" },
-            "timeToPay": { "from_input": "timeToPay" },
-            "discount": { "from_input": "discount" },
-            "addressName": { "from_input": "addressName" },
-            "addressStreet": { "from_input": "addressStreet" },
-            "addressZip": { "from_input": "addressZip" },
-            "addressCity": { "from_input": "addressCity" },
-            "addressCountry": { "from_input": "addressCountry" },
-            "invoiceType": { "from_input": "invoiceType" },
-            "currency": { "from_input": "currency" },
-            "status": { "from_input": "status" },
-            "taxRate": { "from_input": "taxRate" },
-            "taxRule": { "from_input": "taxRule" },
-            "taxText": { "from_input": "taxText" },
-            "taxType": { "from_input": "taxType" },
-            "deliveryDate": { "from_input": "deliveryDate" },
-            "deliveryDateUntil": { "from_input": "deliveryDateUntil" },
-            "smallSettlement": { "from_input": "smallSettlement" },
-            "showNet": { "from_input": "showNet" },
-            "paymentTerms": { "from_input": "paymentTerms" },
-            "deliveryTerms": { "from_input": "deliveryTerms" }
+            "from_input": "record"
           }
         },
         "input": {
@@ -341,41 +315,22 @@
       },
       "upsert": {
         "conflict_keys": ["id"],
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Invoice/{invoiceId}",
+          "path": "/Invoice/{id}",
           "path_params": {
-            "invoiceId": { "from_input": "id" }
+            "id": { "from_param": "id" }
           },
           "headers": { "Content-Type": "application/json" },
           "body": {
-            "contact": { "from_input": "contact" },
-            "contactPerson": { "from_input": "contactPerson" },
-            "invoiceDate": { "from_input": "invoiceDate" },
-            "invoiceNumber": { "from_input": "invoiceNumber" },
-            "header": { "from_input": "header" },
-            "headText": { "from_input": "headText" },
-            "footText": { "from_input": "footText" },
-            "timeToPay": { "from_input": "timeToPay" },
-            "discount": { "from_input": "discount" },
-            "addressName": { "from_input": "addressName" },
-            "addressStreet": { "from_input": "addressStreet" },
-            "addressZip": { "from_input": "addressZip" },
-            "addressCity": { "from_input": "addressCity" },
-            "addressCountry": { "from_input": "addressCountry" },
-            "invoiceType": { "from_input": "invoiceType" },
-            "currency": { "from_input": "currency" },
-            "status": { "from_input": "status" },
-            "taxRate": { "from_input": "taxRate" },
-            "taxRule": { "from_input": "taxRule" },
-            "taxText": { "from_input": "taxText" },
-            "taxType": { "from_input": "taxType" },
-            "deliveryDate": { "from_input": "deliveryDate" },
-            "deliveryDateUntil": { "from_input": "deliveryDateUntil" },
-            "smallSettlement": { "from_input": "smallSettlement" },
-            "showNet": { "from_input": "showNet" },
-            "paymentTerms": { "from_input": "paymentTerms" },
-            "deliveryTerms": { "from_input": "deliveryTerms" }
+            "from_input": "record"
           }
         },
         "input": {

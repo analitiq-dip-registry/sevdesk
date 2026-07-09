@@ -171,21 +171,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "html": {
-              "from_input": "html"
-            },
-            "css": {
-              "from_input": "css"
-            },
-            "isStandard": {
-              "from_input": "isStandard"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -240,33 +226,26 @@
         "conflict_keys": [
           "id"
         ],
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Layout/{layoutId}",
+          "path": "/Layout/{id}",
           "path_params": {
-            "layoutId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "html": {
-              "from_input": "html"
-            },
-            "css": {
-              "from_input": "css"
-            },
-            "isStandard": {
-              "from_input": "isStandard"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -324,5 +303,5 @@
       }
     }
   },
-  "endpoint_id": "layouts"
+  "endpoint_id": "layout"
 }

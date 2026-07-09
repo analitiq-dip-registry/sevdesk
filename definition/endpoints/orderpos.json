@@ -1,19 +1,18 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "endpoint_id": "credit_note_positions",
-  "display_name": "Credit Note Positions",
-  "description": "Line items belonging to credit notes.",
+  "display_name": "Order Positions",
+  "description": "Line items belonging to orders.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/CreditNotePos",
+        "path": "/OrderPos",
         "query": {
-          "creditNote[id]": {
-            "from_param": "creditNote[id]"
+          "order[id]": {
+            "from_param": "order[id]"
           },
-          "creditNote[objectName]": {
-            "from_param": "creditNote[objectName]"
+          "order[objectName]": {
+            "from_param": "order[objectName]"
           },
           "limit": {
             "from_param": "limit"
@@ -24,23 +23,23 @@
         }
       },
       "params": {
-        "creditNote[id]": {
+        "order[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Filter by creditNote[id]."
+          "description": "Filter by order[id]."
         },
-        "creditNote[objectName]": {
+        "order[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Use 'CreditNote'."
+          "description": "Use 'Order'."
         },
         "limit": {
           "in": "query",
@@ -125,7 +124,7 @@
                       }
                     }
                   },
-                  "creditNote": {
+                  "order": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Object",
@@ -165,8 +164,7 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Price of the article/part. Gross or net depending on the sevdesk account setting."
+                    "arrow_type": "Decimal128(18, 4)"
                   },
                   "priceNet": {
                     "type": [
@@ -210,7 +208,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Position number of the position."
+                    "description": "Position number used to order multiple positions. Returned as a string by the API."
                   },
                   "text": {
                     "type": [
@@ -255,15 +253,6 @@
                       }
                     }
                   },
-                  "sumDiscount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discount sum of the position."
-                  },
                   "sumNet": {
                     "type": [
                       "string",
@@ -287,6 +276,15 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)"
+                  },
+                  "sumDiscount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "decimal",
+                    "arrow_type": "Decimal128(18, 4)",
+                    "description": "Discount sum of the position."
                   }
                 },
                 "required": [
@@ -303,41 +301,12 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/CreditNotePos",
+          "path": "/OrderPos",
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "creditNote": {
-              "from_input": "creditNote"
-            },
-            "part": {
-              "from_input": "part"
-            },
-            "quantity": {
-              "from_input": "quantity"
-            },
-            "price": {
-              "from_input": "price"
-            },
-            "name": {
-              "from_input": "name"
-            },
-            "unity": {
-              "from_input": "unity"
-            },
-            "positionNumber": {
-              "from_input": "positionNumber"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "text": {
-              "from_input": "text"
-            },
-            "discount": {
-              "from_input": "discount"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -345,7 +314,7 @@
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
-              "creditNote": {
+              "order": {
                 "type": [
                   "object",
                   "null"
@@ -363,7 +332,7 @@
                   },
                   "objectName": {
                     "type": "string",
-                    "const": "CreditNote"
+                    "const": "Order"
                   }
                 }
               },
@@ -459,7 +428,7 @@
               }
             },
             "required": [
-              "creditNote",
+              "order",
               "quantity",
               "name",
               "unity",
@@ -474,48 +443,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/CreditNotePos/{creditNotePosId}",
+          "path": "/OrderPos/{id}",
           "path_params": {
-            "creditNotePosId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "creditNote": {
-              "from_input": "creditNote"
-            },
-            "part": {
-              "from_input": "part"
-            },
-            "quantity": {
-              "from_input": "quantity"
-            },
-            "price": {
-              "from_input": "price"
-            },
-            "name": {
-              "from_input": "name"
-            },
-            "unity": {
-              "from_input": "unity"
-            },
-            "positionNumber": {
-              "from_input": "positionNumber"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "text": {
-              "from_input": "text"
-            },
-            "discount": {
-              "from_input": "discount"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -532,7 +479,7 @@
                   "integer"
                 ]
               },
-              "creditNote": {
+              "order": {
                 "type": [
                   "object",
                   "null"
@@ -550,7 +497,7 @@
                   },
                   "objectName": {
                     "type": "string",
-                    "const": "CreditNote"
+                    "const": "Order"
                   }
                 }
               },
@@ -657,5 +604,6 @@
         }
       }
     }
-  }
+  },
+  "endpoint_id": "orderpos"
 }

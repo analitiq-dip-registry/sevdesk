@@ -186,15 +186,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactCustomFieldSetting": {
-              "from_input": "contactCustomFieldSetting"
-            },
-            "value": {
-              "from_input": "value"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -261,27 +253,26 @@
         "conflict_keys": [
           "id"
         ],
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/ContactCustomField/{contactCustomFieldId}",
+          "path": "/ContactCustomField/{id}",
           "path_params": {
-            "contactCustomFieldId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactCustomFieldSetting": {
-              "from_input": "contactCustomFieldSetting"
-            },
-            "value": {
-              "from_input": "value"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -353,5 +344,5 @@
       }
     }
   },
-  "endpoint_id": "contact_custom_fields"
+  "endpoint_id": "contactcustomfield"
 }

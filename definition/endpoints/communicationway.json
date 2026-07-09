@@ -1,6 +1,6 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "endpoint_id": "communication_ways",
+  "endpoint_id": "communicationway",
   "display_name": "Communication Ways",
   "description": "Phone, email, web, and other communication channels for contacts.",
   "operations": {
@@ -226,21 +226,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "value": {
-              "from_input": "value"
-            },
-            "key": {
-              "from_input": "key"
-            },
-            "main": {
-              "from_input": "main"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -326,33 +312,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/CommunicationWay/{communicationWayId}",
+          "path": "/CommunicationWay/{id}",
           "path_params": {
-            "communicationWayId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "value": {
-              "from_input": "value"
-            },
-            "key": {
-              "from_input": "key"
-            },
-            "main": {
-              "from_input": "main"
-            }
+            "from_input": "record"
           }
         },
         "input": {

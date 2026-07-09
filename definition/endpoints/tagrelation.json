@@ -1,15 +1,21 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Tags",
-  "description": "Free-form labels attachable to many resources.",
+  "display_name": "Tag Relations",
+  "description": "Many-to-many associations between tags and other resources.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/Tag",
+        "path": "/TagRelation",
         "query": {
-          "name": {
-            "from_param": "name"
+          "tag[id]": {
+            "from_param": "tag[id]"
+          },
+          "tag[objectName]": {
+            "from_param": "tag[objectName]"
+          },
+          "object[objectName]": {
+            "from_param": "object[objectName]"
           },
           "limit": {
             "from_param": "limit"
@@ -20,14 +26,32 @@
         }
       },
       "params": {
-        "name": {
+        "tag[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by tag[id]."
+        },
+        "tag[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Filter by tag name."
+          "description": "Use 'Tag'."
+        },
+        "object[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Tagged object type."
         },
         "limit": {
           "in": "query",
@@ -84,12 +108,6 @@
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
-                  "additionalInformation": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Additional free-form information stored on the tag."
-                  },
                   "create": {
                     "type": "string",
                     "native_type": "datetime",
@@ -118,10 +136,32 @@
                       }
                     }
                   },
-                  "name": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                  "tag": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "object": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Object",
+                    "description": "The tagged object (any sevdesk resource).",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
                   }
                 },
                 "required": [
@@ -138,14 +178,12 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Tag",
+          "path": "/TagRelation",
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -153,15 +191,38 @@
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
-              "name": {
+              "tag": {
                 "type": [
-                  "string",
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "Tag"
+                  }
+                }
+              },
+              "object": {
+                "type": [
+                  "object",
                   "null"
                 ]
               }
             },
             "required": [
-              "name"
+              "tag",
+              "object"
             ]
           }
         },
@@ -170,58 +231,8 @@
             "ref": "response.body.objects.id"
           }
         }
-      },
-      "upsert": {
-        "request": {
-          "method": "PUT",
-          "path": "/Tag/{tagId}",
-          "path_params": {
-            "tagId": {
-              "from_input": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "name": {
-              "from_input": "name"
-            }
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
       }
     }
   },
-  "endpoint_id": "tags"
+  "endpoint_id": "tagrelation"
 }

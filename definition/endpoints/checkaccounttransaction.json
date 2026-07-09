@@ -367,42 +367,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "valueDate": {
-              "from_input": "valueDate"
-            },
-            "entryDate": {
-              "from_input": "entryDate"
-            },
-            "paymtPurpose": {
-              "from_input": "paymtPurpose"
-            },
-            "amount": {
-              "from_input": "amount"
-            },
-            "payeePayerName": {
-              "from_input": "payeePayerName"
-            },
-            "payeePayerAcctNo": {
-              "from_input": "payeePayerAcctNo"
-            },
-            "payeePayerBankCode": {
-              "from_input": "payeePayerBankCode"
-            },
-            "gvCode": {
-              "from_input": "gvCode"
-            },
-            "entryText": {
-              "from_input": "entryText"
-            },
-            "primaNotaNo": {
-              "from_input": "primaNotaNo"
-            },
-            "checkAccount": {
-              "from_input": "checkAccount"
-            },
-            "status": {
-              "from_input": "status"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -517,54 +482,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/CheckAccountTransaction/{transactionId}",
+          "path": "/CheckAccountTransaction/{id}",
           "path_params": {
-            "transactionId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "valueDate": {
-              "from_input": "valueDate"
-            },
-            "entryDate": {
-              "from_input": "entryDate"
-            },
-            "paymtPurpose": {
-              "from_input": "paymtPurpose"
-            },
-            "amount": {
-              "from_input": "amount"
-            },
-            "payeePayerName": {
-              "from_input": "payeePayerName"
-            },
-            "payeePayerAcctNo": {
-              "from_input": "payeePayerAcctNo"
-            },
-            "payeePayerBankCode": {
-              "from_input": "payeePayerBankCode"
-            },
-            "gvCode": {
-              "from_input": "gvCode"
-            },
-            "entryText": {
-              "from_input": "entryText"
-            },
-            "primaNotaNo": {
-              "from_input": "primaNotaNo"
-            },
-            "checkAccount": {
-              "from_input": "checkAccount"
-            },
-            "status": {
-              "from_input": "status"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -686,5 +623,5 @@
       }
     }
   },
-  "endpoint_id": "check_account_transactions"
+  "endpoint_id": "checkaccounttransaction"
 }
