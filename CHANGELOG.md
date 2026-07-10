@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.0] - 2026-07-10
+
+### Changed
+- fix: conform sevdesk endpoints to api-endpoint contract validator (#12)
+
 ## [1.2.1] - 2026-07-05
 
 ### Fixed
