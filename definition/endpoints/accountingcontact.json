@@ -174,15 +174,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "debitorNumber": {
-              "from_input": "debitorNumber"
-            },
-            "creditorNumber": {
-              "from_input": "creditorNumber"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -237,27 +229,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/AccountingContact/{accountingContactId}",
+          "path": "/AccountingContact/{id}",
           "path_params": {
-            "accountingContactId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "debitorNumber": {
-              "from_input": "debitorNumber"
-            },
-            "creditorNumber": {
-              "from_input": "creditorNumber"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -322,5 +313,5 @@
       }
     }
   },
-  "endpoint_id": "accounting_contacts"
+  "endpoint_id": "accountingcontact"
 }

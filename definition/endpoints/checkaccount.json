@@ -261,33 +261,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "importType": {
-              "from_input": "importType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "defaultAccount": {
-              "from_input": "defaultAccount"
-            },
-            "iban": {
-              "from_input": "iban"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "autoMapTransactions": {
-              "from_input": "autoMapTransactions"
-            },
-            "accountingNumber": {
-              "from_input": "accountingNumber"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -364,45 +338,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/CheckAccount/{checkAccountId}",
+          "path": "/CheckAccount/{id}",
           "path_params": {
-            "checkAccountId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "type": {
-              "from_input": "type"
-            },
-            "importType": {
-              "from_input": "importType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "defaultAccount": {
-              "from_input": "defaultAccount"
-            },
-            "iban": {
-              "from_input": "iban"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "autoMapTransactions": {
-              "from_input": "autoMapTransactions"
-            },
-            "accountingNumber": {
-              "from_input": "accountingNumber"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -487,5 +442,5 @@
       }
     }
   },
-  "endpoint_id": "check_accounts"
+  "endpoint_id": "checkaccount"
 }

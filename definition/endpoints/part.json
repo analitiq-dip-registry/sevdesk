@@ -279,48 +279,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "partNumber": {
-              "from_input": "partNumber"
-            },
-            "text": {
-              "from_input": "text"
-            },
-            "category": {
-              "from_input": "category"
-            },
-            "stock": {
-              "from_input": "stock"
-            },
-            "stockEnabled": {
-              "from_input": "stockEnabled"
-            },
-            "unity": {
-              "from_input": "unity"
-            },
-            "price": {
-              "from_input": "price"
-            },
-            "priceNet": {
-              "from_input": "priceNet"
-            },
-            "priceGross": {
-              "from_input": "priceGross"
-            },
-            "pricePurchase": {
-              "from_input": "pricePurchase"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "internalComment": {
-              "from_input": "internalComment"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -465,60 +424,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Part/{partId}",
+          "path": "/Part/{id}",
           "path_params": {
-            "partId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "partNumber": {
-              "from_input": "partNumber"
-            },
-            "text": {
-              "from_input": "text"
-            },
-            "category": {
-              "from_input": "category"
-            },
-            "stock": {
-              "from_input": "stock"
-            },
-            "stockEnabled": {
-              "from_input": "stockEnabled"
-            },
-            "unity": {
-              "from_input": "unity"
-            },
-            "price": {
-              "from_input": "price"
-            },
-            "priceNet": {
-              "from_input": "priceNet"
-            },
-            "priceGross": {
-              "from_input": "priceGross"
-            },
-            "pricePurchase": {
-              "from_input": "pricePurchase"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "internalComment": {
-              "from_input": "internalComment"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -671,5 +596,5 @@
       }
     }
   },
-  "endpoint_id": "parts"
+  "endpoint_id": "part"
 }

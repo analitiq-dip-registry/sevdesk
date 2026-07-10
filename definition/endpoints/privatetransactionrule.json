@@ -1,15 +1,18 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Categories",
-  "description": "Categories used to classify contacts and other resources.",
+  "display_name": "Private Transaction Rules",
+  "description": "Rules auto-marking bank transactions as private.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/Category",
+        "path": "/PrivateTransactionRule",
         "query": {
-          "objectType": {
-            "from_param": "objectType"
+          "checkAccount[id]": {
+            "from_param": "checkAccount[id]"
+          },
+          "checkAccount[objectName]": {
+            "from_param": "checkAccount[objectName]"
           },
           "limit": {
             "from_param": "limit"
@@ -20,14 +23,23 @@
         }
       },
       "params": {
-        "objectType": {
+        "checkAccount[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by checkAccount[id]."
+        },
+        "checkAccount[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Filter by object type."
+          "description": "Use 'CheckAccount'."
         },
         "limit": {
           "in": "query",
@@ -112,18 +124,26 @@
                       }
                     }
                   },
-                  "name": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                  "checkAccount": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
                   },
-                  "objectType": {
+                  "matchingType": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Type the category applies to (Contact, Invoice, etc.)."
+                    "description": "Matching rule kind."
                   },
-                  "code": {
+                  "matchingValue": {
                     "type": [
                       "string",
                       "null"
@@ -131,13 +151,23 @@
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
-                  "translationCode": {
+                  "paymentPurpose": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The payment purpose of transactions to match."
+                  },
+                  "counterpartName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The counterpart name of transactions to match."
                   }
                 },
                 "required": [
@@ -154,20 +184,12 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Category",
+          "path": "/PrivateTransactionRule",
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "objectType": {
-              "from_input": "objectType"
-            },
-            "code": {
-              "from_input": "code"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -175,19 +197,35 @@
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
-              "name": {
+              "checkAccount": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CheckAccount"
+                  }
+                }
+              },
+              "matchingType": {
                 "type": [
                   "string",
                   "null"
                 ]
               },
-              "objectType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
+              "matchingValue": {
                 "type": [
                   "string",
                   "null"
@@ -195,8 +233,8 @@
               }
             },
             "required": [
-              "name",
-              "objectType"
+              "checkAccount",
+              "matchingType"
             ]
           }
         },
@@ -207,30 +245,26 @@
         }
       },
       "upsert": {
-        "conflict_keys": [
-          "id"
-        ],
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Category/{categoryId}",
+          "path": "/PrivateTransactionRule/{id}",
           "path_params": {
-            "categoryId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "name": {
-              "from_input": "name"
-            },
-            "objectType": {
-              "from_input": "objectType"
-            },
-            "code": {
-              "from_input": "code"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -247,19 +281,35 @@
                   "integer"
                 ]
               },
-              "name": {
+              "checkAccount": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "CheckAccount"
+                  }
+                }
+              },
+              "matchingType": {
                 "type": [
                   "string",
                   "null"
                 ]
               },
-              "objectType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
+              "matchingValue": {
                 "type": [
                   "string",
                   "null"
@@ -268,6 +318,9 @@
             }
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
             "ref": "response.body.objects.id"
@@ -276,5 +329,5 @@
       }
     }
   },
-  "endpoint_id": "categories"
+  "endpoint_id": "privatetransactionrule"
 }

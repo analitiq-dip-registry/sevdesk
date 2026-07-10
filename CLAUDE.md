@@ -25,44 +25,46 @@ None required. The API token is account-scoped (one token per sevdesk account / 
 
 All endpoints expose `read` (GET list) plus `write.insert` (POST) and `write.upsert` (PUT/{id}) where the API supports them. Reference-data endpoints are read-only.
 
+Each endpoint's `endpoint_id` (and its file basename) equals the handle derived from its `request.path` — lowercased, path-params dropped — per the api-endpoint `endpoint-id-locator` rule.
+
 ### Contacts and contact metadata
-- `contacts` — `/Contact` — read, insert, upsert
-- `contact_addresses` — `/ContactAddress` — read, insert, upsert
-- `communication_ways` — `/CommunicationWay` — read, insert, upsert
-- `contact_custom_fields` — `/ContactCustomField` — read, insert, upsert
-- `accounting_contacts` — `/AccountingContact` — read, insert, upsert
+- `contact` — `/Contact` — read, insert, upsert
+- `contactaddress` — `/ContactAddress` — read, insert, upsert
+- `communicationway` — `/CommunicationWay` — read, insert, upsert
+- `contactcustomfield` — `/ContactCustomField` — read, insert, upsert
+- `accountingcontact` — `/AccountingContact` — read, insert, upsert
 
 ### Sales documents
-- `invoices` — `/Invoice` — read, insert, upsert
-- `invoice_positions` — `/InvoicePos` — read, insert, upsert
-- `credit_notes` — `/CreditNote` — read, insert, upsert
-- `credit_note_positions` — `/CreditNotePos` — read, insert, upsert
-- `orders` — `/Order` — read, insert, upsert
-- `order_positions` — `/OrderPos` — read, insert, upsert
+- `invoice` — `/Invoice` — read, insert, upsert
+- `invoicepos` — `/InvoicePos` — read, insert, upsert
+- `creditnote` — `/CreditNote` — read, insert, upsert
+- `creditnotepos` — `/CreditNotePos` — read, insert, upsert
+- `order` — `/Order` — read, insert, upsert
+- `orderpos` — `/OrderPos` — read, insert, upsert
 
 ### Purchase / bookkeeping documents
-- `vouchers` — `/Voucher` — read, insert, upsert
-- `voucher_positions` — `/VoucherPos` — read, insert, upsert
+- `voucher` — `/Voucher` — read, insert, upsert
+- `voucherpos` — `/VoucherPos` — read, insert, upsert
 
 ### Catalog and inventory
-- `parts` — `/Part` — read, insert, upsert
+- `part` — `/Part` — read, insert, upsert
 
 ### Banking
-- `check_accounts` — `/CheckAccount` — read, insert, upsert
-- `check_account_transactions` — `/CheckAccountTransaction` — read, insert, upsert
-- `private_transaction_rules` — `/PrivateTransactionRule` — read, insert, upsert
+- `checkaccount` — `/CheckAccount` — read, insert, upsert
+- `checkaccounttransaction` — `/CheckAccountTransaction` — read, insert, upsert
+- `privatetransactionrule` — `/PrivateTransactionRule` — read, insert, upsert
 
 ### Classification and templates
-- `categories` — `/Category` — read, insert, upsert
-- `tags` — `/Tag` — read, insert, upsert
-- `tag_relations` — `/TagRelation` — read, insert (no PUT — recreate to change)
-- `layouts` — `/Layout` — read, insert, upsert
+- `category` — `/Category` — read, insert, upsert
+- `tag` — `/Tag` — read, insert, upsert
+- `tagrelation` — `/TagRelation` — read, insert (no PUT — recreate to change)
+- `layout` — `/Layout` — read, insert, upsert
 
 ### Reference data (read-only)
-- `static_countries` — `/StaticCountry`
-- `static_currencies` — `/StaticCurrency`
-- `unities` — `/Unity`
-- `accounting_types` — `/AccountingType`
+- `staticcountry` — `/StaticCountry`
+- `staticcurrency` — `/StaticCurrency`
+- `unity` — `/Unity`
+- `accountingtype` — `/AccountingType`
 
 ## Pagination
 
@@ -82,5 +84,5 @@ Not documented by sevdesk. No rate limit configuration is applied.
 - The API base URL is `https://my.sevdesk.de/api/v1` — all endpoint paths are relative to this.
 - All sevdesk POST endpoints wrap the created/updated record in `{ "objects": <Resource> }`. Endpoint definitions extract `id` via `response.body.objects.id`.
 - Many writable fields are sevdesk relations: `{ "id": ..., "objectName": "Category" }` style. Each endpoint's `input.schema` documents the expected `objectName` per relation.
-- POST `/Contact`, `/Invoice`, `/CreditNote`, `/Order`, `/Voucher` create base records only. For atomic create-with-positions, sevdesk exposes `/Invoice/Factory/saveInvoice`, `/CreditNote/Factory/saveCreditNote`, `/Order/Factory/saveOrder`, `/Voucher/Factory/saveVoucher` — not currently modeled here; positions can be created separately via the `*_positions` endpoints.
+- POST `/Contact`, `/Invoice`, `/CreditNote`, `/Order`, `/Voucher` create base records only. For atomic create-with-positions, sevdesk exposes `/Invoice/Factory/saveInvoice`, `/CreditNote/Factory/saveCreditNote`, `/Order/Factory/saveOrder`, `/Voucher/Factory/saveVoucher` — not currently modeled here; positions can be created separately via the `*pos` position endpoints (`invoicepos`, `creditnotepos`, `orderpos`, `voucherpos`).
 - Action endpoints (`sendBy`, `sendViaEmail`, `bookAmount`, `enshrine`, `resetToDraft`, `resetToOpen`) are not modeled — they are POST side-effects on existing documents that don't fit the read/write CRUD operation contract.

@@ -568,48 +568,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "voucherDate": {
-              "from_input": "voucherDate"
-            },
-            "supplier": {
-              "from_input": "supplier"
-            },
-            "supplierName": {
-              "from_input": "supplierName"
-            },
-            "description": {
-              "from_input": "description"
-            },
-            "payDate": {
-              "from_input": "payDate"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "creditDebit": {
-              "from_input": "creditDebit"
-            },
-            "voucherType": {
-              "from_input": "voucherType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "documentType": {
-              "from_input": "documentType"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -737,60 +696,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Voucher/{voucherId}",
+          "path": "/Voucher/{id}",
           "path_params": {
-            "voucherId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "voucherDate": {
-              "from_input": "voucherDate"
-            },
-            "supplier": {
-              "from_input": "supplier"
-            },
-            "supplierName": {
-              "from_input": "supplierName"
-            },
-            "description": {
-              "from_input": "description"
-            },
-            "payDate": {
-              "from_input": "payDate"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "creditDebit": {
-              "from_input": "creditDebit"
-            },
-            "voucherType": {
-              "from_input": "voucherType"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "documentType": {
-              "from_input": "documentType"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -925,5 +850,5 @@
       }
     }
   },
-  "endpoint_id": "vouchers"
+  "endpoint_id": "voucher"
 }

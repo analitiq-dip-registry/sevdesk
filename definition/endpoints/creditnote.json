@@ -1,19 +1,18 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Orders",
-  "description": "Quotations and order confirmations.",
-  "endpoint_id": "orders",
+  "display_name": "Credit Notes",
+  "description": "Credit notes issued to customers.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/Order",
+        "path": "/CreditNote",
         "query": {
           "status": {
             "from_param": "status"
           },
-          "orderNumber": {
-            "from_param": "orderNumber"
+          "creditNoteNumber": {
+            "from_param": "creditNoteNumber"
           },
           "startDate": {
             "from_param": "startDate"
@@ -45,14 +44,14 @@
           ],
           "description": "Filter by status."
         },
-        "orderNumber": {
+        "creditNoteNumber": {
           "in": "query",
           "type": "string",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Filter by orderNumber."
+          "description": "Filter by credit note number."
         },
         "startDate": {
           "in": "query",
@@ -61,7 +60,7 @@
           "operators": [
             "eq"
           ],
-          "description": "Filter by startDate."
+          "description": "Filter from credit note date."
         },
         "endDate": {
           "in": "query",
@@ -70,7 +69,7 @@
           "operators": [
             "eq"
           ],
-          "description": "Filter by endDate."
+          "description": "Filter to credit note date."
         },
         "contact[id]": {
           "in": "query",
@@ -79,7 +78,7 @@
           "operators": [
             "eq"
           ],
-          "description": "Filter by contact[id]."
+          "description": "Filter by contact id."
         },
         "contact[objectName]": {
           "in": "query",
@@ -138,34 +137,32 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order id."
+                    "arrow_type": "Utf8"
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order object name."
+                    "arrow_type": "Utf8"
                   },
                   "create": {
                     "type": "string",
                     "native_type": "datetime",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date of order creation."
+                    "description": "Create timestamp."
                   },
                   "update": {
                     "type": "string",
                     "native_type": "datetime",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date of last order update."
+                    "description": "Last update timestamp."
                   },
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "Client to which the order belongs. Filled automatically.",
+                    "description": "sevdesk client.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -179,7 +176,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "User who created the order. Filled automatically.",
+                    "description": "User who created the credit note. Filled automatically.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -189,20 +186,21 @@
                       }
                     }
                   },
-                  "orderNumber": {
+                  "creditNoteNumber": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order number."
+                    "arrow_type": "Utf8"
                   },
                   "contact": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "The contact used in the order.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -216,7 +214,6 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "The user who acts as a contact person for the order.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -226,27 +223,16 @@
                       }
                     }
                   },
-                  "orderDate": {
+                  "creditNoteDate": {
                     "type": "string",
                     "native_type": "datetime",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Order date."
+                    "format": "date-time"
                   },
                   "status": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Status code of the order (100, 200, 300, 500, 750, 1000)."
-                  },
-                  "orderType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Type of the order (AN=quotation, AB=order confirmation, LI=delivery note)."
+                    "arrow_type": "Utf8"
                   },
                   "header": {
                     "type": [
@@ -254,8 +240,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Header, normally prefix plus the order number."
+                    "arrow_type": "Utf8"
                   },
                   "headText": {
                     "type": [
@@ -263,8 +248,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Head text (may contain HTML)."
+                    "arrow_type": "Utf8"
                   },
                   "footText": {
                     "type": [
@@ -272,17 +256,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Foot text (may contain HTML)."
-                  },
-                  "address": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Complete address of the recipient."
+                    "arrow_type": "Utf8"
                   },
                   "addressName": {
                     "type": [
@@ -323,7 +297,6 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "Country of the address.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -333,11 +306,27 @@
                       }
                     }
                   },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Complete recipient address (name, street, city, zip, country)."
+                  },
+                  "creditNoteType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8"
+                  },
                   "currency": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Currency code (ISO-4217)."
+                    "arrow_type": "Utf8"
                   },
                   "sumNet": {
                     "type": [
@@ -345,8 +334,7 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order."
+                    "arrow_type": "Decimal128(18, 4)"
                   },
                   "sumTax": {
                     "type": [
@@ -354,8 +342,7 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order."
+                    "arrow_type": "Decimal128(18, 4)"
                   },
                   "sumGross": {
                     "type": [
@@ -363,8 +350,7 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order."
+                    "arrow_type": "Decimal128(18, 4)"
                   },
                   "sumDiscounts": {
                     "type": [
@@ -373,7 +359,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Sum of all discounts in the order."
+                    "description": "Sum of all discounts in the credit note."
                   },
                   "sumNetForeignCurrency": {
                     "type": [
@@ -382,7 +368,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order in the foreign currency."
+                    "description": "Net sum in the foreign currency."
                   },
                   "sumTaxForeignCurrency": {
                     "type": [
@@ -391,7 +377,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order in the foreign currency."
+                    "description": "Tax sum in the foreign currency."
                   },
                   "sumGrossForeignCurrency": {
                     "type": [
@@ -400,7 +386,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order in the foreign currency."
+                    "description": "Gross sum in the foreign currency."
                   },
                   "sumDiscountsForeignCurrency": {
                     "type": [
@@ -409,7 +395,7 @@
                     ],
                     "native_type": "decimal",
                     "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discounts sum of the order in the foreign currency."
+                    "description": "Discounts sum in the foreign currency."
                   },
                   "taxRate": {
                     "type": [
@@ -417,14 +403,15 @@
                       "null"
                     ],
                     "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Deprecated. Use the taxRate of the individual positions instead."
+                    "arrow_type": "Decimal128(18, 4)"
                   },
                   "taxRule": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "VAT rule (sevdesk-Update 2.0).",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -441,7 +428,24 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Object",
-                    "description": "Tax set of the order (sevdesk-Update 1.0).",
+                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "objectName": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Object",
+                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -457,8 +461,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
+                    "arrow_type": "Utf8"
                   },
                   "taxType": {
                     "type": [
@@ -466,8 +469,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax type (sevdesk-Update 1.0)."
+                    "arrow_type": "Utf8"
                   },
                   "showNet": {
                     "type": [
@@ -475,8 +477,7 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "If true, the net amount of each position is shown; otherwise gross."
+                    "arrow_type": "Utf8"
                   },
                   "smallSettlement": {
                     "type": [
@@ -485,42 +486,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Whether the client uses the small settlement scheme."
-                  },
-                  "deliveryTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Delivery terms of the order."
-                  },
-                  "paymentTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Payment terms of the order."
-                  },
-                  "origin": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Object from which the order was created.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Whether the small settlement scheme applies (returned as a string flag)."
                   },
                   "customerInternalNote": {
                     "type": [
@@ -529,13 +495,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Internal note of the customer (Referenz/Bestellnummer)."
+                    "description": "Internal customer note (Referenz/Bestellnummer)."
                   },
-                  "version": {
-                    "type": "string",
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Version of the order. Starts with 0."
+                    "description": "Type used to send the credit note (VPR, VPDF, VM, VP)."
                   },
                   "sendDate": {
                     "type": [
@@ -545,16 +514,16 @@
                     "native_type": "datetime",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "The date the order was sent to the customer."
+                    "description": "Date the credit note was sent to the customer."
                   },
-                  "sendType": {
+                  "enshrined": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Type used to send the order (VPR, VPDF, VM, VP)."
+                    "native_type": "datetime",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time"
                   },
                   "deliveryDate": {
                     "type": [
@@ -565,14 +534,14 @@
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time"
                   },
-                  "deliveryDateUntil": {
+                  "refSrcInvoice": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Source invoice id when issued from invoice."
                   }
                 },
                 "required": [
@@ -589,65 +558,12 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Order",
+          "path": "/CreditNote",
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactPerson": {
-              "from_input": "contactPerson"
-            },
-            "orderDate": {
-              "from_input": "orderDate"
-            },
-            "orderNumber": {
-              "from_input": "orderNumber"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "orderType": {
-              "from_input": "orderType"
-            },
-            "header": {
-              "from_input": "header"
-            },
-            "headText": {
-              "from_input": "headText"
-            },
-            "footText": {
-              "from_input": "footText"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "taxRule": {
-              "from_input": "taxRule"
-            },
-            "taxText": {
-              "from_input": "taxText"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            },
-            "smallSettlement": {
-              "from_input": "smallSettlement"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -699,26 +615,20 @@
                   }
                 }
               },
-              "orderDate": {
+              "creditNoteDate": {
                 "type": [
                   "string",
                   "null"
                 ],
                 "format": "date-time"
               },
-              "orderNumber": {
+              "creditNoteNumber": {
                 "type": [
                   "string",
                   "null"
                 ]
               },
               "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "orderType": {
                 "type": [
                   "string",
                   "null"
@@ -737,6 +647,58 @@
                 ]
               },
               "footText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressStreet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressZip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressCity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressCountry": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "StaticCountry"
+                  }
+                }
+              },
+              "creditNoteType": {
                 "type": [
                   "string",
                   "null"
@@ -801,25 +763,11 @@
                   "null"
                 ],
                 "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
               }
             },
             "required": [
-              "contact",
               "contactPerson",
-              "orderDate",
+              "creditNoteDate",
               "currency",
               "taxRule",
               "taxText"
@@ -833,72 +781,26 @@
         }
       },
       "upsert": {
+        "params": {
+          "id": {
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        },
         "request": {
           "method": "PUT",
-          "path": "/Order/{orderId}",
+          "path": "/CreditNote/{id}",
           "path_params": {
-            "orderId": {
-              "from_input": "id"
+            "id": {
+              "from_param": "id"
             }
           },
           "headers": {
             "Content-Type": "application/json"
           },
           "body": {
-            "contact": {
-              "from_input": "contact"
-            },
-            "contactPerson": {
-              "from_input": "contactPerson"
-            },
-            "orderDate": {
-              "from_input": "orderDate"
-            },
-            "orderNumber": {
-              "from_input": "orderNumber"
-            },
-            "status": {
-              "from_input": "status"
-            },
-            "orderType": {
-              "from_input": "orderType"
-            },
-            "header": {
-              "from_input": "header"
-            },
-            "headText": {
-              "from_input": "headText"
-            },
-            "footText": {
-              "from_input": "footText"
-            },
-            "currency": {
-              "from_input": "currency"
-            },
-            "taxRate": {
-              "from_input": "taxRate"
-            },
-            "taxRule": {
-              "from_input": "taxRule"
-            },
-            "taxText": {
-              "from_input": "taxText"
-            },
-            "taxType": {
-              "from_input": "taxType"
-            },
-            "showNet": {
-              "from_input": "showNet"
-            },
-            "deliveryDate": {
-              "from_input": "deliveryDate"
-            },
-            "deliveryDateUntil": {
-              "from_input": "deliveryDateUntil"
-            },
-            "smallSettlement": {
-              "from_input": "smallSettlement"
-            }
+            "from_input": "record"
           }
         },
         "input": {
@@ -959,26 +861,20 @@
                   }
                 }
               },
-              "orderDate": {
+              "creditNoteDate": {
                 "type": [
                   "string",
                   "null"
                 ],
                 "format": "date-time"
               },
-              "orderNumber": {
+              "creditNoteNumber": {
                 "type": [
                   "string",
                   "null"
                 ]
               },
               "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "orderType": {
                 "type": [
                   "string",
                   "null"
@@ -997,6 +893,58 @@
                 ]
               },
               "footText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressStreet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressZip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressCity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "addressCountry": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "required": [
+                  "id",
+                  "objectName"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "const": "StaticCountry"
+                  }
+                }
+              },
+              "creditNoteType": {
                 "type": [
                   "string",
                   "null"
@@ -1061,19 +1009,6 @@
                   "null"
                 ],
                 "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
               }
             }
           }
@@ -1088,5 +1023,6 @@
         }
       }
     }
-  }
+  },
+  "endpoint_id": "creditnote"
 }

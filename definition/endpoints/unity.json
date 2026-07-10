@@ -1,12 +1,12 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Static Currencies (read-only)",
-  "description": "Reference list of ISO currencies.",
+  "display_name": "Unities (read-only)",
+  "description": "Reference list of units of measure.",
   "operations": {
     "read": {
       "request": {
         "method": "GET",
-        "path": "/StaticCurrency",
+        "path": "/Unity",
         "query": {
           "limit": {
             "from_param": "limit"
@@ -72,19 +72,11 @@
                     "native_type": "string",
                     "arrow_type": "Utf8"
                   },
-                  "code": {
+                  "name": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "ISO 4217 currency code."
-                  },
-                  "name": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "description": "Unit-of-measure name (e.g. piece, hour)."
                   },
                   "translationCode": {
                     "type": [
@@ -106,5 +98,5 @@
       }
     }
   },
-  "endpoint_id": "static_currencies"
+  "endpoint_id": "unity"
 }
