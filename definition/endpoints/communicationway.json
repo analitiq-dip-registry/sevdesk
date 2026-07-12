@@ -139,29 +139,13 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Contact relation."
                   },
                   "type": {
                     "type": "string",
@@ -187,15 +171,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Communication way key relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Communication way key relation."
                   },
                   "main": {
                     "type": [

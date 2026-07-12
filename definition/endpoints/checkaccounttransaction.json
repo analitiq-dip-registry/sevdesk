@@ -199,15 +199,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "valueDate": {
                     "type": "string",
@@ -290,15 +282,7 @@
                   "checkAccount": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "status": {
                     "type": "string",
@@ -312,15 +296,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "targetTransaction": {
                     "type": [
@@ -328,15 +304,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "enshrined": {
                     "type": [

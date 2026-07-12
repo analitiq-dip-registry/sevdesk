@@ -116,15 +116,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client the custom field belongs to (filled automatically).",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client the custom field belongs to (filled automatically)."
                   },
                   "contact": {
                     "type": [
@@ -133,29 +125,13 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Contact relation."
                   },
                   "contactCustomFieldSetting": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting')."
                   },
                   "value": {
                     "type": [

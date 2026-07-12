@@ -174,29 +174,13 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "createUser": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "User who created the voucher (objectName 'SevUser').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "User who created the voucher (objectName 'SevUser')."
                   },
                   "voucherDate": {
                     "type": [
@@ -214,15 +198,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Supplier contact.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Supplier contact."
                   },
                   "supplierName": {
                     "type": [
@@ -247,15 +223,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Attached document of the voucher (objectName 'Document').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Attached document of the voucher (objectName 'Document')."
                   },
                   "documentType": {
                     "type": [
@@ -356,15 +324,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule')."
                   },
                   "taxType": {
                     "type": [
@@ -390,15 +350,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Cost centre for the voucher (objectName 'CostCentre').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Cost centre for the voucher (objectName 'CostCentre')."
                   },
                   "voucherType": {
                     "type": [
@@ -513,15 +465,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet')."
                   },
                   "showNet": {
                     "type": [

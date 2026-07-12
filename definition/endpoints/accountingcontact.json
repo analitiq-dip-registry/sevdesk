@@ -114,29 +114,13 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Contact relation."
                   },
                   "debitorNumber": {
                     "type": [

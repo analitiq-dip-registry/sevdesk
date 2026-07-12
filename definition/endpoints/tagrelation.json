@@ -126,42 +126,18 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "tag": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "object": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The tagged object (any sevdesk resource).",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "The tagged object (any sevdesk resource)."
                   }
                 },
                 "required": [

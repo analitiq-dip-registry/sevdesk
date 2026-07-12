@@ -162,29 +162,13 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "createUser": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "User who created the credit note. Filled automatically.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "User who created the credit note. Filled automatically."
                   },
                   "creditNoteNumber": {
                     "type": [
@@ -200,28 +184,12 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "creditNoteDate": {
                     "type": "string",
@@ -296,15 +264,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "address": {
                     "type": [
@@ -411,15 +371,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "taxSet": {
                     "type": [
@@ -428,32 +380,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "taxSet": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Tax set (sevdesk-Update 1.0). Relation {id, objectName: 'TaxSet'}."
                   },
                   "taxText": {
                     "type": [
@@ -541,15 +468,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Source invoice relation when the credit note was issued from an invoice.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Source invoice relation when the credit note was issued from an invoice."
                   }
                 },
                 "required": [

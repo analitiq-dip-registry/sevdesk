@@ -109,30 +109,26 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "sevdesk client."
                   },
                   "invoiceNumber": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Customer relation.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "Customer relation."
                   },
                   "contactPerson": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk user creating the invoice.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "sevdesk user creating the invoice."
                   },
                   "createUser": {
                     "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "User who created the invoice. Filled automatically by sevdesk.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "User who created the invoice. Filled automatically by sevdesk."
                   },
                   "invoiceDate": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
                   "header": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
@@ -148,8 +144,7 @@
                   "addressCountry": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "arrow_type": "Json"
                   },
                   "payDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
                   "deliveryDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
@@ -160,8 +155,7 @@
                   "taxRule": {
                     "type": ["object", "null"],
                     "native_type": "object",
-                    "arrow_type": "Json",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "arrow_type": "Json"
                   },
                   "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
                   "taxType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
@@ -169,31 +163,27 @@
                     "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom').",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom')."
                   },
                   "dunningLevel": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Number of reminders already sent for the invoice." },
                   "paymentMethod": {
                     "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Payment method relation.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "Payment method relation."
                   },
                   "costCentre": {
                     "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Cost centre relation.",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "Cost centre relation."
                   },
                   "sendDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
                   "origin": {
                     "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Origin object of the invoice (e.g. an Order).",
-                    "properties": { "id": { "type": "string" }, "objectName": { "type": "string" } }
+                    "description": "Origin object of the invoice (e.g. an Order)."
                   },
                   "invoiceType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Type (RE, WKR, SR, MA, TR, AR, ER)." },
                   "accountIntervall": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Recurring-invoice interval as ISO-8601 duration." },

@@ -116,15 +116,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "sevdesk client."
                   },
                   "name": {
                     "type": "string",
@@ -157,15 +149,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Category of the part.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "Category of the part."
                   },
                   "stock": {
                     "type": [
@@ -189,15 +173,7 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The unit in which the part is measured.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "description": "The unit in which the part is measured."
                   },
                   "price": {
                     "type": [
