@@ -114,7 +114,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -128,7 +128,7 @@
                   "creditNote": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -144,7 +144,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "properties": {
                       "id": {
                         "type": "string"
@@ -245,7 +245,7 @@
                   "unity": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "properties": {
                       "id": {
                         "type": "string"

@@ -114,7 +114,7 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "description": "sevdesk client.",
                     "properties": {
                       "id": {
@@ -128,7 +128,7 @@
                   "invoice": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "description": "Invoice relation.",
                     "properties": {
                       "id": {
@@ -145,7 +145,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "description": "Linked product.",
                     "properties": {
                       "id": {
@@ -183,7 +183,7 @@
                   "unity": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
+                    "arrow_type": "Json",
                     "description": "Unit of measure relation.",
                     "properties": {
                       "id": {
