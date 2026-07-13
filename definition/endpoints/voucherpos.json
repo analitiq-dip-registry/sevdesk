@@ -115,72 +115,32 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "sevdesk client."
                   },
                   "voucher": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "The voucher to which the position belongs.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "The voucher to which the position belongs."
                   },
                   "accountDatev": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0 (replaces accountingType).",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0 (replaces accountingType)."
                   },
                   "accountingType": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "The accounting type (booking account) to which the position belongs.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "The accounting type (booking account) to which the position belongs."
                   },
                   "estimatedAccountingType": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "The accounting type estimated by sevdesk voucher recognition.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "The accounting type estimated by sevdesk voucher recognition."
                   },
                   "taxRate": {
                     "type": "string",

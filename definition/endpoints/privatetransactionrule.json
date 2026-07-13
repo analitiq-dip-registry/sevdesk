@@ -113,29 +113,13 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "sevdesk client."
                   },
                   "checkAccount": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "matchingType": {
                     "type": "string",

@@ -114,29 +114,13 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "sevdesk client."
                   },
                   "creditNote": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "part": {
                     "type": [
@@ -144,15 +128,7 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "quantity": {
                     "type": "string",
@@ -245,15 +221,7 @@
                   "unity": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json"
                   },
                   "sumDiscount": {
                     "type": [

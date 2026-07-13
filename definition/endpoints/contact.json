@@ -174,16 +174,8 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Client (SevClient) the contact belongs to.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Client (SevClient) the contact belongs to."
                   },
                   "name": {
                     "type": [
@@ -251,16 +243,8 @@
                   "category": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Category relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Category relation."
                   },
                   "parent": {
                     "type": [
@@ -268,16 +252,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Parent contact (must be an organization).",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Parent contact (must be an organization)."
                   },
                   "description": {
                     "type": [

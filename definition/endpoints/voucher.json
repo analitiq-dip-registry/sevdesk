@@ -173,30 +173,14 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "sevdesk client.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "sevdesk client."
                   },
                   "createUser": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "User who created the voucher (objectName 'SevUser').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "User who created the voucher (objectName 'SevUser')."
                   },
                   "voucherDate": {
                     "type": [
@@ -213,16 +197,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Supplier contact.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Supplier contact."
                   },
                   "supplierName": {
                     "type": [
@@ -246,16 +222,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Attached document of the voucher (objectName 'Document').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Attached document of the voucher (objectName 'Document')."
                   },
                   "documentType": {
                     "type": [
@@ -355,16 +323,8 @@
                   "taxRule": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule')."
                   },
                   "taxType": {
                     "type": [
@@ -389,16 +349,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Cost centre for the voucher (objectName 'CostCentre').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Cost centre for the voucher (objectName 'CostCentre')."
                   },
                   "voucherType": {
                     "type": [
@@ -512,16 +464,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet')."
                   },
                   "showNet": {
                     "type": [

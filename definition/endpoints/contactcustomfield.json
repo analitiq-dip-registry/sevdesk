@@ -115,16 +115,8 @@
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "sevdesk client the custom field belongs to (filled automatically).",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "sevdesk client the custom field belongs to (filled automatically)."
                   },
                   "contact": {
                     "type": [
@@ -132,30 +124,14 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Contact relation.",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Contact relation."
                   },
                   "contactCustomFieldSetting": {
                     "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Object",
-                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting').",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "objectName": {
-                        "type": "string"
-                      }
-                    }
+                    "arrow_type": "Json",
+                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting')."
                   },
                   "value": {
                     "type": [
