@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.0.0] - 2026-07-13
+
+### Changed
+- fix: type sevdesk relation fields as Json instead of Object (#13)
+
 ## [2.0.0] - 2026-07-10
 
 ### Changed
