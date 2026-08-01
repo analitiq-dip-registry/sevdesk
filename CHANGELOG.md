@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.0.1] - 2026-08-01
+
+### Fixed
+- feat: add required increment_by to offset pagination (rc17) (#14)
+
 ## [3.0.0] - 2026-07-13
 
 ### Changed
