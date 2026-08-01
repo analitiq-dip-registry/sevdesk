@@ -41,7 +41,8 @@
         },
         "offset": {
           "param": "offset",
-          "initial": 0
+          "initial": 0,
+          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
