@@ -87,14 +87,14 @@
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
                     "description": "Create timestamp."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
                     "description": "Last update timestamp."
@@ -219,19 +219,12 @@
         "conflict_keys": [
           "id"
         ],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
           "path": "/Layout/{id}",
           "path_params": {
             "id": {
-              "from_param": "id"
+              "from_input": "record.id"
             }
           },
           "headers": {

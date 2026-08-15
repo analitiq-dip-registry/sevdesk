@@ -1,46 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "contactcustomfield",
   "display_name": "Contact Custom Fields",
-  "description": "Custom field values attached to contacts; replaces the legacy ContactField resource.",
+  "description": "Values of user-defined contact fields — one value per contact per contact-custom-field definition.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/ContactCustomField",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -54,30 +19,30 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/ContactCustomField",
+        "query": {
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
-        "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
-        }
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
+        "stop_when": { "empty": { "ref": "response.body.objects" } }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
@@ -86,68 +51,59 @@
               "type": "array",
               "items": {
                 "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Unique identifier of the contact custom field."
+                    "description": "Id of the contact field. Declared type string on the wire even though it is a numeric surrogate key."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Internal object name, which is 'ContactCustomField'."
+                    "description": "Model name; always 'ContactCustomField'. Documented as a fixed constant, but the spec declares no enum keyword, so no closed domain is emitted."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (system-set). Provider-wide system field; wire values carry an explicit UTC offset (e.g. 2023-04-18T15:45:38+02:00)."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-modification timestamp (system-set). NOT usable as an incremental cursor: GET /ContactCustomField exposes no modified-after filter param."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client the custom field belongs to (filled automatically)."
+                    "description": "SevClient relation ({id, objectName='SevClient'}); filled automatically by sevdesk. Opaque JSON."
                   },
                   "contact": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "Contact relation ({id, objectName='Contact'}) the field value belongs to. Opaque JSON."
                   },
                   "contactCustomFieldSetting": {
-                    "type": "object",
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting')."
+                    "description": "ContactCustomFieldSetting relation ({id, objectName='ContactCustomFieldSetting'}) — the field definition this value instantiates. The spec allows the expanded setting record here; treated as an opaque relation object."
                   },
                   "value": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The value of the contact custom field."
+                    "description": "The value of the contact field."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -159,167 +115,106 @@
         "request": {
           "method": "POST",
           "path": "/ContactCustomField",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "Model_ContactCustomField: one contact field value to create. Relation ids are integers on the request side, unlike the string ids the read side returns.",
+            "required": ["objectName", "contact", "contactCustomFieldSetting", "value"],
             "properties": {
+              "objectName": {
+                "type": "string",
+                "const": "ContactCustomField",
+                "description": "Model name; must be sent as 'ContactCustomField'."
+              },
               "contact": {
                 "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "required": ["id", "objectName"],
+                "description": "Contact the field value belongs to. Required on create.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "contactCustomFieldSetting": {
                 "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "required": ["id", "objectName"],
+                "description": "The contact custom field definition this value instantiates. Required on create.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "ContactCustomFieldSetting"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "ContactCustomFieldSetting" }
                 }
               },
               "value": {
-                "type": "string"
+                "type": "string",
+                "description": "The value of the contact field. Required on create."
               }
-            },
-            "required": [
-              "contact",
-              "contactCustomFieldSetting",
-              "value"
-            ]
+            }
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       },
       "upsert": {
-        "conflict_keys": [
-          "id"
-        ],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/ContactCustomField/{id}",
+          "path": "/ContactCustomField/{contact_custom_field_id}",
+          "headers": { "Content-Type": "application/json" },
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "contact_custom_field_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id",
-              "contact",
-              "contactCustomFieldSetting",
-              "value"
-            ],
+            "description": "Model_ContactCustomFieldUpdate: every body field is optional except the id that addresses the record. PUT /ContactCustomField/{contact_custom_field_id} is keyed solely by that surrogate id — an unknown id does not create.",
+            "required": ["id"],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": ["string", "integer"],
+                "description": "Id of the contact field to update; supplies the {contact_custom_field_id} path segment. Numeric value, serialized as a string on the read side."
+              },
+              "objectName": {
+                "type": ["string", "null"],
+                "const": "ContactCustomField",
+                "description": "Model name; 'ContactCustomField' when sent."
               },
               "contact": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
+                "description": "Contact relation. Optional on update (partial update).",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "contactCustomFieldSetting": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
+                "description": "Contact custom field definition relation. Optional on update (partial update).",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "ContactCustomFieldSetting"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "ContactCustomFieldSetting" }
                 }
               },
               "value": {
-                "type": "string"
+                "type": ["string", "null"],
+                "description": "The value of the contact field."
               }
             }
           }
         },
+        "conflict_keys": ["id"],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       }
     }
-  },
-  "endpoint_id": "contactcustomfield"
+  }
 }

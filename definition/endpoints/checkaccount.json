@@ -1,34 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "checkaccount",
   "display_name": "Check Accounts",
-  "description": "Bank, cash, and register accounts used for bookkeeping.",
+  "description": "Bank, cash, PayPal, file-import and clearing accounts (CheckAccount), with IBAN, balance, booking account number and transaction-sync configuration. Read is full-refresh only; the provider documents no filter parameter on this resource. Writes cover creation of file-import accounts only — sevdesk requires bank and PayPal accounts to be created through the UI.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/CheckAccount",
-        "query": {
-          "status": {
-            "from_param": "status"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "status": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by status."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -42,30 +19,30 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/CheckAccount",
+        "query": {
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
-        "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
-        }
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
+        "stop_when": { "empty": { "ref": "response.body.objects" } }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
@@ -74,171 +51,141 @@
               "type": "array",
               "items": {
                 "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Check account id; read-only, serialized as a JSON string on the wire."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Model name; always 'CheckAccount'. The read model declares no enum, so none is emitted."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (read-only); wire samples carry a UTC offset (e.g. 2024-06-28T14:42:58+02:00)."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-update timestamp (read-only); wire samples carry a UTC offset (e.g. 2024-06-28T14:42:58+02:00)."
                   },
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Owning SevClient relation ({id, objectName='SevClient'}); read-only, auto-filled by sevdesk. Opaque JSON."
                   },
                   "name": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the check account."
+                  },
+                  "iban": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "IBAN of the account."
                   },
                   "type": {
                     "type": "string",
+                    "enum": ["online", "offline", "register"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "online | offline | register."
+                    "description": "Type of the check account. Accounts with a CSV or MT940 import are regarded as online."
                   },
                   "importType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
+                    "enum": ["CSV", "MT940", null],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Import type for online accounts not connected to a data provider: CSV | MT940 | null."
+                    "description": "Import type, for accounts of type 'online' that are not connected to a data provider. Null for every other account."
                   },
                   "currency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "defaultAccount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Defines if this check account is the default account."
+                    "description": "Currency of the check account; an ISO-4217 code in practice, though the spec declares no format."
+                  },
+                  "defaultAccount": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "'1' when this check account is the default account, '0' otherwise. A flag serialized as a string on read; a genuine integer on the update request."
                   },
                   "baseAccount": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "1 if the account is your base account that comes with every sevdesk setup."
+                    "description": "'1' when the account is the base account that comes with every sevdesk setup. Numeric flag serialized as a string."
                   },
                   "priority": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Defines the sorting of accounts; highest is first."
-                  },
-                  "iban": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "bic": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The BIC of the bank this account belongs to."
-                  },
-                  "bankServer": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "description": "Sorting weight; the highest value sorts first. Numeric value serialized as a string."
                   },
                   "status": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
+                    "enum": ["0", "100"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "0=archived, 100=active."
+                    "description": "Status of the check account: 0 = Archived, 100 = Active."
+                  },
+                  "balance": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Account balance as reported by PayPal or finAPI; not set for other account types. A decimal serialized as a string."
+                  },
+                  "bankServer": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Bank server of the check account; set only when the account is connected to a data provider."
                   },
                   "autoMapTransactions": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "'1' when transactions on this account are automatically mapped to invoices and vouchers on import. A flag serialized as a string on read; a genuine integer on the update request."
                   },
                   "autoSyncTransactions": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "If 1, the account is automatically updated through PayPal or finAPI. Only for connected online accounts."
+                    "description": "'1' when the account is automatically updated through PayPal or finAPI; applies only to connected online accounts. A flag serialized as a string. Not spec-flagged nullable despite applying only to connected accounts."
                   },
                   "lastSync": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Timepoint of the last payment import through PayPal or finAPI."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Timepoint of the last payment import through PayPal or finAPI; wire samples carry a UTC offset. Not spec-flagged nullable despite applying only to connected accounts."
                   },
                   "accountingNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Booking account used for this account, e.g. 1800 in SKR04 and 1200 in SKR03. Documented as unique among all check accounts of the client. A numeric value serialized as a string on read; a genuine integer on the create requests."
                   },
-                  "lastBalance": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "balance": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Account balance as reported by PayPal or finAPI. Not set for other account types."
+                  "bic": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "BIC of the bank this account belongs to."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -249,191 +196,42 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/CheckAccount",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "path": "/CheckAccount/Factory/fileImportAccount",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One file-import check account to create. sevdesk exposes no create-at-collection route for CheckAccount; creation is available only through the two disjoint factory routes, and this mode binds the file-import factory. Bank and PayPal accounts must be created through the sevdesk UI.",
+            "required": ["name", "importType"],
             "properties": {
               "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "Name of the check account."
               },
               "importType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "defaultAccount": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "iban": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "autoMapTransactions": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "enum": ["CSV", "MT940"],
+                "description": "Import type of the file-import account."
               },
               "accountingNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "name",
-              "type",
-              "currency"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
-      "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/CheckAccount/{id}",
-          "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "importType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "defaultAccount": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["integer", "null"],
+                "description": "Booking account for this account, e.g. 1800 in SKR04. Genuine integer on create, string on read. Must be unique among all check accounts of the client."
               },
               "iban": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "autoMapTransactions": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "accountingNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"],
+                "description": "IBAN of the account."
               }
             }
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.objects.id" },
+          "success_when": { "not_empty": { "ref": "response.body.objects" } }
         }
       }
     }
-  },
-  "endpoint_id": "checkaccount"
+  }
 }

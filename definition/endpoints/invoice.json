@@ -2,9 +2,73 @@
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "endpoint_id": "invoice",
   "display_name": "Invoices",
-  "description": "Outbound invoices including drafts, open, paid, and cancelled.",
+  "description": "Outbound invoices (Rechnungen) including drafts, open, partially paid, paid and cancelled documents. Reads GET /Invoice; writes go through the saveInvoice factory RPC, which is the only documented create/update path for the current spec.",
   "operations": {
     "read": {
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by invoice status: 50=Draft created via the factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid. The response model returns the same values as JSON strings."
+        },
+        "invoiceNumber": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by invoice number (e.g. 'RE-1000')."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["gte"],
+          "description": "Lower bound on invoiceDate (the document date, NOT the modification time): returns invoices whose invoice date is equal or higher. Declared as an integer Unix timestamp by the API contract."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["lte"],
+          "description": "Upper bound on invoiceDate (the document date, NOT the modification time): returns invoices whose invoice date is equal or lower. Declared as an integer Unix timestamp by the API contract."
+        },
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by contact id (send together with contact[objectName])."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Use 'Contact'."
+        },
+        "updateAfter": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "replication",
+          "description": "Incremental watermark: returns invoices updated last after the supplied timestamp. Grounded in the Invoice tag's filter table ('updateAfter={timestamp} | Only retrieve all invoices updated last after timestamp'), which the getInvoices operation description links to; because that table is narrative rather than a declared OpenAPI parameter, the provider documents NO unit for {timestamp}. Sent here as whole seconds since the epoch, matching the integer Unix timestamps the sibling startDate/endDate filters on the same path item declare, and matching the sevdesk order endpoint."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. The provider rejects values outside 1..1000 with HTTP 400 (enforced since 2025-05-30)."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Invoice",
@@ -15,86 +79,41 @@
           "endDate": { "from_param": "endDate" },
           "contact[id]": { "from_param": "contact[id]" },
           "contact[objectName]": { "from_param": "contact[objectName]" },
+          "updateAfter": { "from_param": "updateAfter" },
           "limit": { "from_param": "limit" },
           "offset": { "from_param": "offset" }
         }
       },
-      "params": {
-        "status": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Filter by status."
-        },
-        "invoiceNumber": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Filter by invoice number."
-        },
-        "startDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Filter invoices from this invoice date."
-        },
-        "endDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Filter invoices up to this invoice date."
-        },
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": ["eq"],
-          "description": "Use 'Contact'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": { "ref": "runtime.batch_size" },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
           "empty": { "ref": "response.body.objects" }
         }
       },
+      "replication": {
+        "supported_methods": ["full_refresh", "incremental"],
+        "cursor_mappings": [
+          {
+            "cursor_field": "update",
+            "param": "updateAfter",
+            "operator": "gt",
+            "format": "epoch_seconds"
+          }
+        ]
+      },
       "response": {
         "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
@@ -102,122 +121,65 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "id": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "objectName": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "create": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Create timestamp." },
-                  "update": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Last update timestamp." },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
-                  },
-                  "invoiceNumber": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "contact": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Customer relation."
-                  },
-                  "contactPerson": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk user creating the invoice."
-                  },
-                  "createUser": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "User who created the invoice. Filled automatically by sevdesk."
-                  },
-                  "invoiceDate": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "header": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "headText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "footText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "timeToPay": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
-                  "discountTime": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
-                  "discount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "addressName": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressStreet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressZip": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressCity": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressCountry": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "payDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "deliveryDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "deliveryDateUntil": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "status": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Invoice status (50=Draft via factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid)." },
-                  "smallSettlement": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether the small-settlement scheme applies (wire value '0'/'1')." },
-                  "taxRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "taxRule": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "taxType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "taxSet": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom')."
-                  },
-                  "dunningLevel": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Number of reminders already sent for the invoice." },
-                  "paymentMethod": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Payment method relation."
-                  },
-                  "costCentre": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Cost centre relation."
-                  },
-                  "sendDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "origin": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Origin object of the invoice (e.g. an Order)."
-                  },
-                  "invoiceType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Type (RE, WKR, SR, MA, TR, AR, ER)." },
-                  "accountIntervall": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Recurring-invoice interval as ISO-8601 duration." },
-                  "accountNextInvoice": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Timestamp (epoch seconds, as string) of the next recurring invoice." },
-                  "reminderTotal": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Total reminder amount." },
-                  "reminderDebit": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Debit of the reminder." },
-                  "reminderDeadline": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Deadline of the reminder." },
-                  "reminderCharge": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Additional reminder charge." },
-                  "currency": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "sumNet": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTax": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGross": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumNetForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTaxForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGrossForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumDiscounts": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumDiscountsForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumNetAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTaxAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGrossAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "paidAmount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "showNet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether net amounts are shown per position (wire value '0'/'1')." },
-                  "enshrined": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "sendType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "deliveryTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "paymentTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "originId": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "customerInternalNote": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "address": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "currencyExchangeRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "currencyExchangeRateDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "datevConnectOnline": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Internal attribute." },
-                  "sendPaymentReceivedNotificationDate": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal attribute (wire value is a plain string, e.g. '0')." }
+                  "id": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "sevdesk id of the invoice; numeric value serialized as a JSON string on the wire (system-set)." },
+                  "objectName": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "enum": ["Invoice"] },
+                  "invoiceNumber": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Invoice number (e.g. 'RE-1000')." },
+                  "contact": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Contact relation ({id, objectName='Contact'}); opaque relation envelope." },
+                  "create": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Creation timestamp (system-set). Wire sample carries a UTC offset ('2024-04-08T00:00:00+02:00') -> zone-aware." },
+                  "update": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Last-modification timestamp (system-set); the incremental replication cursor, pushed down via the updateAfter filter." },
+                  "sevClient": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "SevClient relation ({id, objectName='SevClient'}); system-set." },
+                  "invoiceDate": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Document date of the invoice; the startDate/endDate query filters window on this field. The response model omits a format declaration, but the documented sample carries a UTC offset ('2024-04-08T00:00:00+02:00') -> zone-aware." },
+                  "header": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Document header text (e.g. 'My RE-1000')." },
+                  "headText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Text printed above the positions." },
+                  "footText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Text printed below the positions." },
+                  "timeToPay": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Days until the invoice is due; numeric value serialized as a JSON string on the wire." },
+                  "discountTime": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Days within which the cash discount applies; numeric value serialized as a JSON string on the wire." },
+                  "discount": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Cash discount percentage; numeric value serialized as a JSON string on the wire." },
+                  "addressCountry": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "StaticCountry relation ({id, objectName='StaticCountry'})." },
+                  "payDate": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Date the invoice was paid; null while unpaid (positively evidenced by the resetToOpen/resetToDraft response examples)." },
+                  "createUser": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "SevUser relation that created the document ({id, objectName='SevUser'}); system-set." },
+                  "deliveryDate": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Delivery date, or the start of the delivery period when deliveryDateUntil is set." },
+                  "status": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "enum": ["50", "100", "200", "750", "1000", null], "description": "50=Draft created via the factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid. Serialized as a JSON string on the wire." },
+                  "smallSettlement": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether the client uses the small-settlement scheme. Declared boolean by the API contract, but the response example carries the quoted string '0'/'1', so the wire type is frozen as a string." },
+                  "contactPerson": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "SevUser relation acting as contact person ({id, objectName='SevUser'})." },
+                  "taxRate": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Deprecated document-level tax rate - use the taxRate of the individual positions instead. Numeric value serialized as a JSON string on the wire." },
+                  "taxRule": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "TaxRule relation ({id, objectName='TaxRule'}); sevdesk-Update 2.0. Declared nullable:false by the schema, but invoices created under bookkeeping system 1.0 return taxType/taxSet and no taxRule, so nulls occur in practice." },
+                  "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Tax text printed on the document (e.g. 'Umsatzsteuer 19%')." },
+                  "dunningLevel": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Number of reminders already sent for the invoice; numeric value serialized as a JSON string on the wire." },
+                  "taxType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "enum": ["default", "eu", "noteu", "custom", null], "description": "Bookkeeping system version 1.0 tax type; replaced by taxRule under sevdesk-Update 2.0. Enum taken verbatim from the declared schema - the field's own prose and the tag attribute table also describe a fifth value 'ss' that the declared enum does not carry (first-party inconsistency)." },
+                  "paymentMethod": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "PaymentMethod relation ({id, objectName='PaymentMethod'})." },
+                  "costCentre": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "CostCentre relation ({id, objectName='CostCentre'})." },
+                  "sendDate": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Set by the system via sendBy/sendViaEmail." },
+                  "origin": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Relation to the object this invoice originated from, e.g. an Order ({id, objectName}). The provider folded the former originId scalar into this envelope." },
+                  "invoiceType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "enum": ["RE", "WKR", "SR", "MA", "TR", "AR", "ER", null], "description": "RE=normal invoice, WKR=recurring invoice, SR=cancellation invoice, MA=reminder, TR=partial invoice, AR=partial final invoice, ER=final invoice." },
+                  "accountIntervall": { "type": ["string", "null"], "native_type": "iso-8601-duration", "arrow_type": "Utf8", "description": "Interval in which recurring invoices are due, as an ISO-8601 duration. The published example '2022-03-14' is not a valid duration (first-party example bug); the value is carried through as text." },
+                  "accountNextInvoice": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Next recurring-invoice date; a Unix epoch in seconds delivered as a JSON string with no declared format, so it is kept as text rather than promoted to a temporal." },
+                  "reminderTotal": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Total reminder amount; numeric value serialized as a JSON string on the wire." },
+                  "reminderDebit": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Debit of the reminder; numeric value serialized as a JSON string on the wire." },
+                  "reminderDeadline": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Deadline of the reminder. Declared format: date-time; the published example '01.01.2020' is a known defective placeholder, not a wire sample." },
+                  "reminderCharge": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Additional reminder charge; numeric value serialized as a JSON string on the wire." },
+                  "taxSet": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "TaxSet relation (bookkeeping system version 1.0; used when taxType='custom')." },
+                  "address": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Complete multiline address of the recipient including name, street, city, zip and country. The provider collapsed the former addressName/addressStreet/addressZip/addressCity scalars into this single string." },
+                  "currency": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "ISO-4217 currency code (e.g. 'EUR')." },
+                  "sumNet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Net sum; numeric value serialized as a JSON string on the wire." },
+                  "sumTax": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Tax sum; numeric value serialized as a JSON string on the wire." },
+                  "sumGross": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Gross sum; numeric value serialized as a JSON string on the wire." },
+                  "sumDiscounts": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Sum of all discounts; numeric value serialized as a JSON string on the wire." },
+                  "sumNetForeignCurrency": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Net sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumTaxForeignCurrency": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Tax sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumGrossForeignCurrency": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Gross sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumDiscountsForeignCurrency": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Discount sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumNetAccounting": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Net sum in the accounting currency; numeric value serialized as a JSON string on the wire." },
+                  "sumTaxAccounting": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Tax sum in the accounting currency; numeric value serialized as a JSON string on the wire." },
+                  "sumGrossAccounting": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Gross sum in the accounting currency; numeric value serialized as a JSON string on the wire." },
+                  "paidAmount": { "type": ["number", "null"], "native_type": "double", "arrow_type": "Float64", "description": "Amount already paid on the invoice. The only genuine JSON number in the response model (type: number, format: float, unquoted example)." },
+                  "customerInternalNote": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal note on the customer, not printed on the document." },
+                  "showNet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether positions are printed net. Declared boolean by the API contract, but the response example carries the quoted string '0'/'1', so the wire type is frozen as a string." },
+                  "enshrined": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Timestamp at which the invoice was enshrined (made immutable); null while the invoice is still editable." },
+                  "sendType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "enum": ["VPR", "VPDF", "VM", "VP", null], "description": "VPR=printed, VPDF=downloaded, VM=mailed, VP=postal; set by the system via sendBy/sendViaEmail." },
+                  "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "End of the delivery period when the document states a range. The response model omits a format declaration, but the documented sample carries a UTC offset ('2024-04-08T00:00:00+02:00') -> zone-aware." },
+                  "datevConnectOnline": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Internal attribute; declared as a property-less object by the provider." },
+                  "sendPaymentReceivedNotificationDate": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal attribute; the wire value is a plain string (e.g. '0')." }
                 },
                 "required": ["id", "objectName"]
               }
@@ -230,167 +192,297 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Invoice",
+          "path": "/Invoice/Factory/saveInvoice",
           "headers": { "Content-Type": "application/json" },
           "body": {
-            "from_input": "record"
+            "invoice": { "from_input": "record.invoice" },
+            "invoicePosSave": { "from_input": "record.invoicePosSave" }
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One saveInvoice payload: the invoice header plus its positions. There is no plain POST /Invoice in the current spec - the createInvoiceByFactory RPC is the only documented create path. The saveInvoice wrapper's own required list names 'invoicePos' while NO such property exists; the declared array property is 'invoicePosSave', and that is what the API accepts (first-party inconsistency). The operation description also references a 'takeDefaultAddress' parameter the request schema never declares, so it is not authored here.",
             "properties": {
-              "contact": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
+              "invoice": {
+                "type": "object",
+                "description": "Invoice header (Model_Invoice). Relation ids are integers on the request side, unlike the string ids the read side returns.",
                 "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "Contact" }
-                }
+                  "objectName": { "type": "string", "const": "Invoice" },
+                  "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                  "invoiceNumber": { "type": "string", "description": "Invoice number (e.g. 'RE-1000'); assigned by sevdesk when omitted." },
+                  "invoiceDate": { "type": "string", "format": "date-time", "description": "Document date of the invoice." },
+                  "contact": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "Contact" }
+                    }
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "SevUser" }
+                    }
+                  },
+                  "status": { "type": "string", "description": "50=Draft created via the factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid. Status transitions after creation are driven by the action endpoints (sendBy/sendViaEmail/bookAmount, resetToOpen/resetToDraft)." },
+                  "header": { "type": "string", "description": "Document header text." },
+                  "headText": { "type": "string" },
+                  "footText": { "type": "string" },
+                  "address": { "type": "string", "description": "Complete multiline address block printed on the document (name, street, zip, city, country)." },
+                  "addressCountry": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "StaticCountry" }
+                    }
+                  },
+                  "timeToPay": { "type": "integer", "description": "Days until the invoice is due; integer on the request side." },
+                  "discountTime": { "type": "integer", "description": "Days within which the cash discount applies; integer on the request side." },
+                  "discount": { "type": "number", "description": "Cash discount percentage; number on the request side." },
+                  "deliveryDate": { "type": "string", "format": "date-time" },
+                  "deliveryDateUntil": { "type": "string", "format": "date-time", "description": "End of the delivery period when the document states a range." },
+                  "taxRate": { "type": "number", "description": "Document-level tax rate (e.g. 19). Deprecated in favour of the per-position taxRate, but still carried by the factory." },
+                  "taxRule": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxRule" }
+                    },
+                    "description": "TaxRule relation (bookkeeping system version 2.0)."
+                  },
+                  "taxSet": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxSet" }
+                    },
+                    "description": "Bookkeeping system version 1.0 only; used when taxType='custom'."
+                  },
+                  "taxText": { "type": "string", "description": "Tax text printed on the document (e.g. 'Umsatzsteuer 19%')." },
+                  "taxType": { "type": "string", "enum": ["default", "eu", "noteu", "custom"], "description": "Bookkeeping system version 1.0 only; replaced by taxRule under 2.0. Enum taken verbatim from the declared schema (the provider's prose additionally mentions 'ss')." },
+                  "invoiceType": { "type": "string", "enum": ["RE", "WKR", "SR", "MA", "TR", "AR", "ER"], "description": "RE=normal invoice, WKR=recurring, SR=cancellation, MA=reminder, TR=partial, AR=partial final, ER=final." },
+                  "currency": { "type": "string", "description": "ISO-4217 currency code (e.g. 'EUR')." },
+                  "paymentMethod": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "PaymentMethod" }
+                    }
+                  },
+                  "costCentre": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "CostCentre" }
+                    }
+                  },
+                  "accountIntervall": { "type": "string", "description": "Interval in which recurring invoices are due, as an ISO-8601 duration (WKR invoices only)." },
+                  "smallSettlement": { "type": "boolean" },
+                  "showNet": { "type": "boolean" },
+                  "customerInternalNote": { "type": "string" }
+                },
+                "required": ["objectName", "mapAll", "contact", "contactPerson", "invoiceDate", "invoiceType", "currency", "taxRule", "taxText"]
               },
-              "contactPerson": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "SevUser" }
+              "invoicePosSave": {
+                "type": "array",
+                "description": "Positions to create with the invoice. The saveInvoice required list names 'invoicePos', but no such property exists - 'invoicePosSave' is the declared array property and the one the API accepts.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "objectName": { "type": "string", "const": "InvoicePos" },
+                    "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                    "part": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Part" }
+                      },
+                      "description": "Omit for a free-text position."
+                    },
+                    "quantity": { "type": "number" },
+                    "price": { "type": "number", "description": "Position price; supply price or priceGross." },
+                    "priceGross": { "type": "number" },
+                    "priceTax": { "type": "number" },
+                    "name": { "type": "string" },
+                    "unity": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Unity" }
+                      }
+                    },
+                    "positionNumber": { "type": "integer" },
+                    "text": { "type": "string" },
+                    "discount": { "type": "number" },
+                    "taxRate": { "type": "number" }
+                  },
+                  "required": ["objectName", "mapAll", "quantity", "unity", "taxRate"]
                 }
-              },
-              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
-              "invoiceNumber": { "type": ["string", "null"] },
-              "header": { "type": ["string", "null"] },
-              "headText": { "type": ["string", "null"] },
-              "footText": { "type": ["string", "null"] },
-              "timeToPay": { "type": ["integer", "null"] },
-              "discount": { "type": ["string", "number", "null"] },
-              "addressName": { "type": ["string", "null"] },
-              "addressStreet": { "type": ["string", "null"] },
-              "addressZip": { "type": ["string", "null"] },
-              "addressCity": { "type": ["string", "null"] },
-              "addressCountry": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "StaticCountry" }
-                }
-              },
-              "invoiceType": { "type": ["string", "null"] },
-              "currency": { "type": ["string", "null"] },
-              "status": { "type": ["string", "null"] },
-              "taxRate": { "type": ["string", "number", "null"] },
-              "taxRule": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "TaxRule" }
-                }
-              },
-              "taxText": { "type": ["string", "null"] },
-              "taxType": { "type": ["string", "null"] },
-              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
-              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
-              "smallSettlement": { "type": ["string", "null"] },
-              "showNet": { "type": ["string", "null"] },
-              "paymentTerms": { "type": ["string", "null"] },
-              "deliveryTerms": { "type": ["string", "null"] }
+              }
             },
-            "required": ["contact", "contactPerson", "invoiceDate", "invoiceType", "currency", "taxRule", "taxText"]
+            "required": ["invoice", "invoicePosSave"]
           }
-        },
-        "response": {
-          "generated_keys": { "ref": "response.body.objects.id" }
         }
       },
       "upsert": {
         "conflict_keys": ["id"],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
-          "method": "PUT",
-          "path": "/Invoice/{id}",
-          "path_params": {
-            "id": { "from_param": "id" }
-          },
+          "method": "POST",
+          "path": "/Invoice/Factory/saveInvoice",
           "headers": { "Content-Type": "application/json" },
           "body": {
-            "from_input": "record"
+            "invoice": { "from_input": "record.invoice" },
+            "invoicePosSave": { "from_input": "record.invoicePosSave" }
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": ["id"],
+            "description": "One saveInvoice payload addressed at an existing document. The same factory RPC updates instead of creating when invoice.id is supplied alongside the constant envelope fields objectName='Invoice' and mapAll=true (createInvoiceByFactory: 'this request can also be used to update invoices'; InvoicePos tag update recipe). There is no PUT /Invoice/{invoiceId} in the current spec. The record carries the sevdesk id twice: once at the top level, where it is the upsert conflict key, and once inside the envelope as invoice.id, which is the field the provider actually matches on - supply the same value in both places.",
             "properties": {
-              "id": { "type": ["string", "integer"] },
-              "contact": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
+              "id": { "type": "string", "description": "sevdesk id of the invoice to update; the upsert conflict key. Numeric value, serialized as a string on the read side. Must be echoed as invoice.id, which is where the factory reads it." },
+              "invoice": {
+                "type": "object",
+                "description": "Invoice header (Model_Invoice) carrying the id of the document to update. Relation ids are integers on the request side, unlike the string ids the read side returns. An enshrined invoice rejects modification.",
                 "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "Contact" }
-                }
+                  "id": { "type": ["string", "integer"], "description": "sevdesk id of the invoice to update; supplying it is what turns the factory call into an update." },
+                  "objectName": { "type": "string", "const": "Invoice" },
+                  "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                  "invoiceNumber": { "type": "string" },
+                  "invoiceDate": { "type": "string", "format": "date-time" },
+                  "contact": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "Contact" }
+                    }
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "SevUser" }
+                    }
+                  },
+                  "status": { "type": "string", "description": "Status transitions are driven by the action endpoints (sendBy/sendViaEmail/bookAmount, resetToOpen/resetToDraft)." },
+                  "header": { "type": "string" },
+                  "headText": { "type": "string" },
+                  "footText": { "type": "string" },
+                  "address": { "type": "string", "description": "Complete multiline address block printed on the document." },
+                  "addressCountry": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "StaticCountry" }
+                    }
+                  },
+                  "timeToPay": { "type": "integer" },
+                  "discountTime": { "type": "integer" },
+                  "discount": { "type": "number" },
+                  "deliveryDate": { "type": "string", "format": "date-time" },
+                  "deliveryDateUntil": { "type": "string", "format": "date-time" },
+                  "taxRate": { "type": "number" },
+                  "taxRule": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxRule" }
+                    },
+                    "description": "TaxRule relation (bookkeeping system version 2.0)."
+                  },
+                  "taxSet": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxSet" }
+                    },
+                    "description": "Bookkeeping system version 1.0 only; used when taxType='custom'."
+                  },
+                  "taxText": { "type": "string" },
+                  "taxType": { "type": "string", "enum": ["default", "eu", "noteu", "custom"], "description": "Bookkeeping system version 1.0 only; replaced by taxRule under 2.0." },
+                  "invoiceType": { "type": "string", "enum": ["RE", "WKR", "SR", "MA", "TR", "AR", "ER"] },
+                  "currency": { "type": "string", "description": "ISO-4217 currency code." },
+                  "paymentMethod": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "PaymentMethod" }
+                    }
+                  },
+                  "costCentre": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "CostCentre" }
+                    }
+                  },
+                  "accountIntervall": { "type": "string", "description": "Interval in which recurring invoices are due, as an ISO-8601 duration (WKR invoices only)." },
+                  "smallSettlement": { "type": "boolean" },
+                  "showNet": { "type": "boolean" },
+                  "customerInternalNote": { "type": "string" }
+                },
+                "required": ["id", "objectName", "mapAll"]
               },
-              "contactPerson": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "SevUser" }
+              "invoicePosSave": {
+                "type": "array",
+                "description": "Positions sent with the update: an entry carrying its own id updates that position in place, an entry without one is added. Named 'invoicePosSave' - the saveInvoice required list's 'invoicePos' is a first-party inconsistency and matches no declared property.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": ["string", "integer"], "description": "sevdesk id of an existing position; omit to add a new one." },
+                    "objectName": { "type": "string", "const": "InvoicePos" },
+                    "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                    "part": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Part" }
+                      },
+                      "description": "Omit for a free-text position."
+                    },
+                    "quantity": { "type": "number" },
+                    "price": { "type": "number" },
+                    "priceGross": { "type": "number" },
+                    "priceTax": { "type": "number" },
+                    "name": { "type": "string" },
+                    "unity": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Unity" }
+                      }
+                    },
+                    "positionNumber": { "type": "integer" },
+                    "text": { "type": "string" },
+                    "discount": { "type": "number" },
+                    "taxRate": { "type": "number" }
+                  },
+                  "required": ["objectName", "mapAll", "quantity", "unity", "taxRate"]
                 }
-              },
-              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
-              "invoiceNumber": { "type": ["string", "null"] },
-              "header": { "type": ["string", "null"] },
-              "headText": { "type": ["string", "null"] },
-              "footText": { "type": ["string", "null"] },
-              "timeToPay": { "type": ["integer", "null"] },
-              "discount": { "type": ["string", "number", "null"] },
-              "addressName": { "type": ["string", "null"] },
-              "addressStreet": { "type": ["string", "null"] },
-              "addressZip": { "type": ["string", "null"] },
-              "addressCity": { "type": ["string", "null"] },
-              "addressCountry": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "StaticCountry" }
-                }
-              },
-              "invoiceType": { "type": ["string", "null"] },
-              "currency": { "type": ["string", "null"] },
-              "status": { "type": ["string", "null"] },
-              "taxRate": { "type": ["string", "number", "null"] },
-              "taxRule": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "TaxRule" }
-                }
-              },
-              "taxText": { "type": ["string", "null"] },
-              "taxType": { "type": ["string", "null"] },
-              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
-              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
-              "smallSettlement": { "type": ["string", "null"] },
-              "showNet": { "type": ["string", "null"] },
-              "paymentTerms": { "type": ["string", "null"] },
-              "deliveryTerms": { "type": ["string", "null"] }
-            }
+              }
+            },
+            "required": ["id", "invoice"]
           }
-        },
-        "response": {
-          "generated_keys": { "ref": "response.body.objects.id" }
         }
       }
     }

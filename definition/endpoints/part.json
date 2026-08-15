@@ -1,45 +1,24 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Parts (Products)",
-  "description": "Products and articles offered or stocked.",
+  "endpoint_id": "part",
+  "display_name": "Part (Inventory)",
+  "description": "Parts (products/articles) with stock levels, sales and purchase prices, tax rate and category assignment.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/Part",
-        "query": {
-          "partNumber": {
-            "from_param": "partNumber"
-          },
-          "name": {
-            "from_param": "name"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
         "partNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by part number."
+          "operators": ["eq"],
+          "description": "Filter by part number (the documented natural-key lookup filter)."
         },
         "name": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by name."
+          "operators": ["eq"],
+          "description": "Filter by part name."
         },
         "limit": {
           "in": "query",
@@ -54,32 +33,35 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/Part",
+        "query": {
+          "partNumber": { "from_param": "partNumber" },
+          "name": { "from_param": "name" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
@@ -88,36 +70,31 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The part id."
+                    "type": "integer",
+                    "native_type": "integer",
+                    "arrow_type": "Int32",
+                    "description": "sevdesk id of the part."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The part object name."
+                    "enum": ["Part"],
+                    "description": "Model name; always 'Part'."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (system-set); wire samples carry a UTC offset (e.g. 2024-06-28T14:42:58+02:00)."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-modification timestamp (system-set); wire samples carry a UTC offset."
                   },
                   "name": {
                     "type": "string",
@@ -126,121 +103,92 @@
                     "description": "Name of the part."
                   },
                   "partNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The part number."
+                    "description": "Part number; the documented lookup key for this resource."
                   },
                   "text": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "A text describing the part."
+                    "description": "Free-text description of the part."
                   },
                   "category": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Category of the part."
+                    "description": "Category relation ({id, objectName='Category'})."
                   },
                   "stock": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "The stock of the part."
+                    "type": "number",
+                    "native_type": "double",
+                    "arrow_type": "Float64",
+                    "description": "Current stock amount."
                   },
                   "stockEnabled": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Defines if the stock should be enabled."
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Whether stock tracking is enabled for the part (spec examples show it as 1/0)."
                   },
                   "unity": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The unit in which the part is measured."
+                    "description": "Unity relation ({id, objectName='Unity'}) — the unit the part is measured in."
                   },
                   "price": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Price for which the part is sold. Gross or net depending on the sevdesk account setting."
+                    "type": ["number", "null"],
+                    "native_type": "double",
+                    "arrow_type": "Float64",
+                    "description": "Price the part is sold for; gross or net depending on the account setting."
                   },
                   "priceNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net price for which the part is sold."
+                    "type": ["number", "null"],
+                    "native_type": "double",
+                    "arrow_type": "Float64",
+                    "description": "Net sales price."
                   },
                   "priceGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross price for which the part is sold."
+                    "type": ["number", "null"],
+                    "native_type": "double",
+                    "arrow_type": "Float64",
+                    "description": "Gross sales price; must be supplied until gross auto-calculation ships."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "SevClient relation the part belongs to ({id, objectName='SevClient'})."
                   },
                   "pricePurchase": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "type": ["number", "null"],
+                    "native_type": "double",
+                    "arrow_type": "Float64",
                     "description": "Purchase price of the part."
                   },
                   "taxRate": {
-                    "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax rate of the part."
+                    "type": "number",
+                    "native_type": "double",
+                    "arrow_type": "Float64",
+                    "description": "Tax rate of the part. Under sevdesk-Update 2.0 part creation is restricted to 0.0, 7.0 or 19.0."
                   },
                   "status": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Status of the part. 50 = Inactive, 100 = Active."
+                    "type": ["integer", "null"],
+                    "native_type": "integer",
+                    "arrow_type": "Int32",
+                    "enum": [50, 100, null],
+                    "description": "50 = Inactive, 100 = Active."
                   },
                   "internalComment": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "An internal comment for the part. Does not appear on invoices and orders."
+                    "description": "Internal comment; does not appear on invoices or orders."
                   }
                 },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                "required": ["id", "objectName"]
               }
             }
           }
@@ -252,326 +200,105 @@
         "request": {
           "method": "POST",
           "path": "/Part",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "partNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "text": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "name": { "type": "string", "description": "Name of the part." },
+              "partNumber": { "type": "string", "description": "Part number." },
+              "text": { "type": "string", "description": "Free-text description of the part." },
               "category": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Category" }
+                },
+                "description": "Category relation."
               },
-              "stock": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "stockEnabled": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "stock": { "type": "number", "description": "Initial stock amount." },
+              "stockEnabled": { "type": "boolean", "description": "Whether stock tracking is enabled." },
               "unity": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Unity" }
+                },
+                "description": "Unity relation — the unit the part is measured in."
               },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceNet": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceGross": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "pricePurchase": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "internalComment": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+              "price": { "type": "number", "description": "Sales price; gross or net depending on the account setting." },
+              "priceNet": { "type": "number", "description": "Net sales price." },
+              "priceGross": { "type": "number", "description": "Gross sales price; must be supplied until gross auto-calculation ships." },
+              "pricePurchase": { "type": "number", "description": "Purchase price." },
+              "taxRate": { "type": "number", "description": "Tax rate. Under sevdesk-Update 2.0 creation is restricted to 0.0, 7.0 or 19.0." },
+              "status": { "type": "integer", "enum": [50, 100], "description": "50 = Inactive, 100 = Active." },
+              "internalComment": { "type": "string", "description": "Internal comment." }
             },
-            "required": [
-              "name",
-              "unity",
-              "taxRate"
-            ]
+            "required": ["name", "partNumber", "stock", "unity", "taxRate"]
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.objects.id" }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
+        "conflict_keys": ["partNumber"],
         "request": {
           "method": "PUT",
-          "path": "/Part/{id}",
+          "path": "/Part/{part_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "part_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "partNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "text": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "id": { "type": "integer", "description": "sevdesk id of the part to update; supplies the {partId} path segment." },
+              "name": { "type": "string", "description": "Name of the part." },
+              "partNumber": { "type": "string", "description": "Part number — the conflict key this upsert matches on." },
+              "text": { "type": "string", "description": "Free-text description of the part." },
               "category": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Category" }
+                },
+                "description": "Category relation."
               },
-              "stock": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "stockEnabled": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
+              "stock": { "type": "number", "description": "Stock amount." },
+              "stockEnabled": { "type": "boolean", "description": "Whether stock tracking is enabled." },
               "unity": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Unity" }
+                },
+                "description": "Unity relation — the unit the part is measured in."
               },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceNet": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceGross": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "pricePurchase": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "internalComment": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
+              "price": { "type": "number", "description": "Sales price; gross or net depending on the account setting." },
+              "priceNet": { "type": "number", "description": "Net sales price." },
+              "priceGross": { "type": "number", "description": "Gross sales price." },
+              "pricePurchase": { "type": "number", "description": "Purchase price." },
+              "taxRate": { "type": "number", "description": "Tax rate of the part." },
+              "status": { "type": "integer", "enum": [50, 100], "description": "50 = Inactive, 100 = Active." },
+              "internalComment": { "type": "string", "description": "Internal comment." }
+            },
+            "required": ["id", "partNumber"]
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.objects.id" }
         }
       }
     }
-  },
-  "endpoint_id": "part"
+  }
 }

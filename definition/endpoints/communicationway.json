@@ -2,69 +2,39 @@
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "endpoint_id": "communicationway",
   "display_name": "Communication Ways",
-  "description": "Phone, email, web, and other communication channels for contacts.",
+  "description": "Communication ways (phone, e-mail, web, mobile) attached to a contact.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/CommunicationWay",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "type": {
-            "from_param": "type"
-          },
-          "main": {
-            "from_param": "main"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
         "contact[id]": {
           "in": "query",
-          "type": "integer",
+          "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
+          "operators": ["eq"],
+          "description": "Filter by contact id (send together with contact[objectName])."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
+          "operators": ["eq"],
+          "description": "Use 'Contact'. Only needed when contact[id] is given."
         },
         "type": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Type filter (EMAIL, PHONE, WEB, MOBILE)."
+          "enum": ["PHONE", "EMAIL", "WEB", "MOBILE"],
+          "operators": ["eq"],
+          "description": "Filter by communication way type."
         },
         "main": {
           "in": "query",
-          "type": "integer",
+          "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter to main communication way (1)."
+          "enum": ["0", "1"],
+          "operators": ["eq"],
+          "description": "Filter on whether the communication way is the contact's main one. Documented as a string-serialized boolean ('0'/'1')."
         },
         "limit": {
           "in": "query",
@@ -79,30 +49,34 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/CommunicationWay",
+        "query": {
+          "contact[id]": { "from_param": "contact[id]" },
+          "contact[objectName]": { "from_param": "contact[objectName]" },
+          "type": { "from_param": "type" },
+          "main": { "from_param": "main" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
-        "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
-        }
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
+        "stop_when": { "empty": { "ref": "response.body.objects" } }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
@@ -111,83 +85,73 @@
               "type": "array",
               "items": {
                 "type": "object",
+                "required": ["id", "objectName", "type", "value"],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Communication way id. Model_CommunicationWayResponse declares type: string (example '0'), readOnly — the wire value is a JSON string even though the write model declares it integer."
                   },
                   "objectName": {
                     "type": "string",
+                    "enum": ["CommunicationWay"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Model name; always 'CommunicationWay' (readOnly)."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (readOnly). Wire sample carries an explicit offset ('2023-04-18T15:45:38+02:00') -> zone-aware."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-update timestamp (readOnly). Wire sample carries an explicit offset ('2023-04-18T15:45:38+02:00') -> zone-aware. NOT usable as an incremental cursor: GET /CommunicationWay documents no modified-after filter, no sort and no comparison operator on it."
                   },
                   "contact": {
-                    "type": "object",
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "Contact relation ({id, objectName: 'Contact'}) the communication way belongs to; readOnly. Opaque JSON."
                   },
                   "type": {
                     "type": "string",
+                    "enum": ["EMAIL", "PHONE", "WEB", "MOBILE"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "enum": [
-                      "EMAIL",
-                      "PHONE",
-                      "WEB",
-                      "MOBILE"
-                    ],
-                    "description": "Communication way type (EMAIL, PHONE, WEB, MOBILE)."
+                    "description": "Type of the communication way; closed domain declared verbatim in Model_CommunicationWayResponse.type."
                   },
                   "value": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Value of the communication way — the phone number, e-mail address or website. No single documented string format; it varies by type."
                   },
                   "key": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Communication way key relation."
+                    "description": "Key relation ({id, objectName: 'CommunicationWayKey'}), similar to the category of an address; readOnly. Opaque JSON."
                   },
                   "main": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Indicates main communication way ('0' or '1')."
+                    "description": "Whether this is the contact's main communication way. The response model declares type: string with example '0' — a string-serialized boolean on the wire (the write models declare it boolean); readOnly."
+                  },
+                  "sevClient": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "SevClient relation ({id, objectName: 'SevClient'}); filled automatically by sevdesk, readOnly. Opaque JSON."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -199,204 +163,112 @@
         "request": {
           "method": "POST",
           "path": "/CommunicationWay",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "Model_CommunicationWay: one communication way to create. Server-owned readOnly fields (id, objectName, create, update, sevClient) are not sent.",
+            "required": ["type", "value", "key"],
             "properties": {
-              "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
-              },
               "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "enum": ["EMAIL", "PHONE", "WEB", "MOBILE"],
+                "description": "Type of the communication way. Required on create."
               },
               "value": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The phone number, e-mail address or website. Required on create."
               },
               "key": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
+                "description": "CommunicationWayKey relation. Required on create; relation ids are integers on the request side, unlike the string ids the read side returns.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CommunicationWayKey"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "CommunicationWayKey" }
+                }
+              },
+              "contact": {
+                "type": "object",
+                "required": ["id", "objectName"],
+                "description": "Contact relation the communication way is attached to. Optional; declared nullable:false by the create model.",
+                "properties": {
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "main": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["boolean", "null"],
+                "description": "Whether this becomes the contact's main communication way. Genuine boolean on write, string ('0'/'1') on read."
               }
-            },
-            "required": [
-              "contact",
-              "type",
-              "value",
-              "key"
-            ]
+            }
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/CommunicationWay/{id}",
+          "path": "/CommunicationWay/{communication_way_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "communication_way_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "Model_CommunicationWayUpdate: every field is optional except the id that addresses the record. sevdesk documents no native upsert verb — create is POST /CommunicationWay and update is this PUT keyed by the resource id in the path, so an unknown id does not create.",
+            "required": ["id"],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": ["string", "integer"],
+                "description": "Id of the communication way to update; supplies the {communication_way_id} path segment. Numeric value, serialized as a string on the read side."
               },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
+                "description": "Contact relation the communication way is attached to.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "enum": ["EMAIL", "PHONE", "WEB", "MOBILE"],
+                "description": "Type of the communication way."
               },
               "value": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The phone number, e-mail address or website."
               },
               "key": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "required": ["id", "objectName"],
+                "description": "CommunicationWayKey relation.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CommunicationWayKey"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "CommunicationWayKey" }
                 }
               },
               "main": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["boolean", "null"],
+                "description": "Whether this is the contact's main communication way. Genuine boolean on write, string ('0'/'1') on read."
               }
             }
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
+        "conflict_keys": ["id"],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       }
     }

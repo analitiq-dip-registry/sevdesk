@@ -1,46 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "contactaddress",
   "display_name": "Contact Addresses",
-  "description": "Postal addresses associated with contacts.",
+  "description": "Postal addresses attached to a contact. sevdesk exposes addresses only through this standalone resource — POST /Contact explicitly refers address creation here.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/ContactAddress",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -54,156 +19,137 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/ContactAddress",
+        "query": {
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "GET /ContactAddress response envelope. Records are wrapped in `objects`; a top-level `total` is added when countAll=true.",
           "properties": {
             "objects": {
               "type": "array",
+              "description": "The page of Model_ContactAddressResponse records.",
               "items": {
                 "type": "object",
+                "required": ["id", "objectName", "create", "update", "contact", "country"],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Contact address id."
+                    "description": "Contact address id (system-assigned, read-only). sevdesk serializes ids as JSON strings on the wire; the spec's `type: integer` on this one model is an outlier against every sibling *Response model (Contact, CheckAccount, CommunicationWay all declare id as type: string with a quoted example)."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Model name; constant value 'ContactAddress'. Given by the spec as an example, not as an enum, so no closed domain is declared."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (system-set, read-only). Provider-wide system field; wire values carry an explicit offset (e.g. 2024-06-28T14:42:58+02:00) -> zone-aware."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-modification timestamp (system-set, read-only). NOT usable as an incremental cursor: GET /ContactAddress declares no query parameters, so no modified-after filter is grounded for this resource."
                   },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "Contact relation ({id, objectName='Contact'}) this address belongs to. Opaque JSON."
                   },
                   "street": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "zip": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "city": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "country": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Country relation."
-                  },
-                  "category": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Address category."
-                  },
-                  "name": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Optional address name (e.g. Billing)."
+                    "description": "Street name (e.g. 'South road 15')."
+                  },
+                  "zip": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Zip code (the spec's description text reads 'Zib code' verbatim). String on the wire, so leading zeros are preserved."
+                  },
+                  "city": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "City name."
+                  },
+                  "country": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "StaticCountry relation ({id, objectName='StaticCountry'}). The id domain is enumerated by GET /StaticCountry. Opaque JSON."
+                  },
+                  "category": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Category relation ({id, objectName='Category'}). The id domain is enumerated by GET /Category?objectType=ContactAddress. Optional on read, required on create. Opaque JSON."
+                  },
+                  "name": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Name printed in the address."
+                  },
+                  "sevClient": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Owning SevClient relation ({id, objectName='SevClient'}); read-only, filled automatically by sevdesk. Opaque JSON."
                   },
                   "name2": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Second name in the address. The spec omits the nullable flag here while name3/name4 carry nullable: true; treated as nullable (spec inconsistency)."
                   },
                   "name3": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Third name in the address."
                   },
                   "name4": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Fourth name in the address."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -215,297 +161,114 @@
         "request": {
           "method": "POST",
           "path": "/ContactAddress",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "Model_ContactAddress: one address to create via POST /ContactAddress. Relation ids are integers on the request side, unlike the string ids the read side returns. id, objectName, create, update and sevClient are read-only and must not be sent.",
+            "required": ["contact", "country", "category"],
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "description": "Contact the address is created for. Required on create.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "country": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "description": "Country of the address. Required on create; the id domain is enumerated by GET /StaticCountry.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "StaticCountry" }
                 }
               },
               "category": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "description": "Category of the address. Required on create (unlike on read, where it is optional); the id domain is enumerated by GET /Category?objectType=ContactAddress.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Category" }
                 }
               },
-              "street": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "zip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "city": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name2": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name3": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name4": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "contact",
-              "country"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
+              "street": { "type": ["string", "null"], "description": "Street name." },
+              "zip": { "type": ["string", "null"], "description": "Zip code. String on the wire, so leading zeros are preserved." },
+              "city": { "type": ["string", "null"], "description": "City name." },
+              "name": { "type": ["string", "null"], "description": "Name printed in the address." },
+              "name2": { "type": ["string", "null"], "description": "Second name in the address." },
+              "name3": { "type": ["string", "null"], "description": "Third name in the address." },
+              "name4": { "type": ["string", "null"], "description": "Fourth name in the address." }
+            }
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/ContactAddress/{id}",
+          "path": "/ContactAddress/{contact_address_id}",
+          "headers": { "Content-Type": "application/json" },
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "contact_address_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "Model_ContactAddressUpdate: a partial update addressed by id. The model declares no required fields of its own, so every payload field is optional; id is required here because it supplies the {contact_address_id} path segment. PUT /ContactAddress/{id} updates only - an unknown id is not a create, so insert-vs-update is decided by the presence of id. id, objectName, create, update and sevClient are not accepted in the update body.",
+            "required": ["id"],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": ["string", "integer"],
+                "description": "sevdesk id of the contact address to update; supplies the {contact_address_id} path segment. Serialized as a string on the read side, declared integer as a path parameter."
               },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "description": "Contact the address belongs to. Optional on update.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "country": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "description": "Country of the address. Optional on update; the id domain is enumerated by GET /StaticCountry.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "StaticCountry" }
                 }
               },
               "category": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "description": "Category of the address. Optional on update; the id domain is enumerated by GET /Category?objectType=ContactAddress.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Category" }
                 }
               },
-              "street": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "zip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "city": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name2": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name3": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "name4": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
+              "street": { "type": ["string", "null"], "description": "Street name." },
+              "zip": { "type": ["string", "null"], "description": "Zip code. String on the wire, so leading zeros are preserved." },
+              "city": { "type": ["string", "null"], "description": "City name." },
+              "name": { "type": ["string", "null"], "description": "Name printed in the address." },
+              "name2": { "type": ["string", "null"], "description": "Second name in the address." },
+              "name3": { "type": ["string", "null"], "description": "Third name in the address." },
+              "name4": { "type": ["string", "null"], "description": "Fourth name in the address." }
             }
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
+        "conflict_keys": ["id"]
       }
     }
-  },
-  "endpoint_id": "contactaddress"
+  }
 }

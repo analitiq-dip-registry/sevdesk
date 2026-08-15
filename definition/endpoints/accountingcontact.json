@@ -1,45 +1,24 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "accountingcontact",
   "display_name": "Accounting Contacts",
-  "description": "Accounting-specific debitor/creditor numbers per contact.",
+  "description": "Accounting contacts linking a sevdesk contact to its debitor and creditor account numbers.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/AccountingContact",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
+        "contact_id": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
+          "operators": ["eq"],
+          "description": "Id of the contact whose accounting contact you want. Sent as the bracketed query key contact[id]; send together with contact_object_name."
+        },
+        "contact_object_name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Object name of the contact filter. Sent as the bracketed query key contact[objectName]; only needed when contact_id is also given. Use 'Contact'."
         },
         "limit": {
           "in": "query",
@@ -54,96 +33,94 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/AccountingContact",
+        "query": {
+          "contact[id]": { "from_param": "contact_id" },
+          "contact[objectName]": { "from_param": "contact_object_name" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
-        "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
-        }
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
+        "stop_when": { "empty": { "ref": "response.body.objects" } }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
               "type": "array",
+              "description": "Page of accounting contacts. sevdesk wraps every list response in a top-level 'objects' array.",
               "items": {
                 "type": "object",
+                "required": ["id", "objectName", "create", "update", "contact", "sevClient"],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The accounting contact id. Read-only; a numeric value serialized as a JSON string on the wire (example '0'). Primary key, and the value taken by PUT/DELETE as the {accounting_contact_id} path segment."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The accounting contact object name; read-only, example 'AccountingContact'. Constant in practice, but the provider declares no enum, so no closed value domain is asserted."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of accounting contact creation; read-only. Provider-wide system field. Wire values carry an explicit offset (e.g. 2024-06-28T14:42:58+02:00) -> zone-aware."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last accounting contact update; read-only. Provider-wide system field. Wire values carry an explicit offset (e.g. 2024-06-28T14:42:58+02:00) -> zone-aware. NOT usable as an incremental cursor: GET /AccountingContact exposes no modified-after filter param."
                   },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "The contact to which this accounting contact belongs. sevdesk relation object ({id, objectName='Contact'}); read-only. Opaque JSON."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the accounting contact belongs; filled automatically by sevdesk. Relation object ({id, objectName='SevClient'}); read-only. Opaque JSON."
                   },
                   "debitorNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Debitor number (receivable account number). Read model declares type string with example '0' - a numeric value serialized as a JSON string on the wire; genuine integer on write."
                   },
                   "creditorNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Creditor number (vendor account number). Read model declares type string with example '0' - a numeric value serialized as a JSON string on the wire; genuine integer on write."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -155,148 +132,86 @@
         "request": {
           "method": "POST",
           "path": "/AccountingContact",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "Model_AccountingContact: one accounting contact to create. Relation ids are integers on the request side, unlike the string ids the read side returns.",
+            "required": ["contact"],
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "description": "The contact this accounting contact belongs to. Required on create and not nullable.",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "debitorNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["integer", "null"],
+                "description": "Debitor number (receivable account number). Genuine integer on write, string on read."
               },
               "creditorNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["integer", "null"],
+                "description": "Creditor number (vendor account number). Genuine integer on write, string on read."
               }
-            },
-            "required": [
-              "contact"
-            ]
+            }
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/AccountingContact/{id}",
+          "path": "/AccountingContact/{accounting_contact_id}",
+          "headers": { "Content-Type": "application/json" },
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "accounting_contact_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "Model_AccountingContactUpdate: every field is optional except the id that addresses the row. PUT /AccountingContact/{accounting_contact_id} updates only - an unknown id is not a create. Provider warning: updating an existing AccountingContact can lead to booking errors, especially in the DATEV export.",
+            "required": ["id"],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": ["string", "integer"],
+                "description": "Id of the accounting contact to update; supplies the {accounting_contact_id} path segment. Integer on the wire, serialized as a string on the read side."
               },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": ["object", "null"],
+                "description": "The contact this accounting contact belongs to. Optional and nullable on update (partial update).",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
                 }
               },
               "debitorNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["integer", "null"],
+                "description": "Debitor number (receivable account number). Genuine integer on write, string on read."
               },
               "creditorNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["integer", "null"],
+                "description": "Creditor number (vendor account number). Genuine integer on write, string on read."
               }
             }
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
+        "conflict_keys": ["id"],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       }
     }
-  },
-  "endpoint_id": "accountingcontact"
+  }
 }

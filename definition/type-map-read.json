@@ -1,11 +1,10 @@
 [
-  { "match": "exact", "native": "STRING",   "canonical": "Utf8" },
-  { "match": "exact", "native": "INTEGER",  "canonical": "Int32" },
-  { "match": "exact", "native": "DECIMAL",  "canonical": "Decimal128(18, 4)" },
-  { "match": "exact", "native": "DATETIME", "canonical": "Timestamp(MICROSECOND, UTC)" },
-  { "match": "exact", "native": "DATE",     "canonical": "Date32" },
-  { "match": "exact", "native": "OBJECT",   "canonical": "Json" },
-  { "match": "exact", "native": "BOOLEAN",  "canonical": "Boolean" },
-  { "match": "exact", "native": "NUMBER",   "canonical": "Float64" },
-  { "match": "exact", "native": "ARRAY",    "canonical": "Json" }
+  { "match": "exact", "native": "STRING",            "canonical": "Utf8" },
+  { "match": "exact", "native": "INTEGER",           "canonical": "Int32" },
+  { "match": "exact", "native": "DOUBLE",            "canonical": "Float64" },
+  { "match": "exact", "native": "BOOLEAN",           "canonical": "Boolean" },
+  { "match": "exact", "native": "DATE",              "canonical": "Date32" },
+  { "match": "exact", "native": "TIMESTAMP",         "canonical": "Timestamp(MICROSECOND, UTC)" },
+  { "match": "exact", "native": "ISO-8601-DURATION", "canonical": "Utf8" },
+  { "match": "exact", "native": "OBJECT",            "canonical": "Json" }
 ]

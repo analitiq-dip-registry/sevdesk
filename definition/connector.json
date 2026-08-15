@@ -1,11 +1,12 @@
 {
   "$schema": "https://schemas.analitiq.ai/connector/latest.json",
-  "connector_id": "sevdesk",
   "kind": "api",
+  "connector_id": "sevdesk",
   "display_name": "sevdesk",
   "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
   "documentation_url": "https://api.sevdesk.de/",
-  "version": "3.0.1",
+  "tags": ["accounting", "invoicing", "finance", "api"],
+  "version": "4.0.0",
   "default_transport": "api",
   "transports": {
     "api": {
@@ -13,12 +14,8 @@
       "base_url": "https://my.sevdesk.de/api/v1",
       "headers": {
         "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": {
-          "template": "${secrets.api_token}"
-        }
-      },
-      "timeout_seconds": 30
+        "Authorization": { "template": "${secrets.api_token}" }
+      }
     }
   },
   "auth": {
@@ -28,7 +25,7 @@
     "inputs": {
       "api_token": {
         "source": "user",
-        "phase": "pre_auth",
+        "phase": "auth",
         "storage": "secrets",
         "type": "string",
         "required": true,
@@ -40,8 +37,18 @@
         }
       }
     },
-    "required_for_activation": [
-      "secrets.api_token"
-    ]
+    "post_auth_outputs": {
+      "bookkeeping_system_version": {
+        "mode": "auto_discovery",
+        "storage": "connection.discovered",
+        "type": "string",
+        "value_path": "objects.version",
+        "discovery_request": {
+          "transport_ref": "api",
+          "method": "GET",
+          "path": "/Tools/bookkeepingSystemVersion"
+        }
+      }
+    }
   }
 }

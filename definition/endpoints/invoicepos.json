@@ -2,45 +2,44 @@
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "endpoint_id": "invoicepos",
   "display_name": "Invoice Positions",
-  "description": "Line items belonging to invoices.",
+  "description": "Line items (positions) belonging to invoices, including quantity, unit price, tax rate and computed net/gross accounting sums.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/InvoicePos",
-        "query": {
-          "invoice[id]": {
-            "from_param": "invoice[id]"
-          },
-          "invoice[objectName]": {
-            "from_param": "invoice[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
+        "id": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by invoice position id."
+        },
         "invoice[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by invoice id."
+          "operators": ["eq"],
+          "description": "Filter by the id of the invoice the position belongs to (send together with invoice[objectName])."
         },
         "invoice[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Use 'Invoice'."
+        },
+        "part[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by the id of the part referenced by the position (send together with part[objectName])."
+        },
+        "part[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Use 'Part'."
         },
         "limit": {
           "in": "query",
@@ -55,32 +54,38 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/InvoicePos",
+        "query": {
+          "id": { "from_param": "id" },
+          "invoice[id]": { "from_param": "invoice[id]" },
+          "invoice[objectName]": { "from_param": "invoice[objectName]" },
+          "part[id]": { "from_param": "part[id]" },
+          "part[objectName]": { "from_param": "part[objectName]" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
@@ -91,544 +96,141 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "sevdesk id of the invoice position; serialized as a string on the read path."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "enum": ["InvoicePos"]
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (system-set)."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-modification timestamp (system-set)."
                   },
                   "invoice": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Invoice relation."
+                    "description": "Invoice relation ({id, objectName='Invoice'})."
                   },
                   "part": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Linked product."
+                    "description": "Part relation ({id, objectName='Part'}); absent for free-text positions."
                   },
                   "quantity": {
                     "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Quantity of the article/part."
-                  },
-                  "price": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Price of the article/part. Gross or net depending on account setting."
-                  },
-                  "name": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Name of the article/part."
+                    "description": "Quantity of the position. Wire-serialized as a string like every other numeric on this response model. Model_InvoicePosResponse declares type:boolean/example:true, which is an unbacked generator artefact contradicted by both Model_InvoicePos (number/float) and the tag attribute table (Double); see the notes on this endpoint."
+                  },
+                  "price": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Unit price of the position; wire-serialized as a string."
+                  },
+                  "name": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Name of the position."
                   },
                   "unity": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Unit of measure relation."
+                    "description": "Unity relation ({id, objectName='Unity'}) — the unit the quantity is measured in."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "SevClient relation ({id, objectName='SevClient'}) — the owning client; system-set."
                   },
                   "positionNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Position number used to order positions. Returned as a string by the API."
+                    "description": "Ordering position of the line item within the invoice; wire-serialized as a string."
                   },
                   "text": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "A text describing the position."
+                    "description": "Free-text description of the position."
                   },
                   "discount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "An optional discount of the position."
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discount applied to the position; wire-serialized as a string."
                   },
                   "taxRate": {
                     "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax rate of the position."
-                  },
-                  "priceNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net price of the part."
-                  },
-                  "priceGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross price of the part."
-                  },
-                  "priceTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax on the price of the part."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax rate of the position in percent; wire-serialized as a string."
                   },
                   "sumDiscount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discount sum of the position."
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discount sum of the position; wire-serialized as a string."
                   },
                   "sumNetAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net accounting sum of the position."
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net accounting sum of the position; wire-serialized as a string."
                   },
                   "sumTaxAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax accounting sum of the position."
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax accounting sum of the position; wire-serialized as a string."
                   },
                   "sumGrossAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross accounting sum of the position."
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross accounting sum of the position; wire-serialized as a string."
                   },
-                  "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                  "priceNet": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net price of the position; wire-serialized as a string."
                   },
-                  "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                  "priceGross": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross price of the position; wire-serialized as a string."
                   },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "discountedValue": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "discountedSumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "discountedSumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "discountedSumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                  "priceTax": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax amount of the position; wire-serialized as a string."
                   }
                 },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                "required": ["id", "objectName"]
               }
             }
-          }
-        }
-      }
-    },
-    "write": {
-      "insert": {
-        "request": {
-          "method": "POST",
-          "path": "/InvoicePos",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "invoice": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Invoice"
-                  }
-                }
-              },
-              "part": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Part"
-                  }
-                }
-              },
-              "quantity": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "unity": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
-              },
-              "positionNumber": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "text": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "discount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "invoice",
-              "quantity",
-              "name",
-              "unity",
-              "taxRate"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
-      "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/InvoicePos/{id}",
-          "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "invoice": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Invoice"
-                  }
-                }
-              },
-              "part": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Part"
-                  }
-                }
-              },
-              "quantity": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "unity": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
-              },
-              "positionNumber": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "text": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "discount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
           }
         }
       }

@@ -1,33 +1,24 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Tags",
-  "description": "Free-form labels attachable to many resources.",
+  "endpoint_id": "tag",
+  "display_name": "Tag",
+  "description": "sevdesk tags. Read is GET /Tag (records wrapped in `objects`), full refresh only — Model_TagResponse carries no `update` field and sevdesk documents no updateAfter/createAfter filter on this operation, so there is no incremental cursor. Two structural oddities are authored deliberately: (1) insert has no plain POST /Tag — creation is reachable only through the factory route POST /Tag/Factory/create, whose body REQUIRES `object`, so a tag cannot be created standalone but only attached to an existing Invoice, Voucher, Order or CreditNote; that route also answers with the TagRelation shape (Model_TagCreateResponse), not the read record, so the created tag's own id sits at `tag.id`. (2) PUT /Tag/{tagId} answers with a bare Model_TagResponse — the spec declares no `objects` wrapper on the update, unlike GET — so the upsert reads its generated key straight off `response.body.id`. The spec spells the update path param `{tagId}`; it is authored `{tag_id}` to satisfy the snake_case placeholder constraint.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/Tag",
-        "query": {
-          "name": {
-            "from_param": "name"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
+        "id": {
+          "in": "query",
+          "type": "number",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter by the sevdesk id of the tag. Declared `type: number` by sevdesk's GET /Tag parameter list and authored verbatim, even though the read model serializes the record's own `id` as a JSON string."
+        },
         "name": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by tag name."
+          "operators": ["eq"],
+          "description": "Filter by tag name. Filterable, but not documented as unique, so it is not usable as a conflict key."
         },
         "limit": {
           "in": "query",
@@ -42,33 +33,37 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/Tag",
+        "query": {
+          "id": { "from_param": "id" },
+          "name": { "from_param": "name" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "GET /Tag response envelope. Records are wrapped in `objects`; a top-level `total` is added only when countAll=true, which this endpoint does not send.",
           "properties": {
             "objects": {
               "type": "array",
@@ -78,49 +73,43 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Unique identifier of the tag (system-set). Declared `type: string` by Model_TagResponse; the numeric value is serialized as a JSON string on the wire (spec example '1')."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "enum": ["Tag"],
+                    "description": "Model name; always 'Tag'. Not declared as an enum in the spec, but its description pins the constant."
                   },
                   "additionalInformation": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Additional free-form information stored on the tag."
+                    "description": "Additional information on the tag. Declared `type: string, default: null`."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Creation timestamp (system-set, readOnly). sevdesk emits offset-carrying ISO-8601 across its models (e.g. 2024-06-28T14:42:58+02:00). The only temporal field on this model — Model_TagResponse declares no `update`, unlike nearly every other sevdesk model."
                   },
                   "name": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the tag (readOnly on the response model)."
+                  },
+                  "sevClient": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client relation the tag belongs to ({id, objectName='SevClient'}); filled automatically by sevdesk."
                   }
                 },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                "required": ["id", "objectName", "create"]
               }
             }
           }
@@ -131,93 +120,77 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Tag",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "path": "/Tag/Factory/create",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One POST /Tag/Factory/create payload. sevdesk documents NO plain POST /Tag — the /Tag path item declares `get` only — so this non-RESTful factory route is the sole create path, and its `object` member is required: a tag cannot be created standalone, only attached to an existing Invoice, Voucher, Order or CreditNote. The route's 200 body is Model_TagCreateResponse (the TagRelation shape, objectName 'TagRelation'), which is NOT the read record shape; the created tag's own id is therefore read from `tag.id`, not `id`.",
             "properties": {
               "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "Name of the tag."
+              },
+              "object": {
+                "type": "object",
+                "description": "The document the new tag is attached to. Required by the factory route — there is no standalone tag creation.",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "Id of the invoice/order/voucher/creditNote the tag is attached to."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "enum": ["Invoice", "Voucher", "Order", "CreditNote"],
+                    "description": "Model name of the attached document."
+                  }
+                },
+                "required": ["id", "objectName"]
               }
             },
-            "required": [
-              "name"
-            ]
+            "required": ["object"]
           }
         },
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.tag.id" }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
+        "conflict_keys": ["id"],
         "request": {
           "method": "PUT",
-          "path": "/Tag/{id}",
+          "path": "/Tag/{tag_id}",
+          "headers": { "Content-Type": "application/json" },
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
+            "tag_id": { "from_input": "record.id" }
           },
           "body": {
-            "from_input": "record"
+            "name": { "from_input": "record.name" }
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "PUT /Tag/{tagId} (spec spelling; authored {tag_id}) updates an existing tag. sevdesk declares exactly one updatable property — `name` — so the request body carries only that; `id` is present solely to address the record and supplies the path segment. The provider documents no natural key beyond the tag id (`name` is filterable but nowhere documented as unique), so this mode matches on the provider-assigned id.",
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "sevdesk id of the tag to update; supplies the {tag_id} path segment. The path parameter is declared integer by the spec, while the read model serializes id as a string."
               },
               "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The new name of the tag — the only property PUT /Tag/{tagId} accepts."
               }
-            }
+            },
+            "required": ["id"]
           }
         },
-        "conflict_keys": [
-          "id"
-        ],
         "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
+          "generated_keys": { "ref": "response.body.id" }
         }
       }
     }
-  },
-  "endpoint_id": "tag"
+  }
 }

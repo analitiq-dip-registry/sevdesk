@@ -75,14 +75,14 @@
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
                     "description": "Create timestamp."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
                     "description": "Last update timestamp."

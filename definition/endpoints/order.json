@@ -1,94 +1,59 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Orders",
-  "description": "Quotations and order confirmations.",
   "endpoint_id": "order",
+  "display_name": "Orders",
+  "description": "Orders (Auftraege) covering estimates/proposals (AN), order confirmations (AB) and delivery notes (LI).",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/Order",
-        "query": {
-          "status": {
-            "from_param": "status"
-          },
-          "orderNumber": {
-            "from_param": "orderNumber"
-          },
-          "startDate": {
-            "from_param": "startDate"
-          },
-          "endDate": {
-            "from_param": "endDate"
-          },
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
         "status": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by status."
+          "operators": ["eq"],
+          "description": "Filter by order status: 100=Draft, 200=Delivered, 300=Rejected/Cancelled, 500=Accepted, 750=Partially calculated, 1000=Calculated. Declared as an integer by the API contract; the response model returns the same values as JSON strings."
         },
         "orderNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by orderNumber."
+          "operators": ["eq"],
+          "description": "Filter by order number (e.g. 'Offer-1000')."
         },
         "startDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by startDate."
+          "operators": ["gte"],
+          "description": "Lower bound on orderDate (the document date, NOT the modification time): returns orders whose order date is equal or higher. Declared as an integer Unix timestamp by the API contract; the published example renders it as '01.01.2020'."
         },
         "endDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by endDate."
+          "operators": ["lte"],
+          "description": "Upper bound on orderDate (the document date, NOT the modification time): returns orders whose order date is equal or lower. Declared as an integer Unix timestamp by the API contract."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact[id]."
+          "operators": ["eq"],
+          "description": "Filter by contact id (send together with contact[objectName])."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
+          "operators": ["eq"],
           "description": "Use 'Contact'."
+        },
+        "updateAfter": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "replication",
+          "description": "Incremental watermark: returns orders updated last after the supplied Unix timestamp. Sent as whole seconds since the epoch, matching the integer Unix timestamps the sibling startDate/endDate filters declare."
         },
         "limit": {
           "in": "query",
@@ -103,32 +68,51 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/Order",
+        "query": {
+          "status": { "from_param": "status" },
+          "orderNumber": { "from_param": "orderNumber" },
+          "startDate": { "from_param": "startDate" },
+          "endDate": { "from_param": "endDate" },
+          "contact[id]": { "from_param": "contact[id]" },
+          "contact[objectName]": { "from_param": "contact[objectName]" },
+          "updateAfter": { "from_param": "updateAfter" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
+      "replication": {
+        "supported_methods": ["full_refresh", "incremental"],
+        "cursor_mappings": [
+          {
+            "cursor_field": "update",
+            "param": "updateAfter",
+            "operator": "gt",
+            "format": "epoch_seconds"
+          }
+        ]
+      },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
@@ -136,386 +120,48 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order id."
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order object name."
-                  },
-                  "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Date of order creation."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Date of last order update."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Client to which the order belongs. Filled automatically."
-                  },
-                  "createUser": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "User who created the order. Filled automatically."
-                  },
-                  "orderNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The order number."
-                  },
-                  "contact": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "The contact used in the order."
-                  },
-                  "contactPerson": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "The user who acts as a contact person for the order."
-                  },
-                  "orderDate": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Order date."
-                  },
-                  "status": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Status code of the order (100, 200, 300, 500, 750, 1000)."
-                  },
-                  "orderType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Type of the order (AN=quotation, AB=order confirmation, LI=delivery note)."
-                  },
-                  "header": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Header, normally prefix plus the order number."
-                  },
-                  "headText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Head text (may contain HTML)."
-                  },
-                  "footText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Foot text (may contain HTML)."
-                  },
-                  "address": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Complete address of the recipient."
-                  },
-                  "addressName": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressStreet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressZip": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressCity": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressCountry": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Country of the address."
-                  },
-                  "currency": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Currency code (ISO-4217)."
-                  },
-                  "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order."
-                  },
-                  "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order."
-                  },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order."
-                  },
-                  "sumDiscounts": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Sum of all discounts in the order."
-                  },
-                  "sumNetForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order in the foreign currency."
-                  },
-                  "sumTaxForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order in the foreign currency."
-                  },
-                  "sumGrossForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order in the foreign currency."
-                  },
-                  "sumDiscountsForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discounts sum of the order in the foreign currency."
-                  },
-                  "taxRate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Deprecated. Use the taxRate of the individual positions instead."
-                  },
-                  "taxRule": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "VAT rule (sevdesk-Update 2.0)."
-                  },
-                  "taxSet": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Tax set of the order (sevdesk-Update 1.0)."
-                  },
-                  "taxText": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
-                  },
-                  "taxType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax type (sevdesk-Update 1.0)."
-                  },
-                  "showNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "If true, the net amount of each position is shown; otherwise gross."
-                  },
-                  "smallSettlement": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Whether the client uses the small settlement scheme."
-                  },
-                  "deliveryTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Delivery terms of the order."
-                  },
-                  "paymentTerms": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Payment terms of the order."
-                  },
-                  "origin": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Object from which the order was created."
-                  },
-                  "customerInternalNote": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Internal note of the customer (Referenz/Bestellnummer)."
-                  },
-                  "version": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Version of the order. Starts with 0."
-                  },
-                  "sendDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "The date the order was sent to the customer."
-                  },
-                  "sendType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Type used to send the order (VPR, VPDF, VM, VP)."
-                  },
-                  "deliveryDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDateUntil": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  }
+                  "id": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "sevdesk id of the order; numeric value serialized as a JSON string on the wire (system-set)." },
+                  "objectName": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "enum": ["Order"] },
+                  "create": { "type": "string", "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Creation timestamp (system-set). Typed identically on every sevdesk endpoint as a UTC instant." },
+                  "update": { "type": "string", "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Last-modification timestamp (system-set); the incremental replication cursor, pushed down via the updateAfter filter." },
+                  "orderNumber": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Order number (e.g. 'Offer-1000')." },
+                  "contact": { "type": "object", "native_type": "object", "arrow_type": "Json", "description": "Contact relation ({id, objectName='Contact'})." },
+                  "orderDate": { "type": "string", "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Document date of the order; the startDate/endDate query filters window on this field." },
+                  "status": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "enum": ["100", "200", "300", "500", "750", "1000"], "description": "100=Draft, 200=Delivered, 300=Rejected/Cancelled, 500=Accepted, 750=Partially calculated, 1000=Calculated. Serialized as a JSON string on the wire." },
+                  "header": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Document header text (e.g. 'My Offer-1000')." },
+                  "headText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Text printed above the positions." },
+                  "footText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Text printed below the positions." },
+                  "addressCountry": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "StaticCountry relation ({id, objectName='StaticCountry'})." },
+                  "createUser": { "type": "object", "native_type": "object", "arrow_type": "Json", "description": "SevUser relation that created the document ({id, objectName='SevUser'}); system-set." },
+                  "sevClient": { "type": "object", "native_type": "object", "arrow_type": "Json", "description": "SevClient relation ({id, objectName='SevClient'}); system-set." },
+                  "deliveryTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Delivery terms printed on the document." },
+                  "paymentTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Payment terms printed on the document." },
+                  "origin": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Relation to the object this order originated from ({id, objectName})." },
+                  "version": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Document version counter; numeric value serialized as a JSON string on the wire." },
+                  "smallSettlement": { "type": "boolean", "native_type": "boolean", "arrow_type": "Boolean", "description": "Whether the client uses the small-settlement scheme. One of the two order fields the provider genuinely serializes as a JSON boolean." },
+                  "contactPerson": { "type": "object", "native_type": "object", "arrow_type": "Json", "description": "SevUser relation acting as contact person ({id, objectName='SevUser'})." },
+                  "taxRate": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Deprecated document-level tax rate - use the taxRate of the individual positions instead. Numeric value serialized as a JSON string on the wire." },
+                  "taxRule": { "type": "object", "native_type": "object", "arrow_type": "Json", "description": "TaxRule relation ({id, objectName='TaxRule'}); sevdesk-Update 2.0. Orders created under bookkeeping system 1.0 carry taxType/taxSet instead." },
+                  "taxSet": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "TaxSet relation (bookkeeping system version 1.0; used when taxType='custom')." },
+                  "taxText": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Tax text printed on the document (e.g. 'Umsatzsteuer 19%')." },
+                  "taxType": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "enum": ["default", "eu", "noteu", "custom", "ss"], "description": "Bookkeeping system version 1.0 tax type; replaced by taxRule under sevdesk-Update 2.0." },
+                  "orderType": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "enum": ["AN", "AB", "LI"], "description": "AN=estimate/proposal, AB=order confirmation, LI=delivery note." },
+                  "sendDate": { "type": ["string", "null"], "format": "date-time", "native_type": "timestamp", "arrow_type": "Timestamp(MICROSECOND, UTC)", "description": "Set by the system via sendBy/sendViaEmail." },
+                  "address": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Complete address block printed on the document." },
+                  "currency": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "ISO-4217 currency code (e.g. 'EUR')." },
+                  "sumNet": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Net sum; numeric value serialized as a JSON string on the wire." },
+                  "sumTax": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Tax sum; numeric value serialized as a JSON string on the wire." },
+                  "sumGross": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Gross sum; numeric value serialized as a JSON string on the wire." },
+                  "sumDiscounts": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Sum of all discounts; numeric value serialized as a JSON string on the wire." },
+                  "sumNetForeignCurrency": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Net sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumTaxForeignCurrency": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Tax sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumGrossForeignCurrency": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Gross sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "sumDiscountsForeignCurrency": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Discount sum in the foreign currency; numeric value serialized as a JSON string on the wire." },
+                  "customerInternalNote": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal note on the customer, not printed on the document." },
+                  "showNet": { "type": "boolean", "native_type": "boolean", "arrow_type": "Boolean", "description": "Whether positions are printed net. One of the two order fields the provider genuinely serializes as a JSON boolean." },
+                  "sendType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "enum": ["VPR", "VPDF", "VM", "VP", null], "description": "VPR=printed, VPDF=downloaded, VM=mailed, VP=postal; set by the system via sendBy/sendViaEmail." }
                 },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                "required": ["id", "objectName", "orderDate", "status", "orderType", "taxRule"]
               }
             }
           }
@@ -526,402 +172,211 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Order",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/Order/Factory/saveOrder",
+          "headers": { "Content-Type": "application/json" },
           "body": {
-            "from_input": "record"
+            "order": { "from_input": "record.order" },
+            "orderPosSave": { "from_input": "record.orderPosSave" }
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One saveOrder payload: the order header plus at least one position. There is no plain POST /Order - the factory RPC is the only documented create path, and since 2023-07-24 it rejects a create that carries no position. Negative totals are rejected since v4.167.",
             "properties": {
-              "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+              "order": {
+                "type": "object",
+                "description": "Order header (Model_Order). Relation ids and status are integers on the request side, unlike the strings the read side returns.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
+                  "objectName": { "type": "string", "const": "Order" },
+                  "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                  "orderNumber": { "type": "string", "description": "Order number (e.g. 'Offer-1000')." },
+                  "orderDate": { "type": "string", "format": "date-time", "description": "Document date of the order." },
+                  "contact": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "Contact" }
+                    }
                   },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
-              },
-              "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
+                  "status": { "type": "integer", "enum": [100, 200, 300, 500, 750, 1000], "description": "100=Draft, 200=Delivered, 300=Rejected/Cancelled, 500=Accepted, 750=Partially calculated, 1000=Calculated. Integer on the request side." },
+                  "header": { "type": "string", "description": "Document header text." },
+                  "headText": { "type": "string" },
+                  "footText": { "type": "string" },
+                  "addressCountry": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "StaticCountry" }
+                    }
                   },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
-                }
-              },
-              "orderDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "orderNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "orderType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
+                  "address": { "type": "string", "description": "Complete address block printed on the document." },
+                  "contactPerson": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "SevUser" }
+                    }
                   },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
+                  "taxRate": { "type": "number", "description": "Document-level tax rate (e.g. 19). Deprecated in favour of the per-position taxRate, but still required by the factory." },
+                  "taxRule": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxRule" }
+                    },
+                    "description": "TaxRule relation (bookkeeping system version 2.0)."
+                  },
+                  "taxSet": {
+                    "type": "object",
+                    "required": ["id", "objectName"],
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "objectName": { "type": "string", "const": "TaxSet" }
+                    },
+                    "description": "Bookkeeping system version 1.0 only; used when taxType='custom'."
+                  },
+                  "taxText": { "type": "string", "description": "Tax text printed on the document (e.g. 'Umsatzsteuer 19%')." },
+                  "taxType": { "type": "string", "enum": ["default", "eu", "noteu", "custom", "ss"], "description": "Bookkeeping system version 1.0 only; replaced by taxRule under 2.0." },
+                  "orderType": { "type": "string", "enum": ["AN", "AB", "LI"], "description": "AN=estimate/proposal, AB=order confirmation, LI=delivery note." },
+                  "currency": { "type": "string", "description": "ISO-4217 currency code (e.g. 'EUR')." },
+                  "version": { "type": "integer", "description": "Document version counter; integer on the request side." },
+                  "deliveryTerms": { "type": "string" },
+                  "paymentTerms": { "type": "string" },
+                  "smallSettlement": { "type": "boolean" },
+                  "showNet": { "type": "boolean" },
+                  "customerInternalNote": { "type": "string" }
+                },
+                "required": ["objectName", "mapAll", "orderNumber", "orderDate", "contact", "status", "addressCountry", "contactPerson", "taxRate", "taxRule", "taxText", "taxType", "currency", "header", "version"]
+              },
+              "orderPosSave": {
+                "type": "array",
+                "minItems": 1,
+                "description": "Positions to create with the order. At least one entry is mandatory when creating an AN/AB/LI order (enforced by the provider since 2023-07-24). The saveOrder wrapper's own required list names 'orderPos' while the property is 'orderPosSave' - a documented spec inconsistency; the property name is what the API accepts.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "objectName": { "type": "string", "const": "OrderPos" },
+                    "mapAll": { "type": "boolean", "const": true, "description": "sevdesk factory mapping flag; must be sent as true." },
+                    "part": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Part" }
+                      },
+                      "description": "Omit for a free-text position."
+                    },
+                    "quantity": { "type": "number" },
+                    "price": { "type": "number", "description": "Position price; supply price or priceGross." },
+                    "priceGross": { "type": "number" },
+                    "priceTax": { "type": "number" },
+                    "name": { "type": "string" },
+                    "unity": {
+                      "type": "object",
+                      "required": ["id", "objectName"],
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "objectName": { "type": "string", "const": "Unity" }
+                      }
+                    },
+                    "positionNumber": { "type": "integer" },
+                    "text": { "type": "string" },
+                    "discount": { "type": "number" },
+                    "taxRate": { "type": "number" },
+                    "optional": { "type": "boolean" }
+                  },
+                  "required": ["objectName", "mapAll", "quantity", "unity", "taxRate"]
                 }
-              },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
               }
             },
-            "required": [
-              "contact",
-              "contactPerson",
-              "orderDate",
-              "currency",
-              "taxRule",
-              "taxText"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
+            "required": ["order", "orderPosSave"]
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
+        "conflict_keys": ["id"],
         "request": {
           "method": "PUT",
-          "path": "/Order/{id}",
+          "path": "/Order/{order_id}",
+          "headers": { "Content-Type": "application/json" },
           "path_params": {
-            "id": {
-              "from_param": "id"
-            }
+            "order_id": { "from_input": "record.id" }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
+          "body": { "from_input": "record" }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "Model_OrderUpdate: every field is optional except the id that addresses the document. PUT /Order/{orderId} updates only - an unknown id is a 404, not a create - so this mode matches on the provider-assigned id rather than a natural key.",
             "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
+              "id": { "type": "string", "description": "sevdesk id of the order to update; supplies the {order_id} path segment. Numeric value, serialized as a string on the read side." },
+              "orderNumber": { "type": "string" },
+              "orderDate": { "type": "string", "format": "date-time" },
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "Contact" }
+                }
+              },
+              "status": { "type": "integer", "enum": [100, 200, 300, 500, 750, 1000], "description": "Integer on the request side, unlike the string the read side returns." },
+              "header": { "type": "string" },
+              "headText": { "type": "string" },
+              "footText": { "type": "string" },
+              "address": { "type": "string" },
+              "addressCountry": {
+                "type": "object",
+                "required": ["id", "objectName"],
+                "properties": {
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "StaticCountry" }
                 }
               },
               "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "SevUser" }
                 }
               },
-              "orderDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "orderNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "orderType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
+              "taxRate": { "type": "number" },
               "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "type": "object",
+                "required": ["id", "objectName"],
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
-                }
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "TaxRule" }
+                },
+                "description": "TaxRule relation (bookkeeping system version 2.0)."
               },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+              "taxSet": {
+                "type": "object",
+                "required": ["id", "objectName"],
+                "properties": {
+                  "id": { "type": "integer" },
+                  "objectName": { "type": "string", "const": "TaxSet" }
+                },
+                "description": "Bookkeeping system version 1.0 only; used when taxType='custom'."
               },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
+              "taxText": { "type": "string" },
+              "taxType": { "type": "string", "enum": ["default", "eu", "noteu", "custom", "ss"], "description": "Bookkeeping system version 1.0 only; replaced by taxRule under 2.0." },
+              "orderType": { "type": "string", "enum": ["AN", "AB", "LI"] },
+              "currency": { "type": "string", "description": "ISO-4217 currency code." },
+              "version": { "type": "integer", "description": "Document version counter; integer on the request side." },
+              "deliveryTerms": { "type": "string" },
+              "paymentTerms": { "type": "string" },
+              "smallSettlement": { "type": "boolean" },
+              "showNet": { "type": "boolean" },
+              "customerInternalNote": { "type": "string" }
+            },
+            "required": ["id"]
           }
         }
       }

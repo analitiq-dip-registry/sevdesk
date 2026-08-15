@@ -1,58 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Tag Relations",
-  "description": "Many-to-many associations between tags and other resources.",
+  "endpoint_id": "tagrelation",
+  "display_name": "Tag Relation",
+  "description": "sevdesk tag relations — the join records linking a tag to an Invoice, Voucher, Order or CreditNote. READ-ONLY by grounding, not by omission: /TagRelation declares exactly one operation (get, operationId `getTagRelations`); sevdesk documents no POST /TagRelation, no PUT/PATCH, no DELETE, and no /TagRelation/{id} route of any kind, so this endpoint has no path placeholder. A relation is never created directly — the Tag tag group states verbatim that 'the tag relation does not have to be created separately, as this is automatically created when a tag is created'. The only route that produces one is POST /Tag/Factory/create, a different locator that belongs to the sibling `tag` endpoint and is already authored there as that endpoint's insert; it is deliberately not duplicated here. DELETE /Tag/{tagId} deletes the tag, not the relation. Full refresh only: Model_TagCreateResponse carries no `update` field, and sevdesk's createAfter/createBefore/updateAfter/updateBefore filter families are documented only for Contact, Invoice, Order, Voucher and CreditNote queries — never for Tag/TagRelation — so `create` cannot back an incremental read and no replication block is authored. Records are wrapped in `objects`. GET /TagRelation declares no `parameters` block at all (contrast GET /Tag, which declares id and name), so the only bound inputs are the connector-wide limit/offset pagination params.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/TagRelation",
-        "query": {
-          "tag[id]": {
-            "from_param": "tag[id]"
-          },
-          "tag[objectName]": {
-            "from_param": "tag[objectName]"
-          },
-          "object[objectName]": {
-            "from_param": "object[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "tag[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by tag[id]."
-        },
-        "tag[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Tag'."
-        },
-        "object[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Tagged object type."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -66,150 +19,92 @@
           "controlled_by": "pagination"
         }
       },
+      "request": {
+        "method": "GET",
+        "path": "/TagRelation",
+        "query": {
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
       "pagination": {
         "type": "offset",
-        "limit": {
-          "param": "limit",
-          "default": {
-            "ref": "runtime.batch_size"
-          },
-          "max": 1000
-        },
         "offset": {
           "param": "offset",
           "initial": 0,
           "increment_by": { "ref": "response.record_count" }
         },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
         "stop_when": {
-          "empty": {
-            "ref": "response.body.objects"
-          }
+          "empty": { "ref": "response.body.objects" }
         }
       },
       "response": {
-        "records": {
-          "ref": "response.body.objects"
-        },
+        "records": { "ref": "response.body.objects" },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "GET /TagRelation response envelope. Records are wrapped in `objects`; a top-level `total` is added only when countAll=true, which this endpoint does not send.",
           "properties": {
             "objects": {
               "type": "array",
               "items": {
                 "type": "object",
+                "description": "One tag relation (Model_TagCreateResponse, spec title 'Tag model', objectName example 'TagRelation'). The model declares exactly these seven properties, in spec order. It carries NO top-level `required` array and marks no property `nullable: false`, so every field is optional on the wire and none is declared required here; `id`, `objectName` and `create` are readOnly (system-set).",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Unique identifier of the tag relation record (system-set, readOnly). The spec's description reads 'Id of the tag', but this is the id of the TagRelation record itself; the related tag's own id sits at `tag.id`. Declared type:string; the numeric value is serialized as a JSON string on the wire (spec example '1')."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "enum": ["TagRelation"],
+                    "description": "Model name; always 'TagRelation'. Not declared as an enum in the spec, but its description pins the constant ('Internal object name which is \"TagRelation\".') — authored as an enum for consistency with the sibling sevdesk endpoints."
+                  },
+                  "additionalInformation": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Additional information on the tag relation. Declared type:string with `default: null` and no example, i.e. null unless set."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "timestamp",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Date of tag creation (system-set, readOnly) — the only temporal field on this model. Declared type:string, format:date-time. This model ships no example for the field and the operation ships no response example; the canonical follows the connector-wide date-time ruling rather than a per-field sample. sevdesk's date-time wire shape is offset-bearing across its models (e.g. Model_CheckAccountResponse.create '2024-06-28T14:42:58+02:00'). Not usable as a replication cursor — no create-after/before filter is documented on this route."
                   },
                   "tag": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "object": {
-                    "type": "object",
+                    "type": ["object", "null"],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The tagged object (any sevdesk resource)."
+                    "description": "The tag information — relation object {id, objectName='Tag'}, both required by the nested schema (id declared string, example '1'). Kept opaque."
+                  },
+                  "object": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The document the tag is attached to — relation object {id, objectName}, both required by the nested schema. Its `objectName` is enumerated [Invoice, Voucher, Order, CreditNote] and its `id` is declared INTEGER (unlike every other id in this model, which is string); both facts live on nested properties, so the parent stays opaque."
+                  },
+                  "sevClient": {
+                    "type": ["object", "null"],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client relation the record belongs to ({id, objectName='SevClient'}); filled automatically by sevdesk. Kept opaque."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
         }
       }
-    },
-    "write": {
-      "insert": {
-        "request": {
-          "method": "POST",
-          "path": "/TagRelation",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "tag": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Tag"
-                  }
-                }
-              },
-              "object": {
-                "type": [
-                  "object",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "tag",
-              "object"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      }
     }
-  },
-  "endpoint_id": "tagrelation"
+  }
 }
