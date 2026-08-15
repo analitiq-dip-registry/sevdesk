@@ -54,9 +54,12 @@ Each endpoint's `endpoint_id` (and its file basename) equals the handle derived 
 
 ### Purchase / bookkeeping documents
 - `voucher` — `/Voucher` — read, insert, upsert (both writes via `POST /Voucher/Factory/saveVoucher`)
+- `voucherpos` — `/VoucherPos` — **read only** (positions are written through `saveVoucher`)
 
-> `voucherpos` was **removed** in 4.0.0. The current spec documents no `/VoucherPos` path and no
-> operation tagged VoucherPos; voucher positions survive only as schemas nested inside `saveVoucher`.
+> The pre-4.0.0 `voucherpos` document declared `insert` as `POST /VoucherPos` and `upsert` as
+> `PUT /VoucherPos/{id}`. Neither path has ever existed in the spec — `/VoucherPos` declares `get`
+> only, and there is no `/VoucherPos/{id}` path item at all. Those two write modes were fabrications
+> and are now gone; the read surface is unchanged.
 
 ### Catalog and inventory
 - `part` — `/Part` — read, insert, upsert (upsert conflict key is `partNumber`)

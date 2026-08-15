@@ -1,0 +1,208 @@
+{
+  "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "voucherpos",
+  "display_name": "Voucher Positions",
+  "description": "Line items (positions) belonging to vouchers, including tax rate, net/gross sums and the booking account (accountDatev / accountingType) the position is posted to.",
+  "operations": {
+    "read": {
+      "params": {
+        "voucher[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Filter positions by the id of the voucher they belong to (send together with voucher[objectName])."
+        },
+        "voucher[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": ["eq"],
+          "description": "Use 'Voucher'. Only required if voucher[id] was provided."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
+      "request": {
+        "method": "GET",
+        "path": "/VoucherPos",
+        "query": {
+          "voucher[id]": { "from_param": "voucher[id]" },
+          "voucher[objectName]": { "from_param": "voucher[objectName]" },
+          "limit": { "from_param": "limit" },
+          "offset": { "from_param": "offset" }
+        }
+      },
+      "pagination": {
+        "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": { "ref": "response.record_count" }
+        },
+        "limit": {
+          "param": "limit",
+          "default": { "ref": "runtime.batch_size" },
+          "max": 1000
+        },
+        "stop_when": {
+          "empty": { "ref": "response.body.objects" }
+        }
+      },
+      "response": {
+        "records": { "ref": "response.body.objects" },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "sevdesk id of the voucher position; serialized as a string on the read path."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "enum": ["VoucherPos"],
+                    "description": "The voucher position object name."
+                  },
+                  "create": {
+                    "type": "string",
+                    "format": "date-time",
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Creation timestamp (system-set)."
+                  },
+                  "update": {
+                    "type": "string",
+                    "format": "date-time",
+                    "native_type": "timestamp",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Last-modification timestamp (system-set)."
+                  },
+                  "sevClient": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "SevClient relation ({id, objectName='SevClient'}) — the client the position belongs to; filled automatically."
+                  },
+                  "voucher": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Voucher relation ({id, objectName='Voucher'}) — the voucher the position belongs to."
+                  },
+                  "accountDatev": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "AccountDatev relation ({id, objectName='AccountDatev'}) — the booking account the position is posted to (sevdesk-Update 2.0; replaces accountingType). Its nested id is declared integer on the wire, unlike the string ids of the other relations."
+                  },
+                  "accountingType": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "AccountingType relation ({id, objectName='AccountingType'}) — the legacy booking account the position belongs to."
+                  },
+                  "estimatedAccountingType": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "AccountingType relation ({id, objectName='AccountingType'}) estimated by sevdesk's voucher recognition."
+                  },
+                  "taxRate": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax rate of the voucher position in percent; wire-serialized as a string."
+                  },
+                  "net": {
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Determines whether 'sumNet' or 'sumGross' is regarded. All positions of a voucher must be either net or gross."
+                  },
+                  "isAsset": {
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Determines whether the position is regarded as a depreciable asset."
+                  },
+                  "sumNet": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the voucher position; wire-serialized as a string."
+                  },
+                  "sumTax": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the voucher position; wire-serialized as a string."
+                  },
+                  "sumGross": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the voucher position; wire-serialized as a string."
+                  },
+                  "sumNetAccounting": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net accounting sum; equal to sumNet. Wire-serialized as a string."
+                  },
+                  "sumTaxAccounting": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax accounting sum; equal to sumTax. Wire-serialized as a string."
+                  },
+                  "sumGrossAccounting": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross accounting sum; equal to sumGross. Wire-serialized as a string."
+                  },
+                  "comment": {
+                    "type": ["string", "null"],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Comment for the voucher position."
+                  }
+                },
+                "required": [
+                  "id",
+                  "objectName",
+                  "voucher",
+                  "accountDatev",
+                  "accountingType",
+                  "taxRate",
+                  "net",
+                  "sumNet",
+                  "sumGross"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
