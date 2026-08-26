@@ -1,9 +1,44 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "part",
   "display_name": "Parts (Products)",
-  "description": "Products and articles offered or stocked.",
+  "description": "Products and articles offered or stocked in sevdesk.",
   "operations": {
     "read": {
+      "params": {
+        "partNumber": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all parts with this part number."
+        },
+        "name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all parts with this name."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. sevdesk accepts 1..1000 and returns HTTP 400 outside that range."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Record offset into the result set."
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Part",
@@ -22,51 +57,21 @@
           }
         }
       },
-      "params": {
-        "partNumber": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by part number."
-        },
-        "name": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by name."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -81,6 +86,7 @@
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "sevdesk wraps every list response in an `objects` array.",
           "properties": {
             "objects": {
               "type": "array",
@@ -88,36 +94,36 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "The part id."
+                    "type": "integer",
+                    "native_type": "integer",
+                    "arrow_type": "Int64",
+                    "description": "The part id. The sevdesk spec declares Model_Part.id as `integer`, unlike almost every sibling model whose `id` is `string`."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The part object name."
+                    "description": "The part object name, 'Part'."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of part creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last part update. Not usable as a replication cursor: sevdesk documents no `updateAfter` filter on /Part."
                   },
                   "name": {
                     "type": "string",
@@ -126,13 +132,10 @@
                     "description": "Name of the part."
                   },
                   "partNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The part number."
+                    "description": "The part number. sevdesk's documented natural key for a part."
                   },
                   "text": {
                     "type": [
@@ -150,82 +153,85 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Category of the part."
+                    "description": "Category of the part, as a sevdesk relation ({ id, objectName: 'Category' }). For all categories, send a GET to /Category?objectType=Part."
                   },
                   "stock": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "type": "number",
+                    "native_type": "number",
+                    "arrow_type": "Float64",
                     "description": "The stock of the part."
                   },
                   "stockEnabled": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
                     "description": "Defines if the stock should be enabled."
                   },
                   "unity": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The unit in which the part is measured."
+                    "description": "The unit in which the part is measured, as a sevdesk relation ({ id, objectName: 'Unity' })."
                   },
                   "price": {
                     "type": [
-                      "string",
+                      "number",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Price for which the part is sold. Gross or net depending on the sevdesk account setting."
+                    "native_type": "number",
+                    "arrow_type": "Float64",
+                    "description": "Net price for which the part is sold. sevdesk plans to change this parameter so that the gross price is calculated automatically; until then priceGross must be used."
                   },
                   "priceNet": {
                     "type": [
-                      "string",
+                      "number",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "number",
+                    "arrow_type": "Float64",
                     "description": "Net price for which the part is sold."
                   },
                   "priceGross": {
                     "type": [
-                      "string",
+                      "number",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "number",
+                    "arrow_type": "Float64",
                     "description": "Gross price for which the part is sold."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the part belongs, as a sevdesk relation ({ id, objectName: 'SevClient' }). Filled automatically."
                   },
                   "pricePurchase": {
                     "type": [
-                      "string",
+                      "number",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "number",
+                    "arrow_type": "Float64",
                     "description": "Purchase price of the part."
                   },
                   "taxRate": {
-                    "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "type": "number",
+                    "native_type": "number",
+                    "arrow_type": "Float64",
                     "description": "Tax rate of the part."
                   },
                   "status": {
                     "type": [
-                      "string",
+                      "integer",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Status of the part. 50 = Inactive, 100 = Active."
+                    "native_type": "integer",
+                    "arrow_type": "Int64",
+                    "description": "Status of the part: 50 = Inactive, 100 = Active."
                   },
                   "internalComment": {
                     "type": [
@@ -252,9 +258,6 @@
         "request": {
           "method": "POST",
           "path": "/Part",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -263,132 +266,133 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One part to create. POST /Part takes the part object bare (no envelope) and answers 201 with the created Model_Part, also bare.",
             "properties": {
-              "name": {
+              "id": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "The part id. Server-assigned on insert."
+              },
+              "objectName": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The part object name. Must be 'Part'."
+              },
+              "create": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of part creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last part update."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the part."
               },
               "partNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The part number."
               },
               "text": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "A text describing the part."
               },
               "category": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                "description": "Category of the part. sevdesk relation: { id: <category id>, objectName: 'Category' }. For all categories, send a GET to /Category?objectType=Part."
               },
               "stock": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
+                "type": "number",
+                "description": "The stock of the part."
               },
               "stockEnabled": {
                 "type": [
-                  "string",
+                  "boolean",
                   "null"
-                ]
+                ],
+                "description": "Defines if the stock should be enabled."
               },
               "unity": {
+                "type": "object",
+                "description": "The unit in which the part is measured. sevdesk relation: { id: <unity id>, objectName: 'Unity' }."
+              },
+              "price": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Net price for which the part is sold."
+              },
+              "priceNet": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Net price for which the part is sold."
+              },
+              "priceGross": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Gross price for which the part is sold."
+              },
+              "sevClient": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
-              },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceNet": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "priceGross": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
+                "description": "Client to which the part belongs. sevdesk relation: { id: <client id>, objectName: 'SevClient' }. Filled automatically."
               },
               "pricePurchase": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Purchase price of the part."
               },
               "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
+                "type": "number",
+                "description": "Tax rate of the part."
               },
               "status": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Status of the part: 50 = Inactive, 100 = Active."
               },
               "internalComment": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "An internal comment for the part. Does not appear on invoices and orders."
               }
             },
             "required": [
               "name",
+              "partNumber",
+              "stock",
               "unity",
               "taxRate"
             ]
@@ -396,28 +400,18 @@
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Part/{id}",
+          "path": "/Part/{part_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "part_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -427,151 +421,153 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "One part to update. PUT /Part/{partId} takes the part object bare and answers 200 with the updated Model_Part, also bare. `id` supplies the {partId} URL segment; `partNumber` is the natural key the upsert matches on.",
             "properties": {
               "id": {
+                "type": "integer",
+                "description": "The part id. Supplies the {partId} path segment."
+              },
+              "objectName": {
                 "type": [
                   "string",
-                  "integer"
-                ]
+                  "null"
+                ],
+                "description": "The part object name. Must be 'Part'."
+              },
+              "create": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of part creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last part update."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name of the part."
               },
               "partNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The part number. sevdesk's documented natural key for a part; the conflict key for this mode."
               },
               "text": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "A text describing the part."
               },
               "category": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                "description": "Category of the part. sevdesk relation: { id: <category id>, objectName: 'Category' }."
               },
               "stock": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "The stock of the part."
               },
               "stockEnabled": {
                 "type": [
-                  "string",
+                  "boolean",
                   "null"
-                ]
+                ],
+                "description": "Defines if the stock should be enabled."
               },
               "unity": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
+                "description": "The unit in which the part is measured. sevdesk relation: { id: <unity id>, objectName: 'Unity' }."
               },
               "price": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Net price for which the part is sold."
               },
               "priceNet": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Net price for which the part is sold."
               },
               "priceGross": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Gross price for which the part is sold."
+              },
+              "sevClient": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Client to which the part belongs. sevdesk relation: { id: <client id>, objectName: 'SevClient' }."
               },
               "pricePurchase": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Purchase price of the part."
               },
               "taxRate": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Tax rate of the part."
               },
               "status": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Status of the part: 50 = Inactive, 100 = Active."
               },
               "internalComment": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "An internal comment for the part. Does not appear on invoices and orders."
               }
-            }
+            },
+            "required": [
+              "id",
+              "partNumber"
+            ]
           }
         },
         "conflict_keys": [
-          "id"
+          "partNumber"
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "part"
+  }
 }

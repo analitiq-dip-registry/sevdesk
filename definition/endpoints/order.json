@@ -1,10 +1,78 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Orders",
-  "description": "Quotations and order confirmations.",
   "endpoint_id": "order",
+  "display_name": "Orders",
+  "description": "sevdesk orders — quotations (AN), order confirmations (AB) and delivery notes (LI).",
   "operations": {
     "read": {
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Status of the order. One of 100, 200, 300, 500, 750, 1000."
+        },
+        "orderNumber": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all orders with this order number."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "gte"
+          ],
+          "description": "Retrieve all orders with an order date equal or higher, as epoch seconds. Windows the document date, not the modification time."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "lte"
+          ],
+          "description": "Retrieve all orders with an order date equal or lower, as epoch seconds. Windows the document date, not the modification time."
+        },
+        "contact[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all orders with this contact. Must be provided together with contact[objectName]."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if contact[id] was provided. 'Contact' should be used as value."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Order",
@@ -35,74 +103,6 @@
           }
         }
       },
-      "params": {
-        "status": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by status."
-        },
-        "orderNumber": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by orderNumber."
-        },
-        "startDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by startDate."
-        },
-        "endDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by endDate."
-        },
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact[id]."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
         "limit": {
@@ -115,7 +115,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -128,13 +130,16 @@
           "ref": "response.body.objects"
         },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "id",
+                  "objectName"
+                ],
                 "properties": {
                   "id": {
                     "type": "string",
@@ -149,30 +154,24 @@
                     "description": "The order object name."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "description": "Date of order creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "description": "Date of last order update."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Client to which the order belongs. Filled automatically."
-                  },
-                  "createUser": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "User who created the order. Filled automatically."
                   },
                   "orderNumber": {
                     "type": [
@@ -187,44 +186,34 @@
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The contact used in the order."
-                  },
-                  "contactPerson": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "The user who acts as a contact person for the order."
+                    "description": "The contact used in the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Contact\"}."
                   },
                   "orderDate": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "description": "Order date."
                   },
                   "status": {
                     "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Status code of the order (100, 200, 300, 500, 750, 1000)."
-                  },
-                  "orderType": {
-                    "type": [
-                      "string",
-                      "null"
+                    "enum": [
+                      "100",
+                      "200",
+                      "300",
+                      "500",
+                      "750",
+                      "1000"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Type of the order (AN=quotation, AB=order confirmation, LI=delivery note)."
+                    "description": "Status code of the order. See the sevdesk 'status of orders' table for the meaning of each code."
                   },
                   "header": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Header, normally prefix plus the order number."
+                    "description": "Header, normally the prefix plus the order number."
                   },
                   "headText": {
                     "type": [
@@ -233,7 +222,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Head text (may contain HTML)."
+                    "description": "Head text. Certain HTML tags can be used to format it."
                   },
                   "footText": {
                     "type": [
@@ -242,48 +231,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Foot text (may contain HTML)."
-                  },
-                  "address": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Complete address of the recipient."
-                  },
-                  "addressName": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressStreet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressZip": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressCity": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "description": "Foot text. Certain HTML tags can be used to format it."
                   },
                   "addressCountry": {
                     "type": [
@@ -292,145 +240,25 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Country of the address."
+                    "description": "Country of the address. sevdesk relation shaped {\"id\": ..., \"objectName\": \"StaticCountry\"}."
                   },
-                  "currency": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Currency code (ISO-4217)."
-                  },
-                  "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order."
-                  },
-                  "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order."
-                  },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order."
-                  },
-                  "sumDiscounts": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Sum of all discounts in the order."
-                  },
-                  "sumNetForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum of the order in the foreign currency."
-                  },
-                  "sumTaxForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum of the order in the foreign currency."
-                  },
-                  "sumGrossForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum of the order in the foreign currency."
-                  },
-                  "sumDiscountsForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discounts sum of the order in the foreign currency."
-                  },
-                  "taxRate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Deprecated. Use the taxRate of the individual positions instead."
-                  },
-                  "taxRule": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "VAT rule (sevdesk-Update 2.0)."
-                  },
-                  "taxSet": {
+                  "createUser": {
                     "type": [
                       "object",
                       "null"
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set of the order (sevdesk-Update 1.0)."
+                    "description": "User who created the order; filled automatically. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevUser\"}."
                   },
-                  "taxText": {
+                  "sevClient": {
                     "type": [
-                      "string",
+                      "object",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
-                  },
-                  "taxType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Tax type (sevdesk-Update 1.0)."
-                  },
-                  "showNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "If true, the net amount of each position is shown; otherwise gross."
-                  },
-                  "smallSettlement": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Whether the client uses the small settlement scheme."
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the order belongs; filled automatically. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevClient\"}."
                   },
                   "deliveryTerms": {
                     "type": [
@@ -457,7 +285,145 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Object from which the order was created."
+                    "description": "Object from which the order was created, for example an offer. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Order\"}."
+                  },
+                  "version": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Version of the order; useful when multiple drafts exist for the same order. Starts at 0."
+                  },
+                  "smallSettlement": {
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Whether the client uses the small settlement scheme. If so, the order must not contain any VAT."
+                  },
+                  "contactPerson": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The user who acts as a contact person for the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevUser\"}."
+                  },
+                  "taxRate": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Not used anymore. Use the taxRate of the individual positions instead."
+                  },
+                  "taxRule": {
+                    "type": "object",
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "VAT rule (sevdesk-Update 2.0, replaces taxType/taxSet). sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxRule\"}."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax set of the order (sevdesk-Update 1.0). sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxSet\"}."
+                  },
+                  "taxText": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax text, for example 'Umsatzsteuer 19%'."
+                  },
+                  "taxType": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax type of the order (sevdesk-Update 1.0): default, eu, noteu, custom."
+                  },
+                  "orderType": {
+                    "type": "string",
+                    "enum": [
+                      "AN",
+                      "AB",
+                      "LI"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Type of the order: AN (quotation), AB (order confirmation), LI (delivery note)."
+                  },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "The date the order was sent to the customer."
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Complete address of the recipient including name, street, city, zip and country. May contain line breaks."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Currency used in the order, as an ISO-4217 currency code."
+                  },
+                  "sumNet": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the order. Returned as a string by the API."
+                  },
+                  "sumTax": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the order. Returned as a string by the API."
+                  },
+                  "sumGross": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the order. Returned as a string by the API."
+                  },
+                  "sumDiscounts": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Sum of all discounts in the order. Returned as a string by the API."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the order in the foreign currency. Returned as a string by the API."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the order in the foreign currency. Returned as a string by the API."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the order in the foreign currency. Returned as a string by the API."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discounts sum of the order in the foreign currency. Returned as a string by the API."
                   },
                   "customerInternalNote": {
                     "type": [
@@ -466,23 +432,13 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Internal note of the customer (Referenz/Bestellnummer)."
+                    "description": "Internal note of the customer. Contains data entered into the field 'Referenz/Bestellnummer'."
                   },
-                  "version": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Version of the order. Starts with 0."
-                  },
-                  "sendDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "The date the order was sent to the customer."
+                  "showNet": {
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "If true, the net amount of each position is shown on the order; otherwise the gross amount."
                   },
                   "sendType": {
                     "type": [
@@ -491,31 +447,9 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Type used to send the order (VPR, VPDF, VM, VP)."
-                  },
-                  "deliveryDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDateUntil": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Type which was used to send the order: VPR, VPDF, VM or VP."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -526,214 +460,383 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Order",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/Order/Factory/saveOrder",
           "body": {
             "from_input": "record"
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "properties": {
-              "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
-              },
-              "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
-                }
-              },
-              "orderDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "orderNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "orderType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
-                }
-              },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
+            "description": "sevdesk saveOrder payload: the order plus its positions, created atomically.",
             "required": [
-              "contact",
-              "contactPerson",
-              "orderDate",
-              "currency",
-              "taxRule",
-              "taxText"
-            ]
+              "order"
+            ],
+            "properties": {
+              "order": {
+                "type": "object",
+                "description": "The order model to create.",
+                "required": [
+                  "mapAll",
+                  "orderNumber",
+                  "contact",
+                  "orderDate",
+                  "status",
+                  "header",
+                  "addressCountry",
+                  "version",
+                  "contactPerson",
+                  "taxRate",
+                  "taxRule",
+                  "taxText",
+                  "taxType",
+                  "currency"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "The order id."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "description": "The order object name; 'Order'."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "description": "Required by the sevdesk factory endpoints; send true."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of order creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of last order update."
+                  },
+                  "orderNumber": {
+                    "type": "string",
+                    "description": "The order number."
+                  },
+                  "contact": {
+                    "type": "object",
+                    "description": "The contact used in the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Contact\"}."
+                  },
+                  "orderDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Order date. Accepted as a timestamp or as dd.mm.yyyy."
+                  },
+                  "status": {
+                    "type": "integer",
+                    "description": "Status of the order: 100, 200, 300, 500, 750 or 1000."
+                  },
+                  "header": {
+                    "type": "string",
+                    "description": "Header, normally the prefix plus the order number."
+                  },
+                  "headText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Head text. Certain HTML tags can be used to format it."
+                  },
+                  "footText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Foot text. Certain HTML tags can be used to format it."
+                  },
+                  "addressCountry": {
+                    "type": "object",
+                    "description": "Country of the address. sevdesk relation shaped {\"id\": ..., \"objectName\": \"StaticCountry\"}."
+                  },
+                  "deliveryTerms": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Delivery terms of the order."
+                  },
+                  "paymentTerms": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Payment terms of the order."
+                  },
+                  "version": {
+                    "type": "integer",
+                    "description": "Version of the order. Should start at 0."
+                  },
+                  "smallSettlement": {
+                    "type": "boolean",
+                    "description": "Whether the client uses the small settlement scheme. If so, the order must not contain any VAT."
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "description": "The user who acts as a contact person for the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevUser\"}."
+                  },
+                  "taxRate": {
+                    "type": "number",
+                    "description": "Not used anymore. Use the taxRate of the individual positions instead."
+                  },
+                  "taxRule": {
+                    "type": "object",
+                    "description": "VAT rule (sevdesk-Update 2.0). sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxRule\"}; id is one of 1, 2, 3, 4, 5, 11, 17, 18, 19, 20, 21."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Tax set of the order (sevdesk-Update 1.0), needed when taxType is custom. sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxSet\"}."
+                  },
+                  "taxText": {
+                    "type": "string",
+                    "description": "Tax text, for example 'Umsatzsteuer 19%'."
+                  },
+                  "taxType": {
+                    "type": "string",
+                    "description": "Tax type of the order (sevdesk-Update 1.0): default, eu, noteu or custom."
+                  },
+                  "orderType": {
+                    "type": "string",
+                    "enum": [
+                      "AN",
+                      "AB",
+                      "LI"
+                    ],
+                    "description": "Type of the order: AN (quotation), AB (order confirmation), LI (delivery note)."
+                  },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "The date the order was sent to the customer."
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Complete address of the recipient including name, street, city, zip and country."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Currency used in the order, as an ISO-4217 currency code."
+                  },
+                  "customerInternalNote": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Internal note of the customer ('Referenz/Bestellnummer')."
+                  },
+                  "showNet": {
+                    "type": "boolean",
+                    "description": "If true, the net amount of each position is shown on the order; otherwise the gross amount."
+                  },
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "VPR",
+                      "VPDF",
+                      "VM",
+                      "VP",
+                      null
+                    ],
+                    "description": "Type which was used to send the order."
+                  },
+                  "origin": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Object from which the order was created, for example an offer. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Order\"}."
+                  }
+                }
+              },
+              "orderPosSave": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "Order positions to create. NOTE: the sevdesk OpenAPI document lists 'orderPos' in saveOrder.required, but the property it actually declares — and the one the API accepts — is 'orderPosSave'.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "quantity",
+                    "unity",
+                    "taxRate"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "The order position id."
+                    },
+                    "objectName": {
+                      "type": "string",
+                      "description": "The order position object name; 'OrderPos'."
+                    },
+                    "create": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Date of order position creation."
+                    },
+                    "update": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Date of last order position update."
+                    },
+                    "order": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The order to which the position belongs. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Order\"}."
+                    },
+                    "part": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Part from your inventory used in the position. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Part\"}."
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "description": "Quantity of the article/part."
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Price of the article/part; gross or net depending on the sevdesk account setting."
+                    },
+                    "priceNet": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Net price of the part."
+                    },
+                    "priceTax": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax on the price of the part."
+                    },
+                    "priceGross": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Gross price of the part."
+                    },
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Name of the article/part."
+                    },
+                    "unity": {
+                      "type": "object",
+                      "description": "The unit in which the position's part is measured. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Unity\"}."
+                    },
+                    "sevClient": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Client to which the order position belongs; filled automatically. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevClient\"}."
+                    },
+                    "positionNumber": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "Position number, used to order multiple positions."
+                    },
+                    "text": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "A text describing the position."
+                    },
+                    "discount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "An optional discount of the position."
+                    },
+                    "optional": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Whether the position is optional."
+                    },
+                    "taxRate": {
+                      "type": "number",
+                      "description": "Tax rate of the position."
+                    },
+                    "sumDiscount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Discount sum of the position."
+                    }
+                  }
+                }
+              },
+              "orderPosDelete": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Order position to delete as part of this call."
+              }
+            }
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.order.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Order/{id}",
+          "path": "/Order/{order_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "order_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -741,177 +844,275 @@
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "sevdesk order update model; id identifies the order to update and supplies the {orderId} path segment.",
             "required": [
               "id"
             ],
             "properties": {
               "id": {
+                "type": "integer",
+                "description": "The order id."
+              },
+              "objectName": {
+                "type": "string",
+                "description": "The order object name; 'Order'."
+              },
+              "create": {
                 "type": [
                   "string",
-                  "integer"
-                ]
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of order creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last order update."
+              },
+              "orderNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The order number."
               },
               "contact": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
-              },
-              "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
-                }
+                "description": "The contact used in the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Contact\"}."
               },
               "orderDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
-              },
-              "orderNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "format": "date-time",
+                "description": "Order date. Accepted as a timestamp or as dd.mm.yyyy."
               },
               "status": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
-              },
-              "orderType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Status of the order: 100, 200, 300, 500, 750 or 1000."
               },
               "header": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Header, normally the prefix plus the order number."
               },
               "headText": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Head text. Certain HTML tags can be used to format it."
               },
               "footText": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Foot text. Certain HTML tags can be used to format it."
               },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRule": {
+              "addressCountry": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
+                "description": "Country of the address. sevdesk relation shaped {\"id\": ..., \"objectName\": \"StaticCountry\"}."
+              },
+              "createUser": {
+                "type": [
+                  "object",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
-                }
+                "description": "Filled automatically by sevdesk and cannot be changed. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevUser\"}."
+              },
+              "sevClient": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Client to which the order belongs; filled automatically. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevClient\"}."
+              },
+              "deliveryTerms": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Delivery terms of the order."
+              },
+              "paymentTerms": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Payment terms of the order."
+              },
+              "origin": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Object from which the order was created, for example an offer. sevdesk relation shaped {\"id\": ..., \"objectName\": \"Order\"}."
+              },
+              "version": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Version of the order. Should start at 0."
+              },
+              "smallSettlement": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the client uses the small settlement scheme. If so, the order must not contain any VAT."
+              },
+              "contactPerson": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The user who acts as a contact person for the order. sevdesk relation shaped {\"id\": ..., \"objectName\": \"SevUser\"}."
+              },
+              "taxRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Not used anymore. Use the taxRate of the individual positions instead."
+              },
+              "taxRule": {
+                "type": "object",
+                "description": "VAT rule (sevdesk-Update 2.0). sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxRule\"}; id is one of 1, 2, 3, 4, 5, 11, 17, 18, 19, 20, 21."
+              },
+              "taxSet": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Tax set of the order (sevdesk-Update 1.0), needed when taxType is custom. sevdesk relation shaped {\"id\": ..., \"objectName\": \"TaxSet\"}."
               },
               "taxText": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Tax text, for example 'Umsatzsteuer 19%'."
               },
               "taxType": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Tax type of the order (sevdesk-Update 1.0): default, eu, noteu or custom."
+              },
+              "orderType": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "AN",
+                  "AB",
+                  "LI",
+                  null
+                ],
+                "description": "Type of the order: AN (quotation), AB (order confirmation), LI (delivery note)."
+              },
+              "sendDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "The date the order was sent to the customer."
+              },
+              "address": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Complete address of the recipient including name, street, city, zip and country."
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Currency used in the order, as an ISO-4217 currency code."
+              },
+              "sumNet": {
+                "type": "number",
+                "description": "Net sum of the order."
+              },
+              "sumTax": {
+                "type": "number",
+                "description": "Tax sum of the order."
+              },
+              "sumGross": {
+                "type": "number",
+                "description": "Gross sum of the order."
+              },
+              "sumDiscounts": {
+                "type": "number",
+                "description": "Sum of all discounts in the order."
+              },
+              "sumNetForeignCurrency": {
+                "type": "number",
+                "description": "Net sum of the order in the foreign currency."
+              },
+              "sumTaxForeignCurrency": {
+                "type": "number",
+                "description": "Tax sum of the order in the foreign currency."
+              },
+              "sumGrossForeignCurrency": {
+                "type": "number",
+                "description": "Gross sum of the order in the foreign currency."
+              },
+              "sumDiscountsForeignCurrency": {
+                "type": "number",
+                "description": "Discounts sum of the order in the foreign currency."
+              },
+              "customerInternalNote": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Internal note of the customer ('Referenz/Bestellnummer')."
               },
               "showNet": {
                 "type": [
-                  "string",
+                  "boolean",
                   "null"
-                ]
+                ],
+                "description": "If true, the net amount of each position is shown on the order; otherwise the gross amount."
               },
-              "deliveryDate": {
+              "sendType": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
+                "enum": [
+                  "VPR",
+                  "VPDF",
+                  "VM",
+                  "VP",
+                  null
                 ],
-                "format": "date-time"
-              },
-              "smallSettlement": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "description": "Type which was used to send the order."
               }
             }
           }
@@ -921,7 +1122,7 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }

@@ -1,46 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "contactcustomfield",
   "display_name": "Contact Custom Fields",
-  "description": "Custom field values attached to contacts; replaces the legacy ContactField resource.",
+  "description": "Per-contact values of the account's custom contact fields.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/ContactCustomField",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -52,6 +17,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "request": {
+        "method": "GET",
+        "path": "/ContactCustomField",
+        "query": {
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
         }
       },
       "pagination": {
@@ -66,7 +43,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -88,36 +67,51 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Unique identifier of the contact custom field."
+                    "description": "Id of the contact field."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
                     "description": "Internal object name, which is 'ContactCustomField'."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of contact field creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of contact field update."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client the custom field belongs to (filled automatically)."
+                    "description": "Client to which the contact field belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"SevClient\"}; filled automatically."
                   },
                   "contact": {
                     "type": [
@@ -126,13 +120,16 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "The contact the field value belongs to. sevdesk relation of the form {\"id\": ..., \"objectName\": \"Contact\"}."
                   },
                   "contactCustomFieldSetting": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Custom field setting relation (objectName 'ContactCustomFieldSetting')."
+                    "description": "The contact custom field setting this value instantiates. sevdesk relation of the form {\"id\": ..., \"objectName\": \"ContactCustomFieldSetting\"}."
                   },
                   "value": {
                     "type": [
@@ -141,13 +138,9 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The value of the contact custom field."
+                    "description": "The value of the contact field."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -159,9 +152,6 @@
         "request": {
           "method": "POST",
           "path": "/ContactCustomField",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -173,80 +163,43 @@
             "properties": {
               "contact": {
                 "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact the field value belongs to. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "contactCustomFieldSetting": {
                 "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "ContactCustomFieldSetting"
-                  }
-                }
+                "description": "The contact custom field setting. sevdesk relation: {\"id\": <setting id>, \"objectName\": \"ContactCustomFieldSetting\"}."
               },
               "value": {
-                "type": "string"
+                "type": "string",
+                "description": "The value of the contact field."
+              },
+              "objectName": {
+                "type": "string",
+                "description": "Internal object name, which is 'ContactCustomField'."
               }
             },
             "required": [
               "contact",
               "contactCustomFieldSetting",
-              "value"
+              "value",
+              "objectName"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "conflict_keys": [
-          "id"
-        ],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/ContactCustomField/{id}",
+          "path": "/ContactCustomField/{contact_custom_field_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "contact_custom_field_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -256,70 +209,54 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id",
-              "contact",
-              "contactCustomFieldSetting",
-              "value"
-            ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "Id of the contact field; supplies the {contactCustomFieldId} path segment."
               },
               "contact": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
+                "type": [
+                  "object",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact the field value belongs to. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "contactCustomFieldSetting": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
+                "type": [
+                  "object",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "ContactCustomFieldSetting"
-                  }
-                }
+                "description": "The contact custom field setting. sevdesk relation: {\"id\": <setting id>, \"objectName\": \"ContactCustomFieldSetting\"}."
               },
               "value": {
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The value of the contact field."
+              },
+              "objectName": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Internal object name, which is 'ContactCustomField'."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "contactcustomfield"
+  }
 }

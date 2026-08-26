@@ -2,9 +2,59 @@
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "endpoint_id": "communicationway",
   "display_name": "Communication Ways",
-  "description": "Phone, email, web, and other communication channels for contacts.",
+  "description": "Phone, email, web, and mobile communication channels for contacts.",
   "operations": {
     "read": {
+      "params": {
+        "contact[id]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "ID of the contact for which you want the communication ways."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Object name. Only needed if you also defined the ID of a contact; use 'Contact'."
+        },
+        "type": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Type of the communication ways you want to get. One of PHONE, EMAIL, WEB, MOBILE."
+        },
+        "main": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Define if you only want the main communication way. One of '0', '1'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/CommunicationWay",
@@ -29,56 +79,6 @@
           }
         }
       },
-      "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
-        "type": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Type filter (EMAIL, PHONE, WEB, MOBILE)."
-        },
-        "main": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter to main communication way (1)."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
         "limit": {
@@ -91,7 +91,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -113,57 +115,76 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
-                  },
-                  "contact": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Contact relation."
-                  },
-                  "type": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
+                    "description": "The communication way id."
+                  },
+                  "objectName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The communication way object name ('CommunicationWay')."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of communication way creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last communication way update."
+                  },
+                  "contact": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The contact to which this communication way belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"Contact\"}."
+                  },
+                  "type": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "enum": [
                       "EMAIL",
                       "PHONE",
                       "WEB",
-                      "MOBILE"
+                      "MOBILE",
+                      null
                     ],
-                    "description": "Communication way type (EMAIL, PHONE, WEB, MOBILE)."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Type of the communication way."
                   },
                   "value": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The value of the communication way, e.g. the phone number, e-mail address or website."
                   },
                   "key": {
                     "type": [
@@ -172,7 +193,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Communication way key relation."
+                    "description": "The key of the communication way, similar to the category of addresses. sevdesk relation of the form {\"id\": ..., \"objectName\": \"CommunicationWayKey\"}; for all keys send a GET to /CommunicationWayKey."
                   },
                   "main": {
                     "type": [
@@ -181,13 +202,18 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Indicates main communication way ('0' or '1')."
+                    "description": "Whether the communication way is the main communication way for the contact. sevdesk returns this as a string ('0'/'1') while the request body declares it boolean."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the communication way belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"SevClient\"}; filled automatically."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -199,9 +225,6 @@
         "request": {
           "method": "POST",
           "path": "/CommunicationWay",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -216,66 +239,35 @@
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact to which this communication way belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "enum": [
+                  "EMAIL",
+                  "PHONE",
+                  "WEB",
+                  "MOBILE"
+                ],
+                "description": "Type of the communication way."
               },
               "value": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "The value of the communication way, e.g. the phone number, e-mail address or website."
               },
               "key": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CommunicationWayKey"
-                  }
-                }
+                "type": "object",
+                "description": "The key of the communication way. sevdesk relation: {\"id\": <key id>, \"objectName\": \"CommunicationWayKey\"}."
               },
               "main": {
                 "type": [
-                  "string",
+                  "boolean",
                   "null"
-                ]
+                ],
+                "description": "Whether the communication way is the main communication way for the contact."
               }
             },
             "required": [
-              "contact",
               "type",
               "value",
               "key"
@@ -284,28 +276,18 @@
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/CommunicationWay/{id}",
+          "path": "/CommunicationWay/{communication_way_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "communication_way_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -315,79 +297,57 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "The communication way id; supplies the {communicationWayId} path segment."
               },
               "contact": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact to which this communication way belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "type": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "enum": [
+                  "EMAIL",
+                  "PHONE",
+                  "WEB",
+                  "MOBILE",
+                  null
+                ],
+                "description": "Type of the communication way."
               },
               "value": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The value of the communication way, e.g. the phone number, e-mail address or website."
               },
               "key": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CommunicationWayKey"
-                  }
-                }
+                "description": "The key of the communication way. sevdesk relation: {\"id\": <key id>, \"objectName\": \"CommunicationWayKey\"}."
               },
               "main": {
                 "type": [
-                  "string",
+                  "boolean",
                   "null"
-                ]
+                ],
+                "description": "Whether the communication way is the main communication way for the contact."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "conflict_keys": [
@@ -395,7 +355,7 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }

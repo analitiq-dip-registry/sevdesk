@@ -1,9 +1,42 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "voucherpos",
   "display_name": "Voucher Positions",
-  "description": "Line items belonging to vouchers.",
+  "description": "Line items belonging to vouchers. Read-only: sevdesk exposes no POST on /VoucherPos and no /VoucherPos/{id} route; positions are created through /Voucher/Factory/saveVoucher.",
   "operations": {
     "read": {
+      "params": {
+        "voucher[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all voucher positions belonging to this voucher. Must be provided together with voucher[objectName]."
+        },
+        "voucher[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if voucher[id] was provided. Use 'Voucher'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/VoucherPos",
@@ -22,38 +55,6 @@
           }
         }
       },
-      "params": {
-        "voucher[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by voucher[id]."
-        },
-        "voucher[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Voucher'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
         "limit": {
@@ -66,7 +67,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -97,83 +100,87 @@
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The voucher position object name."
+                    "description": "The voucher position object name ('VoucherPos')."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Create timestamp."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Date of voucher position creation. Carried as a string: the spec declares no format and its only example is the placeholder 01.01.2020, so no wire sample establishes a parseable timestamp or its zone."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Date of last voucher position update. Carried as a string: the spec declares no format and its only example is the placeholder 01.01.2020, so no wire sample establishes a parseable timestamp or its zone."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Client to which the voucher position belongs. sevdesk relation object; objectName is 'SevClient'."
                   },
                   "voucher": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The voucher to which the position belongs."
+                    "description": "The voucher to which the position belongs. sevdesk relation object; objectName is 'Voucher'."
                   },
                   "accountDatev": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0 (replaces accountingType)."
+                    "description": "The account datev (booking account) to which the position belongs. Used in sevdesk-Update 2.0, replacing accountingType. sevdesk relation object; objectName is 'AccountDatev'."
                   },
                   "accountingType": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The accounting type (booking account) to which the position belongs."
+                    "description": "The accounting type (booking account) to which the position belongs. sevdesk relation object; objectName is 'AccountingType'."
                   },
                   "estimatedAccountingType": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "The accounting type estimated by sevdesk voucher recognition."
+                    "description": "Accounting type estimated by sevdesk voucher recognition. sevdesk relation object; objectName is 'AccountingType'."
                   },
                   "taxRate": {
                     "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Tax rate of the voucher position."
                   },
                   "net": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Determines whether 'sumNet' or 'sumGross' is regarded."
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Determines whether sumNet or sumGross is regarded."
                   },
                   "isAsset": {
                     "type": [
-                      "string",
+                      "boolean",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
                     "description": "Determines whether the position is regarded as a depreciable asset."
                   },
                   "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Net sum of the voucher position."
                   },
                   "sumTax": {
@@ -181,17 +188,14 @@
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Tax sum of the voucher position."
                   },
                   "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Gross sum of the voucher position."
                   },
                   "sumNetAccounting": {
@@ -199,27 +203,27 @@
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net accounting sum. Is equal to sumNet."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net accounting sum. Equal to sumNet."
                   },
                   "sumTaxAccounting": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax accounting sum. Is equal to sumTax."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax accounting sum. Equal to sumTax."
                   },
                   "sumGrossAccounting": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross accounting sum. Is equal to sumGross."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross accounting sum. Equal to sumGross."
                   },
                   "comment": {
                     "type": [
@@ -240,241 +244,6 @@
           }
         }
       }
-    },
-    "write": {
-      "insert": {
-        "request": {
-          "method": "POST",
-          "path": "/VoucherPos",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "voucher": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Voucher"
-                  }
-                }
-              },
-              "accountingType": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "AccountingType"
-                  }
-                }
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "net": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "isAsset": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "sumNet": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "comment": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "voucher",
-              "accountingType",
-              "taxRate",
-              "sumNet"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
-      "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/VoucherPos/{id}",
-          "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "voucher": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Voucher"
-                  }
-                }
-              },
-              "accountingType": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "AccountingType"
-                  }
-                }
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "net": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "isAsset": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "sumNet": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "comment": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      }
     }
-  },
-  "endpoint_id": "voucherpos"
+  }
 }

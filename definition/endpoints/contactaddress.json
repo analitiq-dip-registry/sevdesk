@@ -1,46 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "contactaddress",
   "display_name": "Contact Addresses",
   "description": "Postal addresses associated with contacts.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/ContactAddress",
-        "query": {
-          "contact[id]": {
-            "from_param": "contact[id]"
-          },
-          "contact[objectName]": {
-            "from_param": "contact[objectName]"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -52,6 +17,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "request": {
+        "method": "GET",
+        "path": "/ContactAddress",
+        "query": {
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
         }
       },
       "pagination": {
@@ -66,7 +43,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -88,41 +67,42 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Contact address id."
+                    "type": "integer",
+                    "native_type": "integer",
+                    "arrow_type": "Int64",
+                    "description": "The contact address id. NOTE: sevdesk declares this integer here while most sibling resources declare a string id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The contact address object name ('ContactAddress')."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of contact address creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last contact address update."
                   },
                   "contact": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "The contact to which this contact address belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"Contact\"}."
                   },
                   "street": {
                     "type": [
@@ -130,7 +110,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Street name."
                   },
                   "zip": {
                     "type": [
@@ -138,7 +119,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Zip code."
                   },
                   "city": {
                     "type": [
@@ -146,16 +128,14 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "City name."
                   },
                   "country": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Country relation."
+                    "description": "Country of the contact address. sevdesk relation of the form {\"id\": ..., \"objectName\": \"StaticCountry\"}; for all countries send a GET to /StaticCountry."
                   },
                   "category": {
                     "type": [
@@ -164,7 +144,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Address category."
+                    "description": "Category of the contact address. sevdesk relation of the form {\"id\": ..., \"objectName\": \"Category\"}; for all categories send a GET to /Category?objectType=ContactAddress."
                   },
                   "name": {
                     "type": [
@@ -173,7 +153,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Optional address name (e.g. Billing)."
+                    "description": "Name in address."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the contact address belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"SevClient\"}; filled automatically."
                   },
                   "name2": {
                     "type": [
@@ -181,7 +170,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Second name in address."
                   },
                   "name3": {
                     "type": [
@@ -189,7 +179,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Third name in address."
                   },
                   "name4": {
                     "type": [
@@ -197,7 +188,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Fourth name in address."
                   }
                 },
                 "required": [
@@ -215,9 +207,6 @@
         "request": {
           "method": "POST",
           "path": "/ContactAddress",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -228,144 +217,91 @@
             "type": "object",
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "type": "object",
+                "description": "The contact to which this contact address belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "country": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
-                }
+                "type": "object",
+                "description": "Country of the contact address. sevdesk relation: {\"id\": <country id>, \"objectName\": \"StaticCountry\"}."
               },
               "category": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                "description": "Category of the contact address. sevdesk relation: {\"id\": <category id>, \"objectName\": \"Category\"}."
               },
               "street": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Street name."
               },
               "zip": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Zip code."
               },
               "city": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "City name."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name in address."
               },
               "name2": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Second name in address."
               },
               "name3": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Third name in address."
               },
               "name4": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Fourth name in address."
               }
             },
             "required": [
               "contact",
-              "country"
+              "country",
+              "category"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/ContactAddress/{id}",
+          "path": "/ContactAddress/{contact_address_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "contact_address_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -375,125 +311,85 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "integer",
+                "description": "The contact address id; supplies the {contactAddressId} path segment."
               },
               "contact": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact to which this contact address belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "country": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
-                }
+                "description": "Country of the contact address. sevdesk relation: {\"id\": <country id>, \"objectName\": \"StaticCountry\"}."
               },
               "category": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
+                "description": "Category of the contact address. sevdesk relation: {\"id\": <category id>, \"objectName\": \"Category\"}."
               },
               "street": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Street name."
               },
               "zip": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Zip code."
               },
               "city": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "City name."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name in address."
               },
               "name2": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Second name in address."
               },
               "name3": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Third name in address."
               },
               "name4": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Fourth name in address."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "conflict_keys": [
@@ -501,11 +397,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "contactaddress"
+  }
 }

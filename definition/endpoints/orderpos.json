@@ -1,9 +1,42 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "orderpos",
   "display_name": "Order Positions",
-  "description": "Line items belonging to orders.",
+  "description": "Line items belonging to orders. Readable and updatable; sevdesk exposes no POST on /OrderPos, so creation happens through /Order/Factory/saveOrder.",
   "operations": {
     "read": {
+      "params": {
+        "order[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all order positions belonging to this order. Must be provided together with order[objectName]."
+        },
+        "order[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if order[id] was provided. Use 'Order'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/OrderPos",
@@ -22,38 +55,6 @@
           }
         }
       },
-      "params": {
-        "order[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by order[id]."
-        },
-        "order[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Order'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
         "limit": {
@@ -66,7 +67,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -90,37 +93,43 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The order position id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The order position object name ('OrderPos')."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of order position creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last order position update."
                   },
                   "order": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The order to which the position belongs. sevdesk relation object; objectName is 'Order'."
                   },
                   "part": {
                     "type": [
@@ -128,28 +137,31 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "Part from your inventory which is used in the position. sevdesk relation object; objectName is 'Part'."
                   },
                   "quantity": {
                     "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Quantity of the article/part."
                   },
                   "price": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Price of the article/part. Gross or net depending on the sevdesk account setting."
                   },
                   "priceNet": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Net price of the part."
                   },
                   "priceTax": {
@@ -157,8 +169,8 @@
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Tax on the price of the part."
                   },
                   "priceGross": {
@@ -166,8 +178,8 @@
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Gross price of the part."
                   },
                   "name": {
@@ -176,7 +188,26 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the article/part."
+                  },
+                  "unity": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The unit in which the position's part is measured. sevdesk relation object; objectName is 'Unity'."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the order position belongs. sevdesk relation object; objectName is 'SevClient'."
                   },
                   "positionNumber": {
                     "type": [
@@ -185,7 +216,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Position number used to order multiple positions. Returned as a string by the API."
+                    "description": "Position number, usable to order multiple positions."
                   },
                   "text": {
                     "type": [
@@ -193,15 +224,17 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "A text describing the position."
                   },
                   "discount": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "An optional discount of the position."
                   },
                   "optional": {
                     "type": [
@@ -214,45 +247,17 @@
                   },
                   "taxRate": {
                     "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "unity": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax rate of the position."
                   },
                   "sumDiscount": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
                     "description": "Discount sum of the position."
                   }
                 },
@@ -267,168 +272,14 @@
       }
     },
     "write": {
-      "insert": {
-        "request": {
-          "method": "POST",
-          "path": "/OrderPos",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "order": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Order"
-                  }
-                }
-              },
-              "part": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Part"
-                  }
-                }
-              },
-              "quantity": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "price": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "unity": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
-              },
-              "positionNumber": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "text": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "discount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "order",
-              "quantity",
-              "name",
-              "unity",
-              "taxRate"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/OrderPos/{id}",
+          "path": "/OrderPos/{order_pos_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "order_pos_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -443,122 +294,140 @@
             ],
             "properties": {
               "id": {
+                "type": "integer",
+                "description": "The order position id. Supplies the {orderPosId} path segment."
+              },
+              "objectName": {
+                "type": "string",
+                "description": "The order position object name ('OrderPos')."
+              },
+              "create": {
                 "type": [
                   "string",
-                  "integer"
-                ]
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of order position creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last order position update."
               },
               "order": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Order"
-                  }
-                }
+                "description": "The order to which the position belongs. sevdesk relation object of the form {id, objectName}; objectName must be 'Order'."
               },
               "part": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Part"
-                  }
-                }
+                "description": "Part from your inventory which is used in the position. sevdesk relation object of the form {id, objectName}; objectName must be 'Part'."
               },
               "quantity": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Quantity of the article/part."
               },
               "price": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Price of the article/part. Gross or net depending on the sevdesk account setting."
+              },
+              "priceNet": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Net price of the part."
+              },
+              "priceTax": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Tax on the price of the part."
+              },
+              "priceGross": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Gross price of the part."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name of the article/part."
               },
               "unity": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
+                "description": "The unit in which the position's part is measured. sevdesk relation object of the form {id, objectName}; objectName must be 'Unity'."
+              },
+              "sevClient": {
+                "type": [
+                  "object",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Unity"
-                  }
-                }
+                "description": "Client to which the order position belongs. sevdesk relation object of the form {id, objectName}; objectName must be 'SevClient'. Filled automatically."
               },
               "positionNumber": {
                 "type": [
                   "integer",
                   "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
+                ],
+                "description": "Position number, usable to order multiple positions."
               },
               "text": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "A text describing the position."
               },
               "discount": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "An optional discount of the position."
+              },
+              "optional": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Defines if the position is optional."
+              },
+              "taxRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Tax rate of the position."
+              },
+              "sumDiscount": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Discount sum of the position."
               }
             }
           }
@@ -568,11 +437,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "orderpos"
+  }
 }

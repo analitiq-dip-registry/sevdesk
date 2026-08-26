@@ -4,11 +4,17 @@
 
 # sevdesk
 
-Connector for the [sevdesk](https://sevdesk.de) cloud accounting and invoicing API. sevdesk is a cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region. This connector provides access to check account transactions (bank payments) with more endpoints planned.
+Connector for the [sevdesk](https://sevdesk.de) cloud accounting and invoicing API. sevdesk is a
+cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH
+region. This connector exposes **23 endpoints** covering contacts, invoices, credit notes, orders,
+vouchers, bank transactions, products and the reference data those documents reference.
 
 ## What is this?
 
-This is a **connector** -- a configuration that defines how to authenticate with sevdesk and what data endpoints are available for reading. It does not move data by itself. Instead, it is used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source `analitiq-core` engine to set up data pipelines.
+This is a **connector** -- a configuration that defines how to authenticate with sevdesk and what
+data endpoints are available for reading and writing. It does not move data by itself. Instead, it is
+used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source
+`analitiq-core` engine to set up data pipelines.
 
 ## How to use this connector
 
@@ -31,35 +37,96 @@ The `analitiq-plugin-dataflow` plugin will automatically fetch the required conn
 
 ## Prerequisites
 
-- A sevdesk account at [my.sevdesk.de](https://my.sevdesk.de)
-- An API token (32-character hexadecimal string) generated from Extensions (Erweiterungen) > API
+- A sevdesk account with API access (available to sevdesk administrators).
+- Your sevdesk API token.
 
 ## Authentication
 
-sevdesk uses a **Personal API Token** for authentication. The token is sent as-is in the `Authorization` header (no `Bearer` prefix). No OAuth app registration is required. The token has infinite lifetime and does not expire unless manually revoked.
+sevdesk uses a single static **API token** sent in the `Authorization` header. Note that sevdesk does
+**not** use a `Bearer` prefix -- the header value is the raw token:
+
+```
+Authorization: your32characterhexadecimaltoken
+```
+
+The token has an infinite lifetime and stays valid as long as the sevdesk user exists.
 
 ### How to get your credentials
 
-1. Log in to your account at [my.sevdesk.de](https://my.sevdesk.de)
-2. Navigate to **Extensions (Erweiterungen) > API**
-3. Click **Show** and enter your account password to reveal the token
-4. Copy the 32-character hexadecimal API token
-5. Paste the token into the "API Token" field when creating a connection
+1. Log in to [my.sevdesk.de](https://my.sevdesk.de) as an administrator.
+2. Open **Extensions** (*Erweiterungen*) > **API**.
+3. Reveal the token with your account password and copy it. It is a 32-character hexadecimal string.
+
+Paste that token as the connector's **API Token** input. Nothing else is required -- the token is
+account-scoped, so there is no workspace or company to select afterwards.
+
+> Token-as-URL-parameter authentication was removed by sevdesk on 2025-04-29. The header is the only
+> supported method.
 
 ## Available Endpoints
 
-The table below lists all data endpoints defined by this connector. Each endpoint represents a resource you can read from.
+All reads are paginated and return records under an `objects` array.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/CheckAccountTransaction` | GET | Retrieve check account transactions (bank payments) |
+| Endpoint | Path | Operations |
+|---|---|---|
+| `contact` | `/Contact` | read (incremental), insert, upsert |
+| `contactaddress` | `/ContactAddress` | read, insert, upsert |
+| `communicationway` | `/CommunicationWay` | read, insert, upsert |
+| `communicationwaykey` | `/CommunicationWayKey` | read |
+| `contactcustomfield` | `/ContactCustomField` | read, insert, upsert |
+| `contactcustomfieldsetting` | `/ContactCustomFieldSetting` | read, insert, upsert |
+| `accountingcontact` | `/AccountingContact` | read, insert, upsert |
+| `invoice` | `/Invoice` | read (incremental), insert |
+| `invoicepos` | `/InvoicePos` | read |
+| `creditnote` | `/CreditNote` | read, insert, upsert |
+| `creditnotepos` | `/CreditNotePos` | read |
+| `order` | `/Order` | read, insert, upsert |
+| `orderpos` | `/OrderPos` | read, upsert |
+| `voucher` | `/Voucher` | read, insert, upsert |
+| `voucherpos` | `/VoucherPos` | read |
+| `part` | `/Part` | read, insert, upsert |
+| `checkaccount` | `/CheckAccount` | read, insert, upsert |
+| `checkaccounttransaction` | `/CheckAccountTransaction` | read, insert, upsert |
+| `privatetransactionrule` | `/PrivateTransactionRule` | read, insert |
+| `category` | `/Category` | read |
+| `tag` | `/Tag` | read, insert, upsert |
+| `tagrelation` | `/TagRelation` | read |
+| `staticcountry` | `/StaticCountry` | read |
+
+### Incremental sync
+
+`contact` and `invoice` support incremental replication using their `update` field, pushed down to
+sevdesk via the `updateAfter` filter. Every other endpoint is full-refresh only -- sevdesk documents
+no modification-time filter for them. The `startDate`/`endDate` filters on invoices, orders, credit
+notes and vouchers window the **document** date rather than the modification time, so they cannot
+drive an incremental sync.
 
 ## Limitations
 
-- **Rate limits** -- Not documented by sevdesk. No rate limit configuration is applied.
-- **Pagination** -- Offset-based with a maximum page size of 1000 records.
-- **Timeout** -- 30 seconds per request.
-- **Auth header format** -- The `Authorization` header uses the raw API token without a `Bearer` prefix, which differs from most API key connectors.
+- **Invoices cannot be updated.** sevdesk exposes no `PUT /Invoice/<built-in function id>`, so `invoice` supports
+  insert only. Use the sevdesk UI or the document action routes to modify an existing invoice.
+- **Document positions are written with their parent.** `invoicepos`, `creditnotepos` and
+  `voucherpos` are read-only. Positions are created by sending them inside the parent document's
+  `save*` payload (for example `invoicePosSave` on an invoice). `orderpos` additionally supports
+  updating an existing position.
+- **Tags cannot be created standalone.** `POST /Tag/Factory/create` requires the tag to be attached
+  to an existing invoice, voucher, order or credit note.
+- **`category` requires an `objectType`.** sevdesk documents `/Category` only as
+  `GET /Category?objectType=<X>` (for example `Part` or `ContactAddress`), so a stream must supply
+  one. There is no default.
+- **Page size is capped at 1000.** sevdesk rejects any `limit` outside 1..1000 with HTTP 400.
+- **Bank and PayPal accounts must be created in the sevdesk UI.** The connector's `checkaccount`
+  insert targets the file-import account route only.
+- **No rate limits are documented** by sevdesk, so none are configured.
+- **Numbers arrive as strings.** sevdesk serialises ids, money amounts and tax rates as JSON strings
+  on the read path, so those columns land as text. Its write models accept real numbers for the same
+  fields; this asymmetry is the provider's, and is preserved deliberately.
+- Action routes (`sendBy`, `sendViaEmail`, `bookAmount`, `enshrine`, `render`, `getPdf`, ...) and the
+  Export / Report / DATEV families are not modelled -- they are side-effects or file downloads rather
+  than record collections.
+- `staticcountry` and `category` have no entry in sevdesk's OpenAPI `paths:` object; their routes are
+  documented only in sevdesk's own field descriptions, and their field lists are carried forward from
+  the previous release.
 
 ## For AI agents
 

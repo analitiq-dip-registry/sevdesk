@@ -1,9 +1,87 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "voucher",
   "display_name": "Vouchers",
-  "description": "Inbound documents — receipts, supplier invoices, expense reports.",
+  "description": "Inbound bookkeeping documents — receipts, supplier invoices and expense records.",
   "operations": {
     "read": {
+      "params": {
+        "status": {
+          "in": "query",
+          "type": "number",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Status of the vouchers to retrieve. One of 50 (draft), 100 (open/unpaid) or 1000 (paid)."
+        },
+        "creditDebit": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Return only credit (C) or only debit (D) vouchers."
+        },
+        "descriptionLike": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "contains"
+          ],
+          "description": "Retrieve all vouchers whose description (the voucher number) matches this pattern."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "gte"
+          ],
+          "description": "Unix timestamp in seconds. Retrieve all vouchers with a voucher (document) date equal or higher. This windows the document date, not the modification time, so it cannot back an incremental cursor."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "lte"
+          ],
+          "description": "Unix timestamp in seconds. Retrieve all vouchers with a voucher (document) date equal or lower. This windows the document date, not the modification time, so it cannot back an incremental cursor."
+        },
+        "contact_id": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all vouchers for this contact. Must be provided together with contact_object_name."
+        },
+        "contact_object_name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if contact_id was provided. 'Contact' should be used as the value."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Voucher",
@@ -24,10 +102,10 @@
             "from_param": "endDate"
           },
           "contact[id]": {
-            "from_param": "contact[id]"
+            "from_param": "contact_id"
           },
           "contact[objectName]": {
-            "from_param": "contact[objectName]"
+            "from_param": "contact_object_name"
           },
           "limit": {
             "from_param": "limit"
@@ -35,83 +113,6 @@
           "offset": {
             "from_param": "offset"
           }
-        }
-      },
-      "params": {
-        "status": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by status."
-        },
-        "creditDebit": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by C or D."
-        },
-        "descriptionLike": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by descriptionLike."
-        },
-        "startDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by startDate."
-        },
-        "endDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by endDate."
-        },
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact[id]."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
         }
       },
       "pagination": {
@@ -126,7 +127,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -146,51 +149,76 @@
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "id",
+                  "objectName"
+                ],
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The voucher id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The voucher object name — always 'Voucher'."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "sevdesk internal mapping flag."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of voucher creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of the last voucher update."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Client to which the voucher belongs; filled automatically. Relation with objectName 'SevClient'."
                   },
                   "createUser": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "User who created the voucher (objectName 'SevUser')."
+                    "description": "User who created the voucher; filled automatically. Relation with objectName 'SevUser'."
                   },
                   "voucherDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "The voucher document date."
                   },
                   "supplier": {
                     "type": [
@@ -199,7 +227,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Supplier contact."
+                    "description": "The contact used in the voucher as a supplier; null when no contact is linked. Relation with objectName 'Contact'."
                   },
                   "supplierName": {
                     "type": [
@@ -207,7 +235,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Supplier name shown on the voucher when no supplier contact is linked."
                   },
                   "description": {
                     "type": [
@@ -215,7 +244,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The description of the voucher — essentially the voucher number."
                   },
                   "document": {
                     "type": [
@@ -224,108 +254,89 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Attached document of the voucher (objectName 'Document')."
-                  },
-                  "documentType": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Document type (e.g. VOU, ER)."
+                    "description": "The document attached to the voucher. Relation with objectName 'Document'."
                   },
                   "payDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Date the voucher was paid."
                   },
                   "status": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Voucher status: 50 (draft), 100 (open/unpaid) or 1000 (paid)."
                   },
                   "sumNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the voucher. sevdesk returns monetary sums as strings."
                   },
                   "sumTax": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the voucher. sevdesk returns monetary sums as strings."
                   },
                   "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the voucher. sevdesk returns monetary sums as strings."
                   },
                   "sumNetAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net accounting sum of the voucher; usually the same as sumNet."
                   },
                   "sumTaxAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax accounting sum of the voucher; usually the same as sumTax."
                   },
                   "sumGrossAccounting": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross accounting sum of the voucher; usually the same as sumGross."
                   },
                   "sumDiscounts": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Sum of all discounts in the voucher."
                   },
                   "sumDiscountsForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": "string",
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discounts sum of the voucher in the foreign currency."
                   },
                   "paidAmount": {
                     "type": [
-                      "string",
+                      "number",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "number",
+                    "arrow_type": "Float64",
+                    "description": "Amount already paid for this voucher."
                   },
                   "taxRule": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax rule (sevdesk-Update 2.0; objectName 'TaxRule')."
+                    "description": "Tax rule of the voucher. Used in sevdesk-Update (bookkeeping system) 2.0, where it replaces taxType and taxSet. Relation with objectName 'TaxRule'."
                   },
                   "taxType": {
                     "type": [
@@ -333,7 +344,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Tax type of the voucher (default, eu, noteu, custom, ss). Used in sevdesk-Update 1.0; under 2.0 taxRule replaces it."
                   },
                   "creditDebit": {
                     "type": [
@@ -342,7 +354,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "C (credit) or D (debit)."
+                    "description": "Whether the voucher is a credit (C) or a debit (D)."
                   },
                   "costCentre": {
                     "type": [
@@ -351,7 +363,7 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Cost centre for the voucher (objectName 'CostCentre')."
+                    "description": "Cost centre for the voucher. Relation with objectName 'CostCentre'."
                   },
                   "voucherType": {
                     "type": [
@@ -359,29 +371,36 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Type of the voucher: VOU (voucher) or RV (recurring voucher)."
                   },
                   "currency": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Currency of the voucher."
                   },
                   "propertyForeignCurrencyDeadline": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Exchange-rate day; sevdesk derives the exchange rate from it."
                   },
                   "propertyExchangeRate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The exchange rate applied to the voucher."
                   },
                   "recurringInterval": {
                     "type": [
@@ -390,74 +409,57 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "DateInterval for recurring vouchers (e.g. P0Y1M0W)."
+                    "description": "DateInterval in which recurring vouchers are generated (e.g. P0Y1M0W). Required for all recurring vouchers."
                   },
                   "recurringStartDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date recurring vouchers start being generated."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date when the recurring vouchers start being generated."
                   },
                   "recurringNextVoucher": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date the next recurring voucher is generated."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date when the next recurring voucher is generated."
                   },
                   "recurringLastVoucher": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date the last recurring voucher was generated."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date when the last recurring voucher was generated."
                   },
                   "recurringEndDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date recurring vouchers end being generated."
-                  },
-                  "deliveryDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDateUntil": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Date when the recurring vouchers stop being generated."
                   },
                   "enshrined": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Enshrined vouchers cannot be changed. Set only via /Voucher/{voucherId}/enshrine; the operation cannot be undone."
                   },
                   "taxSet": {
                     "type": [
@@ -466,38 +468,36 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set, used when taxType=custom (objectName 'TaxSet')."
-                  },
-                  "showNet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "iban": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "description": "Tax set of the voucher, needed when taxType is 'custom'. Superseded by taxRule under sevdesk-Update 2.0. Relation with objectName 'TaxSet'."
                   },
                   "paymentDeadline": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "Payment deadline of the voucher."
+                  },
+                  "deliveryDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Delivery date of the voucher."
+                  },
+                  "deliveryDateUntil": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "End of the delivery period of the voucher."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -508,10 +508,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Voucher",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/Voucher/Factory/saveVoucher",
           "body": {
             "from_input": "record"
           }
@@ -520,147 +517,511 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "required": [
+              "voucher"
+            ],
+            "description": "One saveVoucher request: the voucher model plus optional positions, a position to delete and an attachment filename. The collection route POST /Voucher does not exist; the factory route is the only create operation sevdesk documents.",
             "properties": {
-              "voucherDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "supplier": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+              "voucher": {
+                "type": "object",
+                "description": "Voucher model.",
                 "required": [
-                  "id",
-                  "objectName"
+                  "objectName",
+                  "mapAll",
+                  "status",
+                  "creditDebit",
+                  "voucherType"
                 ],
                 "properties": {
                   "id": {
                     "type": [
-                      "string",
-                      "integer"
-                    ]
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The voucher id. Set it only when the factory call updates an existing draft voucher."
                   },
                   "objectName": {
                     "type": "string",
-                    "const": "Contact"
+                    "const": "Voucher",
+                    "description": "The voucher object name — must always be 'Voucher'."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "description": "sevdesk internal mapping flag; must always be sent as true."
+                  },
+                  "voucherDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Voucher document date. Provide as a timestamp or dd.mm.yyyy."
+                  },
+                  "supplier": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "The contact used in the voucher as a supplier. Set to null when there is no supplier contact."
+                  },
+                  "supplierName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Supplier name shown on the voucher when no supplier contact is given."
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The description of the voucher — essentially the voucher number."
+                  },
+                  "payDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date the voucher was paid. Provide as a timestamp or dd.mm.yyyy."
+                  },
+                  "status": {
+                    "type": "number",
+                    "enum": [
+                      50,
+                      100
+                    ],
+                    "description": "Voucher status. sevdesk documents 50 (draft) and 100 (open) as the only values this endpoint accepts, and only draft vouchers may be updated through it; status 1000 (paid) is reached through the booking routes, not through creation. Under bookkeeping system 2.0 voucher creation is likewise limited to 50 and 100."
+                  },
+                  "sumNet": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Net sum of the voucher."
+                  },
+                  "sumTax": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Tax sum of the voucher."
+                  },
+                  "sumGross": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Gross sum of the voucher."
+                  },
+                  "sumNetAccounting": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Net accounting sum; usually the same as sumNet."
+                  },
+                  "sumTaxAccounting": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Tax accounting sum; usually the same as sumTax."
+                  },
+                  "sumGrossAccounting": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Gross accounting sum; usually the same as sumGross."
+                  },
+                  "sumDiscounts": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Sum of all discounts in the voucher."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Discounts sum of the voucher in the foreign currency."
+                  },
+                  "paidAmount": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Amount already paid for this voucher."
+                  },
+                  "taxRule": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Tax rule of the voucher. Use this under sevdesk-Update (bookkeeping system) 2.0, where it replaces taxType and taxSet; send taxType instead under 1.0. sevdesk's schema marks both taxRule and taxType required, which no single bookkeeping-system version can satisfy, so neither is listed as required here."
+                  },
+                  "taxType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Tax type of the voucher: default, eu, noteu, custom or ss. Use this under sevdesk-Update 1.0; under 2.0 send taxRule instead."
+                  },
+                  "creditDebit": {
+                    "type": "string",
+                    "enum": [
+                      "C",
+                      "D"
+                    ],
+                    "description": "Defines whether the voucher is a credit (C) or a debit (D)."
+                  },
+                  "voucherType": {
+                    "type": "string",
+                    "enum": [
+                      "VOU",
+                      "RV"
+                    ],
+                    "description": "Type of the voucher: VOU (voucher) or RV (recurring voucher)."
+                  },
+                  "currency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Currency of the voucher. If it differs from the account default currency, propertyForeignCurrencyDeadline or propertyExchangeRate must be supplied."
+                  },
+                  "propertyForeignCurrencyDeadline": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Exchange-rate day; sevdesk derives the exchange rate from it. Provide as a timestamp or dd.mm.yyyy."
+                  },
+                  "propertyExchangeRate": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Defines the exchange rate."
+                  },
+                  "recurringInterval": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "P0Y0M1W",
+                      "P0Y0M2W",
+                      "P0Y1M0W",
+                      "P0Y3M0W",
+                      "P0Y6M0W",
+                      "P1Y0M0W",
+                      "P2Y0M0W",
+                      "P3Y0M0W",
+                      "P4Y0M0W",
+                      "P5Y0M0W"
+                    ],
+                    "description": "DateInterval in which recurring vouchers are generated. Required for all recurring vouchers."
+                  },
+                  "recurringStartDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date when the recurring vouchers start being generated. Required for all recurring vouchers."
+                  },
+                  "recurringNextVoucher": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date when the next recurring voucher should be generated. Required for all recurring vouchers."
+                  },
+                  "recurringLastVoucher": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date when the last recurring voucher was generated."
+                  },
+                  "recurringEndDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date when the recurring vouchers stop being generated. Required for all recurring vouchers."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Tax set of the voucher; add it when taxType is 'custom'. Superseded by taxRule under sevdesk-Update 2.0."
+                  },
+                  "paymentDeadline": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Payment deadline of the voucher."
+                  },
+                  "deliveryDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Delivery date. Provide as a timestamp or dd.mm.yyyy."
+                  },
+                  "deliveryDateUntil": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "End of the delivery period. Provide as a timestamp or dd.mm.yyyy."
+                  },
+                  "document": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "The document of the voucher."
+                  },
+                  "costCentre": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Cost centre for the voucher."
                   }
                 }
               },
-              "supplierName": {
+              "voucherPosSave": {
                 "type": [
-                  "string",
+                  "array",
                   "null"
-                ]
+                ],
+                "description": "Voucher positions to create or update together with the voucher.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "objectName",
+                    "mapAll",
+                    "taxRate",
+                    "net",
+                    "sumNet",
+                    "sumGross"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "The voucher position id; set it only when updating an existing position."
+                    },
+                    "objectName": {
+                      "type": "string",
+                      "const": "VoucherPos",
+                      "description": "The voucher position object name — must always be 'VoucherPos'."
+                    },
+                    "mapAll": {
+                      "type": "boolean",
+                      "description": "sevdesk internal mapping flag; must always be sent as true."
+                    },
+                    "voucher": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The voucher to which the position belongs. On a create call the factory links the position to the voucher it creates, so it need not be supplied."
+                    },
+                    "accountDatev": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The booking account the position belongs to. Use this under sevdesk-Update (bookkeeping system) 2.0, where it replaces accountingType. sevdesk's schema marks both required, which no single version can satisfy, so neither is listed as required here."
+                    },
+                    "accountingType": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The booking account the position belongs to. Use this under sevdesk-Update 1.0; under 2.0 send accountDatev instead."
+                    },
+                    "estimatedAccountingType": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The accounting type estimated by sevdesk's voucher recognition."
+                    },
+                    "taxRate": {
+                      "type": "number",
+                      "description": "Tax rate of the voucher position."
+                    },
+                    "net": {
+                      "type": "boolean",
+                      "description": "Whether sumNet or sumGross is regarded. All positions must be either net or gross; a mixture is not permitted."
+                    },
+                    "isAsset": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Whether the position is regarded as a depreciable asset."
+                    },
+                    "sumNet": {
+                      "type": "number",
+                      "description": "Net sum of the position. Only regarded when net is true."
+                    },
+                    "sumTax": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax sum of the position."
+                    },
+                    "sumGross": {
+                      "type": "number",
+                      "description": "Gross sum of the position. Only regarded when net is false."
+                    },
+                    "sumNetAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Net accounting sum; equal to sumNet."
+                    },
+                    "sumTaxAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax accounting sum; equal to sumTax."
+                    },
+                    "sumGrossAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Gross accounting sum; equal to sumGross."
+                    },
+                    "comment": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Comment for the voucher position."
+                    }
+                  }
+                }
               },
-              "description": {
+              "voucherPosDelete": {
                 "type": [
-                  "string",
+                  "object",
                   "null"
-                ]
+                ],
+                "description": "A voucher position to delete; usable because this request can also update draft vouchers. Defaults to null."
               },
-              "payDate": {
+              "filename": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "creditDebit": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "voucherType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "documentType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "deliveryDateUntil": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
+                "description": "Filename of a previously uploaded file which should be attached to the voucher."
               }
-            },
-            "required": [
-              "status",
-              "creditDebit",
-              "voucherType",
-              "currency"
-            ]
+            }
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.voucher.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Voucher/{id}",
+          "path": "/Voucher/{voucher_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "voucher_id": {
+              "from_input": "record.id"
             }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
-            "from_input": "record"
+            "voucherDate": {
+              "from_input": "record.voucherDate"
+            },
+            "supplier": {
+              "from_input": "record.supplier"
+            },
+            "supplierName": {
+              "from_input": "record.supplierName"
+            },
+            "description": {
+              "from_input": "record.description"
+            },
+            "payDate": {
+              "from_input": "record.payDate"
+            },
+            "status": {
+              "from_input": "record.status"
+            },
+            "paidAmount": {
+              "from_input": "record.paidAmount"
+            },
+            "taxRule": {
+              "from_input": "record.taxRule"
+            },
+            "taxType": {
+              "from_input": "record.taxType"
+            },
+            "creditDebit": {
+              "from_input": "record.creditDebit"
+            },
+            "voucherType": {
+              "from_input": "record.voucherType"
+            },
+            "currency": {
+              "from_input": "record.currency"
+            },
+            "propertyForeignCurrencyDeadline": {
+              "from_input": "record.propertyForeignCurrencyDeadline"
+            },
+            "propertyExchangeRate": {
+              "from_input": "record.propertyExchangeRate"
+            },
+            "taxSet": {
+              "from_input": "record.taxSet"
+            },
+            "paymentDeadline": {
+              "from_input": "record.paymentDeadline"
+            },
+            "deliveryDate": {
+              "from_input": "record.deliveryDate"
+            },
+            "deliveryDateUntil": {
+              "from_input": "record.deliveryDateUntil"
+            },
+            "document": {
+              "from_input": "record.document"
+            },
+            "costCentre": {
+              "from_input": "record.costCentre"
+            }
           }
         },
         "input": {
@@ -670,116 +1031,176 @@
             "required": [
               "id"
             ],
+            "description": "One voucher update. sevdesk documents this route for simple value changes on a draft voucher; complex changes such as adding positions go through the insert mode (/Voucher/Factory/saveVoucher).",
             "properties": {
               "id": {
                 "type": [
                   "string",
                   "integer"
-                ]
+                ],
+                "description": "Id of the voucher to update; supplies the {voucherId} path segment and is the upsert conflict key."
               },
               "voucherDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Voucher document date. Provide as a timestamp or dd.mm.yyyy."
               },
               "supplier": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact used in the voucher as a supplier. Set to null when there is no supplier contact."
               },
               "supplierName": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Supplier name shown on the voucher when no supplier contact is given."
               },
               "description": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The description of the voucher — essentially the voucher number."
               },
               "payDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Date the voucher was paid. Provide as a timestamp or dd.mm.yyyy."
               },
               "status": {
                 "type": [
-                  "string",
+                  "number",
                   "null"
-                ]
+                ],
+                "enum": [
+                  50,
+                  100,
+                  1000,
+                  null
+                ],
+                "description": "Voucher status: 50 (draft), 100 (open) or 1000 (paid). Not supported under sevdesk-Update (bookkeeping system) 2.0, and sevdesk documents that the status cannot be changed through this route — use the booking/reset routes instead."
+              },
+              "paidAmount": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Amount already paid for this voucher."
+              },
+              "taxRule": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Tax rule of the voucher. Use this under sevdesk-Update 2.0, where it replaces taxType and taxSet."
               },
               "taxType": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Tax type of the voucher: default, eu, noteu, custom or ss. Use this under sevdesk-Update 1.0; under 2.0 send taxRule instead."
               },
               "creditDebit": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "enum": [
+                  "C",
+                  "D",
+                  null
+                ],
+                "description": "Defines whether the voucher is a credit (C) or a debit (D)."
               },
               "voucherType": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "enum": [
+                  "VOU",
+                  "RV",
+                  null
+                ],
+                "description": "Type of the voucher: VOU (voucher) or RV (recurring voucher)."
               },
               "currency": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Currency of the voucher. If it differs from the account default currency, propertyForeignCurrencyDeadline or propertyExchangeRate must be supplied."
               },
-              "documentType": {
+              "propertyForeignCurrencyDeadline": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "format": "date-time",
+                "description": "Exchange-rate day; sevdesk derives the exchange rate from it. Provide as a timestamp or dd.mm.yyyy."
               },
-              "showNet": {
+              "propertyExchangeRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Defines the exchange rate."
+              },
+              "taxSet": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Tax set of the voucher; add it when taxType is 'custom'. Superseded by taxRule under sevdesk-Update 2.0."
+              },
+              "paymentDeadline": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "format": "date-time",
+                "description": "Payment deadline of the voucher."
               },
               "deliveryDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Delivery date. Provide as a timestamp or dd.mm.yyyy."
               },
               "deliveryDateUntil": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "End of the delivery period. Provide as a timestamp or dd.mm.yyyy."
+              },
+              "document": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The document of the voucher."
+              },
+              "costCentre": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Cost centre for the voucher."
               }
             }
           }
@@ -789,11 +1210,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "voucher"
+  }
 }

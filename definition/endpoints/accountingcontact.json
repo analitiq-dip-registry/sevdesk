@@ -1,9 +1,42 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "accountingcontact",
   "display_name": "Accounting Contacts",
   "description": "Accounting-specific debitor/creditor numbers per contact.",
   "operations": {
     "read": {
+      "params": {
+        "contact[id]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "ID of the contact for which you want the accounting contact."
+        },
+        "contact[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Object name. Only needed if you also defined the ID of a contact; use 'Contact'."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/AccountingContact",
@@ -22,38 +55,6 @@
           }
         }
       },
-      "params": {
-        "contact[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by contact id."
-        },
-        "contact[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'Contact'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
         "limit": {
@@ -66,7 +67,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -88,40 +91,60 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The accounting contact id."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The accounting contact object name ('AccountingContact')."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of accounting contact creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last accounting contact update."
                   },
                   "contact": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Contact relation."
+                    "description": "The contact to which this accounting contact belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"Contact\"}."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the accounting contact belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"SevClient\"}; filled automatically."
                   },
                   "debitorNumber": {
                     "type": [
@@ -129,7 +152,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Debitor number of the accounting contact."
                   },
                   "creditorNumber": {
                     "type": [
@@ -137,13 +161,10 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Creditor number of the accounting contact."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -155,9 +176,6 @@
         "request": {
           "method": "POST",
           "path": "/AccountingContact",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -168,38 +186,22 @@
             "type": "object",
             "properties": {
               "contact": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "type": "object",
+                "description": "The contact to which this accounting contact belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "debitorNumber": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Debitor number of the accounting contact. sevdesk declares this integer on the request body while the response returns it as a string."
               },
               "creditorNumber": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Creditor number of the accounting contact. sevdesk declares this integer on the request body while the response returns it as a string."
               }
             },
             "required": [
@@ -209,28 +211,18 @@
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/AccountingContact/{id}",
+          "path": "/AccountingContact/{accounting_contact_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "accounting_contact_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -240,51 +232,36 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "The accounting contact id; supplies the {accountingContactId} path segment."
               },
               "contact": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The contact to which this accounting contact belongs. sevdesk relation: {\"id\": <contact id>, \"objectName\": \"Contact\"}."
               },
               "debitorNumber": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Debitor number of the accounting contact."
               },
               "creditorNumber": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Creditor number of the accounting contact."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "conflict_keys": [
@@ -292,11 +269,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "accountingcontact"
+  }
 }
