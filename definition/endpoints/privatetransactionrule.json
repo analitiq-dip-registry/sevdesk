@@ -1,19 +1,30 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "privatetransactionrule",
   "display_name": "Private Transaction Rules",
-  "description": "Rules auto-marking bank transactions as private.",
+  "description": "Rules that automatically mark matching bank transactions as private.",
   "operations": {
     "read": {
+      "params": {
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. sevdesk accepts 1..1000 and returns HTTP 400 outside that range."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Record offset into the result set."
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/PrivateTransactionRule",
         "query": {
-          "checkAccount[id]": {
-            "from_param": "checkAccount[id]"
-          },
-          "checkAccount[objectName]": {
-            "from_param": "checkAccount[objectName]"
-          },
           "limit": {
             "from_param": "limit"
           },
@@ -22,51 +33,21 @@
           }
         }
       },
-      "params": {
-        "checkAccount[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by checkAccount[id]."
-        },
-        "checkAccount[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'CheckAccount'."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -81,6 +62,7 @@
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "sevdesk wraps every list response in an `objects` array.",
           "properties": {
             "objects": {
               "type": "array",
@@ -88,53 +70,51 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
-                  },
-                  "checkAccount": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "matchingType": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Matching rule kind."
-                  },
-                  "matchingValue": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The entity id."
+                  },
+                  "objectName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The entity object name, 'PrivateTransactionRule'."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of entity creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last entity update. Not usable as a replication cursor: sevdesk documents no `updateAfter` filter on /PrivateTransactionRule."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the entity belongs, as a sevdesk relation ({ id, objectName: 'SevClient' })."
                   },
                   "paymentPurpose": {
                     "type": [
@@ -154,11 +134,7 @@
                     "arrow_type": "Utf8",
                     "description": "The counterpart name of transactions to match."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -170,9 +146,6 @@
         "request": {
           "method": "POST",
           "path": "/PrivateTransactionRule",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
@@ -181,138 +154,38 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One private transaction rule to create. POST /PrivateTransactionRule takes the rule object bare (no envelope) and answers 201 with the created Model_PrivateTransactionRuleResponse, also bare. There is no upsert mode: /PrivateTransactionRule/{id} is DELETE-only, sevdesk documents no PUT.",
             "properties": {
-              "checkAccount": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CheckAccount"
-                  }
-                }
+              "objectName": {
+                "type": "string",
+                "description": "Must be 'PrivateTransactionRule'."
               },
-              "matchingType": {
+              "paymentPurpose": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The purpose of transactions that you want to match."
               },
-              "matchingValue": {
+              "counterpartName": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The counterpart name of transactions that you want to match."
               }
             },
             "required": [
-              "checkAccount",
-              "matchingType"
+              "objectName"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
-      "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/PrivateTransactionRule/{id}",
-          "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "checkAccount": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CheckAccount"
-                  }
-                }
-              },
-              "matchingType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "matchingValue": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "conflict_keys": [
-          "id"
-        ],
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "privatetransactionrule"
+  }
 }

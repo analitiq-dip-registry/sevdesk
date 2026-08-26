@@ -1,9 +1,51 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "contact",
   "display_name": "Contacts",
-  "description": "Customers, suppliers, partners, and prospects.",
+  "description": "sevdesk contacts — customers, suppliers, partners and prospects (organizations and persons).",
   "operations": {
     "read": {
+      "params": {
+        "depth": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "default": {
+            "literal": "1"
+          },
+          "description": "Defines whether both organizations and persons are returned. '0' -> only organizations, '1' -> organizations and persons. Defaults to '1' so the endpoint returns the full contact set; without it sevdesk returns organizations only."
+        },
+        "customerNumber": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all contacts with this customer number."
+        },
+        "updateAfter": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "replication",
+          "description": "Return only contacts modified after this point in time, as a Unix timestamp in seconds. Documented in the sevdesk API description's contact filter table."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. sevdesk accepts 1..1000 and returns HTTP 400 outside that range."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Number of records to skip. sevdesk counts records, not pages."
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Contact",
@@ -12,22 +54,10 @@
             "from_param": "depth"
           },
           "customerNumber": {
-            "from_param": "customer_number"
+            "from_param": "customerNumber"
           },
-          "country[id]": {
-            "from_param": "country_id"
-          },
-          "country[objectName]": {
-            "from_param": "country_object_name"
-          },
-          "category[id]": {
-            "from_param": "category_id"
-          },
-          "category[objectName]": {
-            "from_param": "category_object_name"
-          },
-          "embed": {
-            "from_param": "embed"
+          "updateAfter": {
+            "from_param": "updateAfter"
           },
           "limit": {
             "from_param": "limit"
@@ -37,85 +67,15 @@
           }
         }
       },
-      "params": {
-        "depth": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Include nested resources (0 or 1)."
-        },
-        "customer_number": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter contacts by customer number."
-        },
-        "country_id": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Country id filter (use with country_object_name)."
-        },
-        "country_object_name": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Object name of the country relation. Use 'StaticCountry'."
-        },
-        "category_id": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Category id filter (use with category_object_name)."
-        },
-        "category_object_name": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Object name of the category relation. Use 'Category'."
-        },
-        "embed": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Comma-separated list of nested resources to embed."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
@@ -123,60 +83,76 @@
           },
           "max": 1000
         },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
-        },
         "stop_when": {
           "empty": {
             "ref": "response.body.objects"
           }
         }
       },
+      "replication": {
+        "supported_methods": [
+          "full_refresh",
+          "incremental"
+        ],
+        "cursor_mappings": [
+          {
+            "cursor_field": "update",
+            "param": "updateAfter",
+            "operator": "gt",
+            "format": "epoch_seconds"
+          }
+        ]
+      },
       "response": {
         "records": {
           "ref": "response.body.objects"
         },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
               "type": "array",
+              "description": "The sevdesk list envelope — every read response wraps its records in 'objects'.",
               "items": {
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Contact id."
+                    "description": "The contact id."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The contact object name — always 'Contact'."
                   },
                   "create": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "description": "Date of contact creation."
                   },
                   "update": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "description": "Date of last contact update."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Client (SevClient) the contact belongs to."
+                    "description": "Date of last contact update. Backs incremental replication via the updateAfter filter."
                   },
                   "name": {
                     "type": [
@@ -185,7 +161,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Organization name. If set, the contact is treated as an organization."
+                    "description": "The organization name. The contact is regarded as an organization when this holds a value."
                   },
                   "status": {
                     "type": [
@@ -194,58 +170,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Status of the contact: 100 = Lead, 500 = Pending, 1000 = Active."
+                    "description": "Status of the contact: 100 = Lead, 500 = Pending, 1000 = Active. Returned as a string even though it is written as an integer."
                   },
-                  "surename": {
+                  "customerNumber": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "First name (individual)."
-                  },
-                  "familyname": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Family name (individual)."
-                  },
-                  "titel": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Non-academic title (individuals only)."
-                  },
-                  "academicTitle": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Academic title (individuals only)."
-                  },
-                  "name2": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Second name (individuals only)."
-                  },
-                  "category": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Category relation."
+                    "description": "The customer number."
                   },
                   "parent": {
                     "type": [
@@ -254,7 +188,43 @@
                     ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Parent contact (must be an organization)."
+                    "description": "The parent contact to which this contact belongs; must be an organization. sevdesk relation of shape {id, objectName} with objectName 'Contact'."
+                  },
+                  "surename": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The first name of the contact (sevdesk spells it 'surename'). Not used for organizations."
+                  },
+                  "familyname": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The last name of the contact. Not used for organizations."
+                  },
+                  "titel": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "A non-academic title for the contact. Not used for organizations."
+                  },
+                  "category": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Category of the contact. sevdesk relation of shape {id, objectName} with objectName 'Category'."
                   },
                   "description": {
                     "type": [
@@ -263,101 +233,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Free-text description for the contact."
+                    "description": "A description for the contact."
                   },
-                  "customerNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "taxNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "taxOffice": {
+                  "academicTitle": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Tax office of the contact (Greek customers only)."
-                  },
-                  "vatNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "bankAccount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "bankNumber": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "defaultCashbackTime": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32",
-                    "description": "Absolute time in days within which the contact must pay to receive a cashback."
-                  },
-                  "defaultCashbackPercent": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Percentage of the invoice sum returned if invoices are paid in time."
-                  },
-                  "defaultTimeToPay": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
-                    "native_type": "integer",
-                    "arrow_type": "Int32",
-                    "description": "Default payment goal in days set on every invoice of the contact."
-                  },
-                  "defaultDiscountAmount": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Default discount applied to every invoice (percent or absolute, per defaultDiscountPercentage)."
-                  },
-                  "defaultDiscountPercentage": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Whether the default discount is a percentage ('true') or an absolute value ('false')."
+                    "description": "An academic title for the contact. Not used for organizations."
                   },
                   "gender": {
                     "type": [
@@ -365,7 +250,26 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Gender of the contact. Not used for organizations."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the contact belongs; filled automatically. sevdesk relation of shape {id, objectName} with objectName 'SevClient'. Note: the spec declares this relation's id as an integer, unlike the sibling parent relation whose id is a string."
+                  },
+                  "name2": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Second name of the contact. Not used for organizations."
                   },
                   "birthday": {
                     "type": [
@@ -375,7 +279,79 @@
                     "format": "date",
                     "native_type": "date",
                     "arrow_type": "Date32",
-                    "description": "Birthday of the contact (individuals only)."
+                    "description": "Birthday of the contact. Not used for organizations."
+                  },
+                  "vatNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "VAT number of the contact."
+                  },
+                  "bankAccount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Bank account number (IBAN) of the contact."
+                  },
+                  "bankNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Bank number of the bank used by the contact."
+                  },
+                  "defaultCashbackTime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Absolute time in days within which the contact must pay invoices to get a cashback. Returned as a string even though it is written as an integer."
+                  },
+                  "defaultCashbackPercent": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Percentage of the invoice sum the contact gets back for invoices paid in time. Declared string/float on the response model; returned as a string."
+                  },
+                  "defaultTimeToPay": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The payment goal in days set on every invoice of the contact. Returned as a string even though it is written as an integer."
+                  },
+                  "taxNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The tax number of the contact."
+                  },
+                  "taxOffice": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The tax office of the contact (Greek customers only)."
                   },
                   "exemptVat": {
                     "type": [
@@ -384,15 +360,25 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Whether the contact is exempt from paying VAT ('true'/'false')."
+                    "description": "Whether the contact is freed from paying VAT. Returned as the string 'true'/'false' even though it is written as a boolean."
                   },
-                  "taxType": {
+                  "defaultDiscountAmount": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The default discount the contact gets on every invoice — percentage or absolute value depending on defaultDiscountPercentage. Declared string/float on the response model."
+                  },
+                  "defaultDiscountPercentage": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the discount is a percentage ('true') or an absolute value ('false'). Returned as a string even though it is written as a boolean."
                   },
                   "buyerReference": {
                     "type": [
@@ -410,7 +396,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Whether the contact is a government agency ('true'/'false')."
+                    "description": "Whether the contact is a government agency. Returned as the string 'true'/'false' even though it is written as a boolean."
                   },
                   "additionalInformation": {
                     "type": [
@@ -419,14 +405,10 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Additional information stored for the contact (deprecated).",
-                    "deprecated": true
+                    "deprecated": true,
+                    "description": "Additional information stored for the contact. Marked deprecated by the sevdesk OpenAPI specification."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -438,16 +420,12 @@
         "request": {
           "method": "POST",
           "path": "/Contact",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "required": [
               "category"
@@ -455,152 +433,201 @@
             "properties": {
               "category": {
                 "type": "object",
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "surename": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "familyname": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "customerNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "vatNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "bankAccount": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "bankNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "defaultCashbackTime": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "defaultCashbackPercent": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "defaultTimeToPay": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "gender": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "birthday": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date"
+                "description": "Category of the contact. Required on create."
               },
               "parent": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
+                "description": "The parent contact to which this contact belongs. Must be an organization."
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The organization name. If it holds a value the contact is regarded as an organization."
+              },
+              "status": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Status of the contact: 100 = Lead, 500 = Pending, 1000 = Active."
+              },
+              "customerNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The customer number."
+              },
+              "surename": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The first name of the contact. Not to be used for organizations."
+              },
+              "familyname": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The last name of the contact. Not to be used for organizations."
+              },
+              "titel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A non-academic title for the contact. Not to be used for organizations."
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A description for the contact."
+              },
+              "academicTitle": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "An academic title for the contact. Not to be used for organizations."
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Gender of the contact. Not to be used for organizations."
+              },
+              "name2": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Second name of the contact. Not to be used for organizations."
+              },
+              "birthday": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date",
+                "description": "Birthday of the contact. Not to be used for organizations."
+              },
+              "vatNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "VAT number of the contact."
+              },
+              "bankAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Bank account number (IBAN) of the contact."
+              },
+              "bankNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Bank number of the bank used by the contact."
+              },
+              "defaultCashbackTime": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Absolute time in days within which the contact has to pay invoices to get a cashback."
+              },
+              "defaultCashbackPercent": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Percentage of the invoice sum the contact gets back for invoices paid in time."
+              },
+              "defaultTimeToPay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "The payment goal in days set for every invoice of the contact."
+              },
+              "taxNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The tax number of the contact."
+              },
+              "taxOffice": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The tax office of the contact (Greek customers only)."
+              },
+              "exemptVat": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the contact is freed from paying VAT."
+              },
+              "defaultDiscountAmount": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The default discount the contact gets for every invoice, percentage or absolute per defaultDiscountPercentage."
+              },
+              "defaultDiscountPercentage": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the discount is a percentage (true) or an absolute value (false)."
+              },
+              "buyerReference": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Buyer reference of the contact."
+              },
+              "governmentAgency": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the contact is a government agency."
               }
             }
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Contact/{id}",
+          "path": "/Contact/{contact_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "contact_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -608,141 +635,197 @@
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "required": [
               "id"
             ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "The id of the contact to update. Supplies the {contactId} path segment."
               },
               "category": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Category"
-                  }
-                }
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "surename": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "familyname": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "customerNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "vatNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "bankAccount": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "bankNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "defaultCashbackTime": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "defaultCashbackPercent": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "defaultTimeToPay": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              },
-              "gender": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "birthday": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date"
+                "description": "Category of the contact."
               },
               "parent": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
+                "description": "The parent contact to which this contact belongs. Must be an organization."
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "The organization name. If it holds a value the contact is regarded as an organization."
+              },
+              "status": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Status of the contact: 100 = Lead, 500 = Pending, 1000 = Active."
+              },
+              "customerNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The customer number."
+              },
+              "surename": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The first name of the contact. Not to be used for organizations."
+              },
+              "familyname": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The last name of the contact. Not to be used for organizations."
+              },
+              "titel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A non-academic title for the contact. Not to be used for organizations."
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A description for the contact."
+              },
+              "academicTitle": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "An academic title for the contact. Not to be used for organizations."
+              },
+              "gender": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Gender of the contact. Not to be used for organizations."
+              },
+              "name2": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Second name of the contact. Not to be used for organizations."
+              },
+              "birthday": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date",
+                "description": "Birthday of the contact. Not to be used for organizations."
+              },
+              "vatNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "VAT number of the contact."
+              },
+              "bankAccount": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Bank account number (IBAN) of the contact."
+              },
+              "bankNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Bank number of the bank used by the contact."
+              },
+              "defaultCashbackTime": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Absolute time in days within which the contact has to pay invoices to get a cashback."
+              },
+              "defaultCashbackPercent": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Percentage of the invoice sum the contact gets back for invoices paid in time."
+              },
+              "defaultTimeToPay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "The payment goal in days set for every invoice of the contact."
+              },
+              "taxNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The tax number of the contact."
+              },
+              "taxOffice": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The tax office of the contact (Greek customers only)."
+              },
+              "exemptVat": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the contact is freed from paying VAT."
+              },
+              "defaultDiscountAmount": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The default discount the contact gets for every invoice, percentage or absolute per defaultDiscountPercentage."
+              },
+              "defaultDiscountPercentage": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the discount is a percentage (true) or an absolute value (false)."
+              },
+              "buyerReference": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Buyer reference of the contact."
+              },
+              "governmentAgency": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the contact is a government agency."
               }
             }
           }
@@ -752,11 +835,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "contact"
+  }
 }

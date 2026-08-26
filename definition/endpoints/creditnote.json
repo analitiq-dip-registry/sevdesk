@@ -1,7 +1,8 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "creditnote",
   "display_name": "Credit Notes",
-  "description": "Credit notes issued to customers.",
+  "description": "Credit notes (Gutschriften) issued to customers. Read is the paginated /CreditNote collection; writes go through the saveCreditNote factory (insert) and PUT /CreditNote/{creditNoteId} (upsert).",
   "operations": {
     "read": {
       "request": {
@@ -37,12 +38,12 @@
       "params": {
         "status": {
           "in": "query",
-          "type": "integer",
+          "type": "string",
           "required": false,
           "operators": [
             "eq"
           ],
-          "description": "Filter by status."
+          "description": "Status of the credit note: 100 (draft), 200 (open), 300, 500, 750, 1000."
         },
         "creditNoteNumber": {
           "in": "query",
@@ -51,25 +52,25 @@
           "operators": [
             "eq"
           ],
-          "description": "Filter by credit note number."
+          "description": "Retrieve all credit notes with this credit note number."
         },
         "startDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
           "operators": [
-            "eq"
+            "gte"
           ],
-          "description": "Filter from credit note date."
+          "description": "Lower bound on the credit note DOCUMENT date (creditNoteDate), as a Unix timestamp in seconds. Not a modification-time filter."
         },
         "endDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
           "operators": [
-            "eq"
+            "lte"
           ],
-          "description": "Filter to credit note date."
+          "description": "Upper bound on the credit note DOCUMENT date (creditNoteDate), as a Unix timestamp in seconds. Not a modification-time filter."
         },
         "contact[id]": {
           "in": "query",
@@ -78,7 +79,7 @@
           "operators": [
             "eq"
           ],
-          "description": "Filter by contact id."
+          "description": "Retrieve all credit notes for this contact. Must be sent together with contact[objectName]."
         },
         "contact[objectName]": {
           "in": "query",
@@ -87,19 +88,21 @@
           "operators": [
             "eq"
           ],
-          "description": "Use 'Contact'."
+          "description": "Only required if contact[id] was provided. Use the value 'Contact'."
         },
         "limit": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "controlled_by": "pagination"
+          "controlled_by": "pagination",
+          "description": "Number of records per page. sevdesk accepts 1..1000."
         },
         "offset": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "controlled_by": "pagination"
+          "controlled_by": "pagination",
+          "description": "Number of records to skip. Counts records, not pages."
         }
       },
       "pagination": {
@@ -114,7 +117,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -138,38 +143,34 @@
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The creditNote id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The creditNote object name ('CreditNote')."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of creditNote creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
-                  },
-                  "createUser": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "User who created the credit note. Filled automatically."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last creditNote update."
                   },
                   "creditNoteNumber": {
                     "type": [
@@ -177,7 +178,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The creditNote number."
                   },
                   "contact": {
                     "type": [
@@ -185,23 +187,21 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "contactPerson": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The contact used in the creditNote. Relation {id, objectName: 'Contact'}."
                   },
                   "creditNoteDate": {
                     "type": "string",
-                    "native_type": "datetime",
+                    "format": "date-time",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "description": "The credit note document date."
                   },
                   "status": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Status of the credit note: 100 (draft), 200 (open), 750 (partially paid), 1000 (paid)."
                   },
                   "header": {
                     "type": [
@@ -209,7 +209,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Normally consists of prefix plus the creditNote number."
                   },
                   "headText": {
                     "type": [
@@ -217,7 +218,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Head text. May contain HTML formatting."
                   },
                   "footText": {
                     "type": [
@@ -225,39 +227,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressName": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressStreet": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressZip": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "addressCity": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Foot text. May contain HTML formatting."
                   },
                   "addressCountry": {
                     "type": [
@@ -265,114 +236,66 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "Country of the recipient address. Relation {id, objectName: 'StaticCountry'}."
                   },
-                  "address": {
+                  "createUser": {
                     "type": [
-                      "string",
+                      "object",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Complete recipient address (name, street, city, zip, country)."
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "User who created the creditNote. Filled automatically. Relation {id, objectName: 'SevUser'}."
                   },
-                  "creditNoteType": {
+                  "sevClient": {
                     "type": [
-                      "string",
+                      "object",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client the creditNote belongs to. Filled automatically. Relation {id, objectName: 'SevClient'}."
                   },
-                  "currency": {
+                  "deliveryDate": {
                     "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Delivery date. Can be the start of a range when deliveryDateUntil is used."
                   },
-                  "sumNet": {
+                  "smallSettlement": {
                     "type": [
-                      "string",
+                      "boolean",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Whether the client uses the small settlement scheme. If so, the creditNote must not contain any VAT."
                   },
-                  "sumTax": {
+                  "contactPerson": {
                     "type": [
-                      "string",
+                      "object",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumGross": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "sumDiscounts": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Sum of all discounts in the credit note."
-                  },
-                  "sumNetForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Net sum in the foreign currency."
-                  },
-                  "sumTaxForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Tax sum in the foreign currency."
-                  },
-                  "sumGrossForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Gross sum in the foreign currency."
-                  },
-                  "sumDiscountsForeignCurrency": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Discounts sum in the foreign currency."
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "The user acting as contact person for the creditNote. Relation {id, objectName: 'SevUser'}."
                   },
                   "taxRate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Deprecated document-level tax rate. Use the taxRate of the individual positions instead."
                   },
                   "taxRule": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": "object",
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "VAT rule (sevdesk-Update 2.0, replaces taxType/taxSet). Relation {id, objectName: 'TaxRule'}."
                   },
                   "taxSet": {
                     "type": [
@@ -389,7 +312,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
                   },
                   "taxType": {
                     "type": [
@@ -397,24 +321,108 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Tax type (sevdesk-Update 1.0): default, eu, noteu, custom, ss."
                   },
-                  "showNet": {
+                  "sendDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date the creditNote was sent to the customer."
                   },
-                  "smallSettlement": {
+                  "address": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Whether the small settlement scheme applies (returned as a string flag)."
+                    "description": "Complete recipient address including name, street, city, zip and country. May contain line breaks."
+                  },
+                  "currency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "ISO-4217 currency code used in the creditNote."
+                  },
+                  "sumNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the creditNote. Returned as a decimal string."
+                  },
+                  "sumTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the creditNote. Returned as a decimal string."
+                  },
+                  "sumGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the creditNote. Returned as a decimal string."
+                  },
+                  "sumDiscounts": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Sum of all discounts in the creditNote. Returned as a decimal string."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum in the foreign currency. Returned as a decimal string."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum in the foreign currency. Returned as a decimal string."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum in the foreign currency. Returned as a decimal string."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discounts sum in the foreign currency. Returned as a decimal string."
                   },
                   "customerInternalNote": {
                     "type": [
@@ -423,7 +431,16 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Internal customer note (Referenz/Bestellnummer)."
+                    "description": "Internal note of the customer (field 'Referenz/Bestellnummer')."
+                  },
+                  "showNet": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "If true, the net amount of each position is shown on the creditNote, otherwise the gross amount."
                   },
                   "sendType": {
                     "type": [
@@ -432,44 +449,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Type used to send the credit note (VPR, VPDF, VM, VP)."
-                  },
-                  "sendDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Date the credit note was sent to the customer."
-                  },
-                  "enshrined": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "deliveryDate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
-                  },
-                  "refSrcInvoice": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Source invoice relation when the credit note was issued from an invoice."
+                    "description": "Type used to send the creditNote: VPR, VPDF, VM or VP."
                   }
                 },
                 "required": [
@@ -486,10 +466,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/CreditNote",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/CreditNote/Factory/saveCreditNote",
           "body": {
             "from_input": "record"
           }
@@ -498,234 +475,463 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One saveCreditNote factory payload: the credit note plus the positions and discounts saved or deleted with it.",
             "properties": {
-              "contact": {
+              "creditNote": {
+                "type": "object",
+                "description": "The credit note model.",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "The creditNote id. Required only when creating/updating a position for an existing credit note."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "description": "The creditNote object name. Must always be 'CreditNote'."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "description": "sevdesk internal flag. Must always be sent as true."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of creditNote creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of last creditNote update."
+                  },
+                  "creditNoteNumber": {
+                    "type": "string",
+                    "description": "The creditNote number."
+                  },
+                  "contact": {
+                    "type": "object",
+                    "description": "The contact used in the creditNote. Relation {id, objectName: 'Contact'}."
+                  },
+                  "creditNoteDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Credit note document date. sevdesk accepts a timestamp or dd.mm.yyyy."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "100",
+                      "200",
+                      "300",
+                      "500",
+                      "750",
+                      "1000"
+                    ],
+                    "description": "Status of the credit note."
+                  },
+                  "header": {
+                    "type": "string",
+                    "description": "Normally consists of prefix plus the creditNote number."
+                  },
+                  "headText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Head text. May contain HTML formatting."
+                  },
+                  "footText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Foot text. May contain HTML formatting."
+                  },
+                  "addressCountry": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Country of the recipient address. Relation {id, objectName: 'StaticCountry'}. May be null when the complete address is given in 'address'."
+                  },
+                  "createUser": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Filled automatically by sevdesk and cannot be changed. Relation {id, objectName: 'SevUser'}."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Filled automatically by sevdesk. Relation {id, objectName: 'SevClient'}."
+                  },
+                  "smallSettlement": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the client uses the small settlement scheme. If so, the creditNote must not contain any VAT."
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "description": "The user acting as contact person for the creditNote. Relation {id, objectName: 'SevUser'}."
+                  },
+                  "taxRule": {
+                    "type": "object",
+                    "description": "VAT rule (sevdesk-Update 2.0, replaces taxType/taxSet). Relation {id, objectName: 'TaxRule'}."
+                  },
+                  "taxRate": {
+                    "type": "number",
+                    "description": "Deprecated document-level tax rate. Use the taxRate of the individual positions instead."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Tax set (sevdesk-Update 1.0), needed for tax type 'custom'. Relation {id, objectName: 'TaxSet'}."
+                  },
+                  "taxText": {
+                    "type": "string",
+                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
+                  },
+                  "taxType": {
+                    "type": "string",
+                    "description": "Tax type (sevdesk-Update 1.0): default, eu, noteu, custom, ss. Declared required by the provider even under Update 2.0, where taxRule supersedes it."
+                  },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date the creditNote was sent to the customer."
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Complete recipient address including name, street, city, zip and country."
+                  },
+                  "bookingCategory": {
+                    "type": "string",
+                    "enum": [
+                      "PROVISION",
+                      "ROYALTY_ASSIGNED",
+                      "ROYALTY_UNASSIGNED",
+                      "UNDERACHIEVEMENT",
+                      "ACCOUNTING_TYPE"
+                    ],
+                    "description": "Booking category of the credit note."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "ISO-4217 currency code used in the creditNote."
+                  },
+                  "sumNet": {
+                    "type": "number",
+                    "description": "Net sum of the creditNote."
+                  },
+                  "sumTax": {
+                    "type": "number",
+                    "description": "Tax sum of the creditNote."
+                  },
+                  "sumGross": {
+                    "type": "number",
+                    "description": "Gross sum of the creditNote."
+                  },
+                  "sumDiscounts": {
+                    "type": "number",
+                    "description": "Sum of all discounts in the creditNote."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": "number",
+                    "description": "Net sum in the foreign currency."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": "number",
+                    "description": "Tax sum in the foreign currency."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": "number",
+                    "description": "Gross sum in the foreign currency."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": "number",
+                    "description": "Discounts sum in the foreign currency."
+                  },
+                  "customerInternalNote": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Internal note of the customer (field 'Referenz/Bestellnummer')."
+                  },
+                  "showNet": {
+                    "type": "boolean",
+                    "description": "If true, the net amount of each position is shown on the creditNote, otherwise the gross amount."
+                  },
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Type used to send the creditNote: VPR, VPDF, VM or VP."
+                  }
+                },
+                "required": [
+                  "objectName",
+                  "mapAll",
+                  "creditNoteNumber",
+                  "contact",
+                  "creditNoteDate",
+                  "status",
+                  "header",
+                  "addressCountry",
+                  "contactPerson",
+                  "taxRule",
+                  "taxRate",
+                  "taxText",
+                  "taxType",
+                  "bookingCategory",
+                  "currency"
+                ]
+              },
+              "creditNotePosSave": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "Credit note positions to create or update together with the credit note.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "The creditNote position id. Send it to update an existing position."
+                    },
+                    "objectName": {
+                      "type": "string",
+                      "description": "The creditNote position object name. Must always be 'CreditNotePos'."
+                    },
+                    "mapAll": {
+                      "type": "boolean",
+                      "description": "sevdesk internal flag. Must always be sent as true."
+                    },
+                    "create": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Date of creditNote position creation. Declared as a plain string by the provider, e.g. '2023-04-18T15:45:38+02:00'."
+                    },
+                    "update": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Date of last creditNote position update. Declared as a plain string by the provider, e.g. '2023-04-18T15:45:38+02:00'."
+                    },
+                    "creditNote": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The creditNote the position belongs to. Required when creating/updating a position on an existing credit note. Relation {id, objectName: 'CreditNote'}."
+                    },
+                    "part": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Part from your inventory used in the position. Relation {id, objectName: 'Part'}."
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "description": "Quantity of the article/part."
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Price of the article/part. Gross or net depending on the sevdesk account setting."
+                    },
+                    "priceNet": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Net price of the part."
+                    },
+                    "priceTax": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax on the price of the part."
+                    },
+                    "priceGross": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Gross price of the part."
+                    },
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Name of the article/part."
+                    },
+                    "unity": {
+                      "type": "object",
+                      "description": "The unit the position's part is measured in. Relation {id, objectName: 'Unity'}."
+                    },
+                    "sevClient": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Client the position belongs to. Filled automatically. Relation {id, objectName: 'SevClient'}."
+                    },
+                    "positionNumber": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "Position number, used to order multiple positions."
+                    },
+                    "text": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "A text describing the position."
+                    },
+                    "discount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "An optional discount of the position."
+                    },
+                    "optional": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Defines if the position is optional."
+                    },
+                    "taxRate": {
+                      "type": "number",
+                      "description": "Tax rate of the position."
+                    },
+                    "sumDiscount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Discount sum of the position."
+                    }
+                  },
+                  "required": [
+                    "objectName",
+                    "mapAll",
+                    "quantity",
+                    "unity",
+                    "taxRate"
+                  ]
+                }
+              },
+              "creditNotePosDelete": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
+                "description": "Credit note position to delete alongside the save. Relation {id, objectName: 'CreditNotePos'}."
               },
-              "contactPerson": {
+              "discountSave": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
+                "description": "Discount or surcharge to create together with the credit note.",
                 "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
+                  "discount": {
+                    "type": "boolean",
+                    "description": "Defines if this is a discount or a surcharge."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "A text for the discount."
+                  },
+                  "percentage": {
+                    "type": "boolean",
+                    "description": "Defines if this is a percentage or an absolute discount."
+                  },
+                  "value": {
+                    "type": "number",
+                    "description": "Value of the discount."
                   },
                   "objectName": {
                     "type": "string",
-                    "const": "SevUser"
+                    "description": "Object name of the discount. Must always be 'Discounts'."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "description": "sevdesk internal flag. Must always be sent as true."
                   }
-                }
-              },
-              "creditNoteDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "creditNoteNumber": {
-                "type": [
-                  "string",
-                  "null"
+                },
+                "required": [
+                  "discount",
+                  "text",
+                  "percentage",
+                  "value",
+                  "objectName",
+                  "mapAll"
                 ]
               },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "header": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "headText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "footText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressStreet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressZip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressCity": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressCountry": {
+              "discountDelete": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
-                }
-              },
-              "creditNoteType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRule": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
-                }
-              },
-              "taxText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
+                "description": "Discount to delete alongside the save. Relation {id, objectName: 'Discounts'}."
               }
             },
             "required": [
-              "contactPerson",
-              "creditNoteDate",
-              "currency",
-              "taxRule",
-              "taxText"
+              "creditNote"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.creditNote.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/CreditNote/{id}",
+          "path": "/CreditNote/{credit_note_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "credit_note_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -735,210 +941,256 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
+                "type": "integer",
+                "description": "The creditNote id. Supplies the {creditNoteId} path segment."
+              },
+              "objectName": {
+                "type": "string",
+                "description": "The creditNote object name ('CreditNote')."
+              },
+              "create": {
                 "type": [
                   "string",
-                  "integer"
-                ]
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of creditNote creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last creditNote update."
+              },
+              "creditNoteNumber": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The creditNote number."
               },
               "contact": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "Contact"
-                  }
-                }
-              },
-              "contactPerson": {
-                "type": [
-                  "object",
-                  "null"
-                ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "SevUser"
-                  }
-                }
+                "description": "The contact used in the creditNote. Relation {id, objectName: 'Contact'}."
               },
               "creditNoteDate": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "format": "date-time"
-              },
-              "creditNoteNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "format": "date-time",
+                "description": "Credit note document date. sevdesk accepts a timestamp or dd.mm.yyyy."
               },
               "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "enum": [
+                  "100",
+                  "200",
+                  "750",
+                  "1000"
+                ],
+                "description": "Status of the credit note."
               },
               "header": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Normally consists of prefix plus the creditNote number."
               },
               "headText": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Head text. May contain HTML formatting."
               },
               "footText": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "addressName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressStreet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressZip": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "addressCity": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Foot text. May contain HTML formatting."
               },
               "addressCountry": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "StaticCountry"
-                  }
-                }
+                "description": "Country of the recipient address. Relation {id, objectName: 'StaticCountry'}."
               },
-              "creditNoteType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "taxRate": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
-              },
-              "taxRule": {
+              "createUser": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
+                "description": "Filled automatically by sevdesk and cannot be changed. Relation {id, objectName: 'SevUser'}."
+              },
+              "sevClient": {
+                "type": [
+                  "object",
+                  "null"
                 ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "TaxRule"
-                  }
-                }
+                "description": "Filled automatically by sevdesk. Relation {id, objectName: 'SevClient'}."
+              },
+              "deliveryDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Delivery date. Can be the start of a range when deliveryDateUntil is used."
+              },
+              "smallSettlement": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether the client uses the small settlement scheme."
+              },
+              "contactPerson": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The user acting as contact person for the creditNote. Relation {id, objectName: 'SevUser'}."
+              },
+              "taxRate": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Deprecated document-level tax rate. Use the taxRate of the individual positions instead."
+              },
+              "taxRule": {
+                "type": "object",
+                "description": "VAT rule (sevdesk-Update 2.0, replaces taxType/taxSet). Relation {id, objectName: 'TaxRule'}."
+              },
+              "taxSet": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Tax set (sevdesk-Update 1.0), needed for tax type 'custom'. Relation {id, objectName: 'TaxSet'}."
               },
               "taxText": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
               },
               "taxType": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Tax type (sevdesk-Update 1.0): default, eu, noteu, custom, ss."
               },
-              "showNet": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "deliveryDate": {
+              "sendDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Date the creditNote was sent to the customer."
+              },
+              "address": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Complete recipient address including name, street, city, zip and country."
+              },
+              "currency": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "ISO-4217 currency code used in the creditNote."
+              },
+              "sumNet": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Net sum of the creditNote."
+              },
+              "sumTax": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Tax sum of the creditNote."
+              },
+              "sumGross": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Gross sum of the creditNote."
+              },
+              "sumDiscounts": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Sum of all discounts in the creditNote."
+              },
+              "sumNetForeignCurrency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Net sum in the foreign currency."
+              },
+              "sumTaxForeignCurrency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Tax sum in the foreign currency."
+              },
+              "sumGrossForeignCurrency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Gross sum in the foreign currency."
+              },
+              "sumDiscountsForeignCurrency": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Discounts sum in the foreign currency."
+              },
+              "customerInternalNote": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Internal note of the customer (field 'Referenz/Bestellnummer')."
+              },
+              "showNet": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "If true, the net amount of each position is shown on the creditNote, otherwise the gross amount."
+              },
+              "sendType": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Type used to send the creditNote: VPR, VPDF, VM or VP."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "conflict_keys": [
@@ -946,11 +1198,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "creditnote"
+  }
 }

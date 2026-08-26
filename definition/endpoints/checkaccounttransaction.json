@@ -1,9 +1,107 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "checkaccounttransaction",
   "display_name": "Check Account Transactions",
-  "description": "Bank/cash/register transactions on payment accounts.",
+  "description": "Bank, cash and register transactions booked on sevdesk payment accounts.",
   "operations": {
     "read": {
+      "params": {
+        "checkAccount[id]": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all transactions on this check account. Must be provided together with checkAccount[objectName]."
+        },
+        "checkAccount[objectName]": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if checkAccount[id] was provided. Use 'CheckAccount' as the value."
+        },
+        "isBooked": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only retrieve booked transactions."
+        },
+        "paymtPurpose": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only retrieve transactions with this payment purpose."
+        },
+        "startDate": {
+          "in": "query",
+          "type": "string",
+          "format": "date-time",
+          "required": false,
+          "operators": [
+            "gte"
+          ],
+          "description": "Only retrieve transactions from this date on. Windows valueDate (the transaction's document date), not modification time."
+        },
+        "endDate": {
+          "in": "query",
+          "type": "string",
+          "format": "date-time",
+          "required": false,
+          "operators": [
+            "lte"
+          ],
+          "description": "Only retrieve transactions up to this date. Windows valueDate (the transaction's document date), not modification time."
+        },
+        "payeePayerName": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only retrieve transactions with this payee / payer."
+        },
+        "onlyCredit": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only retrieve credit transactions."
+        },
+        "onlyDebit": {
+          "in": "query",
+          "type": "boolean",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Only retrieve debit transactions."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/CheckAccountTransaction",
@@ -43,114 +141,21 @@
           }
         }
       },
-      "params": {
-        "checkAccount[id]": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by check account id."
-        },
-        "checkAccount[objectName]": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Use 'CheckAccount'."
-        },
-        "isBooked": {
-          "in": "query",
-          "type": "boolean",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Only return booked transactions."
-        },
-        "paymtPurpose": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by payment purpose."
-        },
-        "startDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter from this value date (date-time)."
-        },
-        "endDate": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter to this value date (date-time)."
-        },
-        "payeePayerName": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by payee/payer name."
-        },
-        "onlyCredit": {
-          "in": "query",
-          "type": "boolean",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by onlyCredit."
-        },
-        "onlyDebit": {
-          "in": "query",
-          "type": "boolean",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by onlyDebit."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -163,61 +168,80 @@
           "ref": "response.body.objects"
         },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
               "type": "array",
+              "description": "sevdesk wraps every read response in an `objects` array.",
               "items": {
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Check account transaction id."
+                    "description": "The check account transaction id."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The check account transaction object name, always 'CheckAccountTransaction'."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "description": "Date of check account transaction creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "description": "Date of last check account transaction update."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Client to which the check account transaction belongs; filled automatically. sevdesk relation object shaped {id, objectName}, objectName = 'SevClient'."
                   },
                   "valueDate": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date the transaction was imported."
+                    "description": "Date the check account transaction was imported."
                   },
                   "entryDate": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Date the transaction was booked."
+                    "description": "Date the check account transaction was booked."
                   },
                   "paymtPurpose": {
                     "type": [
@@ -225,12 +249,17 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The purpose of the transaction."
                   },
                   "amount": {
-                    "type": "string",
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Amount of the transaction, delivered as a decimal string (e.g. '-100.32')."
                   },
                   "payeePayerName": {
                     "type": [
@@ -238,7 +267,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the other party."
                   },
                   "payeePayerAcctNo": {
                     "type": [
@@ -246,7 +276,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "IBAN or account number of the other party."
                   },
                   "payeePayerBankCode": {
                     "type": [
@@ -254,7 +285,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "BIC or bank code of the other party."
                   },
                   "gvCode": {
                     "type": [
@@ -262,7 +294,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "ZKA business transaction code. This can be given for finAPI accounts."
                   },
                   "entryText": {
                     "type": [
@@ -270,7 +303,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Transaction type, according to the bank. This can be given for finAPI accounts."
                   },
                   "primaNotaNo": {
                     "type": [
@@ -278,18 +312,34 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Transaction primanota. This can be given for finAPI accounts."
                   },
                   "checkAccount": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The check account to which the transaction belongs. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccount'."
                   },
                   "status": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Status: 100=Created, 200=Linked, 300=Private, 350=Auto-booked, 400=Booked."
+                    "enum": [
+                      "100",
+                      "200",
+                      "300",
+                      "350",
+                      "400",
+                      null
+                    ],
+                    "description": "Status of the check account transaction. 100 <-> Created, 200 <-> Linked, 300 <-> Private, 350 <-> Auto-booked without user confirmation, 400 <-> Booked."
                   },
                   "sourceTransaction": {
                     "type": [
@@ -297,7 +347,8 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The check account transaction serving as the source of a money transit. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
                   },
                   "targetTransaction": {
                     "type": [
@@ -305,22 +356,20 @@
                       "null"
                     ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The check account transaction serving as the target of a money transit. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
                   },
                   "enshrined": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "Timepoint when the transaction was enshrined."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -332,142 +381,142 @@
         "request": {
           "method": "POST",
           "path": "/CheckAccountTransaction",
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
             "from_input": "record"
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "required": [
+              "valueDate",
+              "amount",
+              "payeePayerName",
+              "checkAccount",
+              "status"
+            ],
             "properties": {
-              "valueDate": {
+              "id": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "The check account transaction id."
+              },
+              "objectName": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "description": "The check account transaction object name."
+              },
+              "create": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of check account transaction creation."
+              },
+              "update": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Date of last check account transaction update."
+              },
+              "sevClient": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Client to which the check account transaction belongs; filled automatically. sevdesk relation object shaped {id, objectName}, objectName = 'SevClient'."
+              },
+              "valueDate": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date the check account transaction was booked."
               },
               "entryDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Date the check account transaction was imported."
               },
               "paymtPurpose": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The purpose of the transaction."
               },
               "amount": {
-                "type": [
-                  "string",
-                  "number",
-                  "null"
-                ]
+                "type": "number",
+                "description": "Amount of the transaction."
               },
               "payeePayerName": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name of the other party. Required by the provider, though the field itself is nullable."
               },
               "payeePayerAcctNo": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "IBAN or account number of the other party."
               },
               "payeePayerBankCode": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "gvCode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "entryText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "primaNotaNo": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "BIC or bank code of the other party."
               },
               "checkAccount": {
+                "type": "object",
+                "description": "The check account to which the transaction belongs. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccount'."
+              },
+              "status": {
+                "type": "integer",
+                "description": "Status of the check account transaction. 100 <-> Created, 200 <-> Linked, 300 <-> Private, 400 <-> Booked."
+              },
+              "sourceTransaction": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CheckAccount"
-                  }
-                }
+                "description": "The check account transaction serving as the source of the rebooking. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
               },
-              "status": {
+              "targetTransaction": {
                 "type": [
-                  "string",
+                  "object",
                   "null"
-                ]
+                ],
+                "description": "The check account transaction serving as the target of the rebooking. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
               }
-            },
-            "required": [
-              "valueDate",
-              "amount",
-              "checkAccount",
-              "status"
-            ]
+            }
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/CheckAccountTransaction/{id}",
+          "path": "/CheckAccountTransaction/{check_account_transaction_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "check_account_transaction_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -475,108 +524,79 @@
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "required": [
               "id"
             ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "The check account transaction id; supplies the {checkAccountTransactionId} path segment and is the upsert conflict key."
               },
               "valueDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Date the check account transaction was booked."
               },
               "entryDate": {
                 "type": [
                   "string",
                   "null"
                 ],
-                "format": "date-time"
+                "format": "date-time",
+                "description": "Date the check account transaction was imported."
               },
               "paymtPurpose": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The purpose of the transaction."
               },
               "amount": {
                 "type": [
-                  "string",
                   "number",
                   "null"
-                ]
+                ],
+                "description": "Amount of the transaction."
               },
               "payeePayerName": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "payeePayerAcctNo": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "payeePayerBankCode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "gvCode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "entryText": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "primaNotaNo": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Name of the payee / payer."
               },
               "checkAccount": {
                 "type": [
                   "object",
                   "null"
                 ],
-                "required": [
-                  "id",
-                  "objectName"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "string",
-                      "integer"
-                    ]
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "const": "CheckAccount"
-                  }
-                }
+                "description": "The check account to which the transaction belongs. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccount'."
               },
               "status": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Status of the check account transaction. 100 <-> Created, 200 <-> Linked, 300 <-> Private, 400 <-> Booked."
+              },
+              "sourceTransaction": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The check account transaction serving as the source of the rebooking. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
+              },
+              "targetTransaction": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The check account transaction serving as the target of the rebooking. sevdesk relation object shaped {id, objectName}, objectName = 'CheckAccountTransaction'."
               }
             }
           }
@@ -586,11 +606,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "checkaccounttransaction"
+  }
 }

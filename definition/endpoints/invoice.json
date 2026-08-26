@@ -2,97 +2,159 @@
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
   "endpoint_id": "invoice",
   "display_name": "Invoices",
-  "description": "Outbound invoices including drafts, open, paid, and cancelled.",
+  "description": "Outbound invoices including drafts, open, partially paid, paid and cancelled documents.",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/Invoice",
-        "query": {
-          "status": { "from_param": "status" },
-          "invoiceNumber": { "from_param": "invoiceNumber" },
-          "startDate": { "from_param": "startDate" },
-          "endDate": { "from_param": "endDate" },
-          "contact[id]": { "from_param": "contact[id]" },
-          "contact[objectName]": { "from_param": "contact[objectName]" },
-          "limit": { "from_param": "limit" },
-          "offset": { "from_param": "offset" }
-        }
-      },
       "params": {
         "status": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": ["eq"],
-          "description": "Filter by status."
+          "operators": [
+            "eq"
+          ],
+          "description": "Filter by invoice status (100 = draft, 200 = open, 1000 = paid)."
         },
         "invoiceNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": ["eq"],
-          "description": "Filter by invoice number."
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all invoices with this invoice number."
         },
         "startDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
-          "operators": ["eq"],
-          "description": "Filter invoices from this invoice date."
+          "operators": [
+            "gte"
+          ],
+          "description": "Retrieve all invoices with an invoice date equal or higher, as epoch seconds."
         },
         "endDate": {
           "in": "query",
-          "type": "string",
+          "type": "integer",
           "required": false,
-          "operators": ["eq"],
-          "description": "Filter invoices up to this invoice date."
+          "operators": [
+            "lte"
+          ],
+          "description": "Retrieve all invoices with an invoice date equal or lower, as epoch seconds."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": ["eq"],
-          "description": "Filter by contact id."
+          "operators": [
+            "eq"
+          ],
+          "description": "Retrieve all invoices of this contact. Must be sent together with contact[objectName]."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": ["eq"],
-          "description": "Use 'Contact'."
+          "operators": [
+            "eq"
+          ],
+          "description": "Only required if contact[id] was provided. 'Contact' should be used as value."
+        },
+        "updateAfter": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "replication",
+          "description": "Retrieve only invoices modified after this timestamp, as epoch seconds."
         },
         "limit": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "controlled_by": "pagination"
+          "controlled_by": "pagination",
+          "description": "Number of records per page (1-1000)."
         },
         "offset": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "controlled_by": "pagination"
+          "controlled_by": "pagination",
+          "description": "Number of records to skip."
+        }
+      },
+      "request": {
+        "method": "GET",
+        "path": "/Invoice",
+        "query": {
+          "status": {
+            "from_param": "status"
+          },
+          "invoiceNumber": {
+            "from_param": "invoiceNumber"
+          },
+          "startDate": {
+            "from_param": "startDate"
+          },
+          "endDate": {
+            "from_param": "endDate"
+          },
+          "contact[id]": {
+            "from_param": "contact[id]"
+          },
+          "contact[objectName]": {
+            "from_param": "contact[objectName]"
+          },
+          "updateAfter": {
+            "from_param": "updateAfter"
+          },
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
         }
       },
       "pagination": {
         "type": "offset",
         "limit": {
           "param": "limit",
-          "default": { "ref": "runtime.batch_size" },
+          "default": {
+            "ref": "runtime.batch_size"
+          },
           "max": 1000
         },
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
-          "empty": { "ref": "response.body.objects" }
+          "empty": {
+            "ref": "response.body.objects"
+          }
         }
       },
+      "replication": {
+        "supported_methods": [
+          "full_refresh",
+          "incremental"
+        ],
+        "cursor_mappings": [
+          {
+            "cursor_field": "update",
+            "param": "updateAfter",
+            "operator": "gt",
+            "format": "epoch_seconds"
+          }
+        ]
+      },
       "response": {
-        "records": { "ref": "response.body.objects" },
+        "records": {
+          "ref": "response.body.objects"
+        },
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
@@ -102,124 +164,546 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "id": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "objectName": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "create": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Create timestamp." },
-                  "update": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Last update timestamp." },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                  "id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The invoice id."
                   },
-                  "invoiceNumber": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
+                  "objectName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The invoice object name."
+                  },
+                  "invoiceNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The invoice number."
+                  },
                   "contact": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Customer relation."
+                    "description": "The contact used in the invoice. Relation shaped {id, objectName: 'Contact'}."
                   },
-                  "contactPerson": {
-                    "type": "object",
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date of invoice creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date of last invoice update. Replication cursor field."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk user creating the invoice."
+                    "description": "Client to which the invoice belongs. Relation shaped {id, objectName: 'SevClient'}."
+                  },
+                  "invoiceDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The invoice date. Declared as a plain string by the provider."
+                  },
+                  "header": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Normally consists of prefix plus the invoice number."
+                  },
+                  "headText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Header text; certain html tags can be used to format it."
+                  },
+                  "footText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Footer text; certain html tags can be used to format it."
+                  },
+                  "timeToPay": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The time the customer has to pay the invoice, in days."
+                  },
+                  "discountTime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Number of days for which a non-zero discount is granted."
+                  },
+                  "discount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discount percentage, or zero."
+                  },
+                  "addressCountry": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Country of the recipient address. Relation shaped {id, objectName: 'StaticCountry'}."
+                  },
+                  "payDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Payment date."
                   },
                   "createUser": {
-                    "type": ["object", "null"],
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "User who created the invoice. Filled automatically by sevdesk."
+                    "description": "User who created the invoice. Relation shaped {id, objectName: 'SevUser'}."
                   },
-                  "invoiceDate": { "type": "string", "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "header": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "headText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "footText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "timeToPay": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
-                  "discountTime": { "type": ["integer", "null"], "native_type": "integer", "arrow_type": "Int32" },
-                  "discount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "addressName": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressStreet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressZip": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressCity": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "addressCountry": {
-                    "type": ["object", "null"],
+                  "deliveryDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Delivery date; can start a range together with deliveryDateUntil."
+                  },
+                  "status": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Invoice status: 50, 100, 200, 750 or 1000."
+                  },
+                  "smallSettlement": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "Whether the client uses the small settlement scheme."
+                  },
+                  "contactPerson": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
-                    "arrow_type": "Json"
+                    "arrow_type": "Json",
+                    "description": "The user acting as contact person. Relation shaped {id, objectName: 'SevUser'}."
                   },
-                  "payDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "deliveryDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "deliveryDateUntil": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "status": { "type": "string", "native_type": "string", "arrow_type": "Utf8", "description": "Invoice status (50=Draft via factory, 100=Draft, 200=Open, 750=Partially paid, 1000=Paid)." },
-                  "smallSettlement": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether the small-settlement scheme applies (wire value '0'/'1')." },
-                  "taxRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
+                  "taxRate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Deprecated; use the taxRate of the individual positions instead."
+                  },
                   "taxRule": {
-                    "type": ["object", "null"],
-                    "native_type": "object",
-                    "arrow_type": "Json"
-                  },
-                  "taxText": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "taxType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "taxSet": {
-                    "type": ["object", "null"],
+                    "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Tax set (sevdesk-Update 1.0; required when taxType is 'custom')."
+                    "description": "VAT rule (sevdesk-Update 2.0, replaces taxType/taxSet). Relation shaped {id, objectName: 'TaxRule'}."
                   },
-                  "dunningLevel": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Number of reminders already sent for the invoice." },
+                  "taxText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
+                  },
+                  "dunningLevel": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "How many reminders have already been sent for the invoice."
+                  },
+                  "taxType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax type (sevdesk-Update 1.0): default, eu, noteu or custom."
+                  },
                   "paymentMethod": {
-                    "type": ["object", "null"],
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Payment method relation."
+                    "description": "Payment method used for the invoice. Relation shaped {id, objectName: 'PaymentMethod'}."
                   },
                   "costCentre": {
-                    "type": ["object", "null"],
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Cost centre relation."
+                    "description": "Cost centre for the invoice. Relation shaped {id, objectName: 'CostCentre'}."
                   },
-                  "sendDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "The date the invoice was sent to the customer."
+                  },
                   "origin": {
-                    "type": ["object", "null"],
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "Origin object of the invoice (e.g. an Order)."
+                    "description": "Origin of the invoice, e.g. an Order. Relation shaped {id, objectName}."
                   },
-                  "invoiceType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Type (RE, WKR, SR, MA, TR, AR, ER)." },
-                  "accountIntervall": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Recurring-invoice interval as ISO-8601 duration." },
-                  "accountNextInvoice": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Timestamp (epoch seconds, as string) of the next recurring invoice." },
-                  "reminderTotal": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Total reminder amount." },
-                  "reminderDebit": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Debit of the reminder." },
-                  "reminderDeadline": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time", "description": "Deadline of the reminder." },
-                  "reminderCharge": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)", "description": "Additional reminder charge." },
-                  "currency": { "type": "string", "native_type": "string", "arrow_type": "Utf8" },
-                  "sumNet": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTax": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGross": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumNetForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTaxForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGrossForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumDiscounts": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumDiscountsForeignCurrency": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumNetAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumTaxAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "sumGrossAccounting": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "paidAmount": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "showNet": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Whether net amounts are shown per position (wire value '0'/'1')." },
-                  "enshrined": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "sendType": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "deliveryTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "paymentTerms": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "originId": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "customerInternalNote": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "address": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8" },
-                  "currencyExchangeRate": { "type": ["string", "null"], "native_type": "decimal", "arrow_type": "Decimal128(18, 4)" },
-                  "currencyExchangeRateDate": { "type": ["string", "null"], "native_type": "datetime", "arrow_type": "Timestamp(MICROSECOND, UTC)", "format": "date-time" },
-                  "datevConnectOnline": { "type": ["object", "null"], "native_type": "object", "arrow_type": "Json", "description": "Internal attribute." },
-                  "sendPaymentReceivedNotificationDate": { "type": ["string", "null"], "native_type": "string", "arrow_type": "Utf8", "description": "Internal attribute (wire value is a plain string, e.g. '0')." }
+                  "invoiceType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Type of the invoice: RE, WKR, SR, MA, TR, AR or ER."
+                  },
+                  "accountIntervall": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Interval in which recurring invoices are due, as ISO-8601 duration."
+                  },
+                  "accountNextInvoice": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Timestamp (epoch seconds, as string) when the next recurring invoice will be generated."
+                  },
+                  "reminderTotal": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Total reminder amount."
+                  },
+                  "reminderDebit": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Debit of the reminder."
+                  },
+                  "reminderDeadline": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Deadline of the reminder."
+                  },
+                  "reminderCharge": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The additional reminder charge."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Tax set (sevdesk-Update 1.0), required when taxType is 'custom'. Relation shaped {id, objectName: 'TaxSet'}."
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Complete address of the recipient; line breaks are rendered on the invoice pdf."
+                  },
+                  "currency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Currency code according to ISO-4217."
+                  },
+                  "sumNet": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the invoice."
+                  },
+                  "sumTax": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the invoice."
+                  },
+                  "sumGross": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the invoice."
+                  },
+                  "sumDiscounts": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Sum of all discounts in the invoice."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net sum of the invoice in the foreign currency."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax sum of the invoice in the foreign currency."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross sum of the invoice in the foreign currency."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Discounts sum of the invoice in the foreign currency."
+                  },
+                  "sumNetAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Net accounting sum; usually the same as sumNet."
+                  },
+                  "sumTaxAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Tax accounting sum; usually the same as sumTax."
+                  },
+                  "sumGrossAccounting": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Gross accounting sum; usually the same as sumGross."
+                  },
+                  "paidAmount": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "native_type": "number",
+                    "arrow_type": "Float64",
+                    "description": "Amount already paid for this invoice by the customer."
+                  },
+                  "customerInternalNote": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Internal note of the customer ('Referenz/Bestellnummer')."
+                  },
+                  "showNet": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "native_type": "boolean",
+                    "arrow_type": "Boolean",
+                    "description": "If true, net amounts per position are shown; otherwise gross."
+                  },
+                  "enshrined": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Enshrined invoices cannot be changed; set via /Invoice/{invoiceId}/enshrine."
+                  },
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Type used to send the invoice: VPR, VPDF, VM or VP."
+                  },
+                  "deliveryDateUntil": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Upper bound of the delivery date range. Declared as a plain string by the provider."
+                  },
+                  "datevConnectOnline": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Internal attribute."
+                  },
+                  "sendPaymentReceivedNotificationDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Internal attribute."
+                  }
                 },
-                "required": ["id", "objectName"]
+                "required": [
+                  "id",
+                  "objectName"
+                ]
               }
             }
           }
@@ -230,8 +714,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Invoice",
-          "headers": { "Content-Type": "application/json" },
+          "path": "/Invoice/Factory/saveInvoice",
           "body": {
             "from_input": "record"
           }
@@ -240,157 +723,604 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "required": [
+              "invoice",
+              "invoicePosSave"
+            ],
             "properties": {
-              "contact": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
+              "invoice": {
+                "type": "object",
+                "description": "Invoice model to create.",
+                "required": [
+                  "contact",
+                  "contactPerson",
+                  "invoiceDate",
+                  "discount",
+                  "addressCountry",
+                  "status",
+                  "taxRate",
+                  "taxRule",
+                  "taxText",
+                  "taxType",
+                  "invoiceType",
+                  "currency",
+                  "mapAll"
+                ],
                 "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "Contact" }
+                  "id": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The invoice id. Required only when creating or updating positions of an existing invoice."
+                  },
+                  "objectName": {
+                    "type": "string",
+                    "description": "The invoice object name. Use 'Invoice'."
+                  },
+                  "invoiceNumber": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The invoice number."
+                  },
+                  "contact": {
+                    "type": "object",
+                    "description": "The contact used in the invoice. Send {id, objectName: 'Contact'}."
+                  },
+                  "contactPerson": {
+                    "type": "object",
+                    "description": "The user acting as contact person. Send {id, objectName: 'SevUser'}."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of invoice creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Date of last invoice update."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Client to which the invoice belongs; filled automatically. Send {id, objectName: 'SevClient'}."
+                  },
+                  "invoiceDate": {
+                    "type": "string",
+                    "description": "Invoice date as timestamp or dd.mm.yyyy."
+                  },
+                  "header": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Normally consists of prefix plus the invoice number."
+                  },
+                  "headText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Header text; certain html tags can be used."
+                  },
+                  "footText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Footer text; certain html tags can be used."
+                  },
+                  "timeToPay": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The time the customer has to pay the invoice, in days."
+                  },
+                  "discount": {
+                    "type": "integer",
+                    "description": "Discount percentage, or zero."
+                  },
+                  "address": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Complete address of the recipient; line breaks are rendered on the invoice pdf."
+                  },
+                  "addressCountry": {
+                    "type": "object",
+                    "description": "Country of the recipient address. Send {id, objectName: 'StaticCountry'}."
+                  },
+                  "payDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Payment date as timestamp or dd.mm.yyyy."
+                  },
+                  "createUser": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Filled automatically by sevdesk and cannot be changed. Send {id, objectName: 'SevUser'}."
+                  },
+                  "deliveryDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Delivery date; can start a range together with deliveryDateUntil."
+                  },
+                  "deliveryDateUntil": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Upper bound of the delivery date range, as a timestamp."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "50",
+                      "100",
+                      "200",
+                      "750",
+                      "1000"
+                    ],
+                    "description": "Invoice status."
+                  },
+                  "smallSettlement": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the client uses the small settlement scheme."
+                  },
+                  "taxRate": {
+                    "type": "number",
+                    "description": "Deprecated; use the taxRate of the individual positions instead."
+                  },
+                  "taxRule": {
+                    "type": "object",
+                    "description": "VAT rule (sevdesk-Update 2.0). Send {id, objectName: 'TaxRule'}."
+                  },
+                  "taxText": {
+                    "type": "string",
+                    "description": "Tax text, e.g. 'Umsatzsteuer 19%'."
+                  },
+                  "taxType": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "eu",
+                      "noteu",
+                      "custom"
+                    ],
+                    "description": "Tax type (sevdesk-Update 1.0)."
+                  },
+                  "taxSet": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Tax set (sevdesk-Update 1.0), required when taxType is 'custom'. Send {id, objectName: 'TaxSet'}."
+                  },
+                  "dunningLevel": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "How many reminders have already been sent for the invoice."
+                  },
+                  "paymentMethod": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Payment method used for the invoice. Send {id, objectName: 'PaymentMethod'}."
+                  },
+                  "sendDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "The date the invoice was sent to the customer."
+                  },
+                  "invoiceType": {
+                    "type": "string",
+                    "enum": [
+                      "RE",
+                      "WKR",
+                      "SR",
+                      "MA",
+                      "TR",
+                      "AR",
+                      "ER"
+                    ],
+                    "description": "Type of the invoice."
+                  },
+                  "accountIntervall": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Interval in which recurring invoices are due, as ISO-8601 duration."
+                  },
+                  "accountNextInvoice": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Timestamp when the next recurring invoice will be generated."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Currency code according to ISO-4217."
+                  },
+                  "sumNet": {
+                    "type": "number",
+                    "description": "Net sum of the invoice."
+                  },
+                  "sumTax": {
+                    "type": "number",
+                    "description": "Tax sum of the invoice."
+                  },
+                  "sumGross": {
+                    "type": "number",
+                    "description": "Gross sum of the invoice."
+                  },
+                  "sumDiscounts": {
+                    "type": "number",
+                    "description": "Sum of all discounts in the invoice."
+                  },
+                  "sumNetForeignCurrency": {
+                    "type": "number",
+                    "description": "Net sum of the invoice in the foreign currency."
+                  },
+                  "sumTaxForeignCurrency": {
+                    "type": "number",
+                    "description": "Tax sum of the invoice in the foreign currency."
+                  },
+                  "sumGrossForeignCurrency": {
+                    "type": "number",
+                    "description": "Gross sum of the invoice in the foreign currency."
+                  },
+                  "sumDiscountsForeignCurrency": {
+                    "type": "number",
+                    "description": "Discounts sum of the invoice in the foreign currency."
+                  },
+                  "sumNetAccounting": {
+                    "type": "number",
+                    "description": "Net accounting sum; usually the same as sumNet."
+                  },
+                  "sumTaxAccounting": {
+                    "type": "number",
+                    "description": "Tax accounting sum; usually the same as sumTax."
+                  },
+                  "sumGrossAccounting": {
+                    "type": "number",
+                    "description": "Gross accounting sum; usually the same as sumGross."
+                  },
+                  "paidAmount": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Amount already paid for this invoice by the customer."
+                  },
+                  "showNet": {
+                    "type": "boolean",
+                    "description": "If true, net amounts per position are shown; otherwise gross."
+                  },
+                  "enshrined": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Enshrined invoices cannot be changed."
+                  },
+                  "sendType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Type used to send the invoice: VPR, VPDF, VM or VP."
+                  },
+                  "origin": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "Origin of the invoice, e.g. an Order. Send {id, objectName}."
+                  },
+                  "customerInternalNote": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Internal note of the customer ('Referenz/Bestellnummer')."
+                  },
+                  "propertyIsEInvoice": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "If true, the invoice is created as an e-invoice; extra data (sevClient, address fields, bank data, contact email) is then required."
+                  },
+                  "mapAll": {
+                    "type": "boolean",
+                    "description": "Internal sevdesk flag; must be sent as true."
+                  }
                 }
               },
-              "contactPerson": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "SevUser" }
+              "invoicePosSave": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "Invoice positions to create or update.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "objectName",
+                    "mapAll",
+                    "quantity",
+                    "unity",
+                    "taxRate"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "The invoice position id. Required when updating a position of an existing invoice."
+                    },
+                    "objectName": {
+                      "type": "string",
+                      "description": "The invoice position object name. Use 'InvoicePos'."
+                    },
+                    "mapAll": {
+                      "type": "boolean",
+                      "description": "Internal sevdesk flag; must be sent as true."
+                    },
+                    "create": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time",
+                      "description": "Date of invoice position creation."
+                    },
+                    "update": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time",
+                      "description": "Date of last invoice position update."
+                    },
+                    "invoice": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The invoice the position belongs to. Send {id, objectName: 'Invoice'}."
+                    },
+                    "part": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Part from your inventory used in the position. Send {id, objectName: 'Part'}."
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "description": "Quantity of the article/part."
+                    },
+                    "price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Price of the article/part; gross or net depending on the account setting."
+                    },
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Name of the article/part."
+                    },
+                    "unity": {
+                      "type": "object",
+                      "description": "The unit the position's part is measured in. Send {id, objectName: 'Unity'}."
+                    },
+                    "sevClient": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Client the position belongs to; filled automatically. Send {id, objectName: 'SevClient'}."
+                    },
+                    "positionNumber": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "Position number, used to order multiple positions."
+                    },
+                    "text": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "A text describing the position."
+                    },
+                    "discount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "An optional discount of the position."
+                    },
+                    "taxRate": {
+                      "type": "number",
+                      "description": "Tax rate of the position."
+                    },
+                    "sumDiscount": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Discount sum of the position."
+                    },
+                    "sumNetAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Net accounting sum of the position."
+                    },
+                    "sumTaxAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax accounting sum of the position."
+                    },
+                    "sumGrossAccounting": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Gross accounting sum of the position."
+                    },
+                    "priceNet": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Net price of the part."
+                    },
+                    "priceGross": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Gross price of the part."
+                    },
+                    "priceTax": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Tax on the price of the part."
+                    }
+                  }
                 }
               },
-              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
-              "invoiceNumber": { "type": ["string", "null"] },
-              "header": { "type": ["string", "null"] },
-              "headText": { "type": ["string", "null"] },
-              "footText": { "type": ["string", "null"] },
-              "timeToPay": { "type": ["integer", "null"] },
-              "discount": { "type": ["string", "number", "null"] },
-              "addressName": { "type": ["string", "null"] },
-              "addressStreet": { "type": ["string", "null"] },
-              "addressZip": { "type": ["string", "null"] },
-              "addressCity": { "type": ["string", "null"] },
-              "addressCountry": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "StaticCountry" }
+              "invoicePosDelete": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Invoice position to delete alongside the save. Relation {id, objectName: 'InvoicePos'}. The provider declares this as an object with {id, objectName}; it carries no `type` key in the spec."
+              },
+              "filename": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Filename of a previously uploaded file which should be attached."
+              },
+              "discountSave": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "description": "Discounts or surcharges to add to the invoice.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "discount": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Defines if this is a discount or a surcharge."
+                    },
+                    "text": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "A text for the discount."
+                    },
+                    "percentage": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Defines if this is a percentage or an absolute discount."
+                    },
+                    "value": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "Value of the discount."
+                    },
+                    "objectName": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Object name of the discount. Use 'Discounts'."
+                    },
+                    "mapAll": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Internal sevdesk flag."
+                    }
+                  }
                 }
               },
-              "invoiceType": { "type": ["string", "null"] },
-              "currency": { "type": ["string", "null"] },
-              "status": { "type": ["string", "null"] },
-              "taxRate": { "type": ["string", "number", "null"] },
-              "taxRule": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "TaxRule" }
-                }
-              },
-              "taxText": { "type": ["string", "null"] },
-              "taxType": { "type": ["string", "null"] },
-              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
-              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
-              "smallSettlement": { "type": ["string", "null"] },
-              "showNet": { "type": ["string", "null"] },
-              "paymentTerms": { "type": ["string", "null"] },
-              "deliveryTerms": { "type": ["string", "null"] }
-            },
-            "required": ["contact", "contactPerson", "invoiceDate", "invoiceType", "currency", "taxRule", "taxText"]
-          }
-        },
-        "response": {
-          "generated_keys": { "ref": "response.body.objects.id" }
-        }
-      },
-      "upsert": {
-        "conflict_keys": ["id"],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/Invoice/{id}",
-          "path_params": {
-            "id": { "from_param": "id" }
-          },
-          "headers": { "Content-Type": "application/json" },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": ["id"],
-            "properties": {
-              "id": { "type": ["string", "integer"] },
-              "contact": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "Contact" }
-                }
-              },
-              "contactPerson": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "SevUser" }
-                }
-              },
-              "invoiceDate": { "type": ["string", "null"], "format": "date-time" },
-              "invoiceNumber": { "type": ["string", "null"] },
-              "header": { "type": ["string", "null"] },
-              "headText": { "type": ["string", "null"] },
-              "footText": { "type": ["string", "null"] },
-              "timeToPay": { "type": ["integer", "null"] },
-              "discount": { "type": ["string", "number", "null"] },
-              "addressName": { "type": ["string", "null"] },
-              "addressStreet": { "type": ["string", "null"] },
-              "addressZip": { "type": ["string", "null"] },
-              "addressCity": { "type": ["string", "null"] },
-              "addressCountry": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "StaticCountry" }
-                }
-              },
-              "invoiceType": { "type": ["string", "null"] },
-              "currency": { "type": ["string", "null"] },
-              "status": { "type": ["string", "null"] },
-              "taxRate": { "type": ["string", "number", "null"] },
-              "taxRule": {
-                "type": ["object", "null"],
-                "required": ["id", "objectName"],
-                "properties": {
-                  "id": { "type": ["string", "integer"] },
-                  "objectName": { "type": "string", "const": "TaxRule" }
-                }
-              },
-              "taxText": { "type": ["string", "null"] },
-              "taxType": { "type": ["string", "null"] },
-              "deliveryDate": { "type": ["string", "null"], "format": "date-time" },
-              "deliveryDateUntil": { "type": ["string", "null"], "format": "date-time" },
-              "smallSettlement": { "type": ["string", "null"] },
-              "showNet": { "type": ["string", "null"] },
-              "paymentTerms": { "type": ["string", "null"] },
-              "deliveryTerms": { "type": ["string", "null"] }
+              "discountDelete": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Discount to delete. Send {id, objectName: 'Discounts'}."
+              }
             }
           }
         },
         "response": {
-          "generated_keys": { "ref": "response.body.objects.id" }
+          "generated_keys": {
+            "ref": "response.body.invoice.id"
+          },
+          "metadata": {
+            "filename": {
+              "ref": "response.body.filename"
+            }
+          }
         }
       }
     }

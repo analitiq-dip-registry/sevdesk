@@ -1,8 +1,8 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "endpoint_id": "tagrelation",
-  "display_name": "Tag Relations",
-  "description": "Associations between a tag and the sevdesk document it is attached to. Read-only: sevdesk creates a tag relation automatically as part of tag creation and exposes no write route on /TagRelation.",
+  "endpoint_id": "communicationwaykey",
+  "display_name": "Communication Way Keys",
+  "description": "Reference data: the fixed set of communication-way keys (Privat, Arbeit, Fax, Mobil, ...) a contact's communication way can carry. Read-only.",
   "operations": {
     "read": {
       "params": {
@@ -23,7 +23,7 @@
       },
       "request": {
         "method": "GET",
-        "path": "/TagRelation",
+        "path": "/CommunicationWayKey",
         "query": {
           "limit": {
             "from_param": "limit"
@@ -68,7 +68,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "description": "Model_TagCreateResponse. Declares `create` but NO `update` field, so this resource exposes no modification watermark at all.",
+                "description": "Item shape is declared INLINE on GET /CommunicationWayKey; sevdesk publishes no component model for it.",
                 "properties": {
                   "id": {
                     "type": [
@@ -77,7 +77,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Id of the tag relation."
+                    "description": "The id of the communication way key. 1 = Privat, 2 = Arbeit, 3 = Fax, 4 = Mobil, 5 = ' ', 6 = Autobox, 7 = Newsletter, 8 = Rechnungsadresse."
                   },
                   "objectName": {
                     "type": [
@@ -86,16 +86,7 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Internal object name, which is 'TagRelation'."
-                  },
-                  "additionalInformation": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Additional information carried on the relation."
+                    "description": "Object name, which is 'CommunicationWayKey'."
                   },
                   "create": {
                     "type": [
@@ -105,34 +96,46 @@
                     "format": "date-time",
                     "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "description": "Date of tag creation."
+                    "description": "Date the communication way key was created."
                   },
-                  "tag": {
+                  "upadate": {
                     "type": [
-                      "object",
+                      "string",
                       "null"
                     ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "The tag information, as a sevdesk relation ({ id, objectName: 'Tag' })."
+                    "format": "date-time",
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date the communication way key was last updated. The field name is MISSPELLED 'upadate' by sevdesk; this is the wire name the provider actually sends, so it is authored verbatim rather than corrected. Not usable as a replication cursor: sevdesk documents no filter param for it."
                   },
-                  "object": {
+                  "name": {
                     "type": [
-                      "object",
+                      "string",
                       "null"
                     ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "The tagged document, as a sevdesk relation ({ id, objectName: 'Invoice' | 'Voucher' | 'Order' | 'CreditNote' })."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "enum": [
+                      "Arbeit",
+                      "Autobox",
+                      "Fax",
+                      "Mobil",
+                      "Newsletter",
+                      "Privat",
+                      "Rechnungsadresse",
+                      " ",
+                      null
+                    ],
+                    "description": "Name of the communication way key. Closed domain of 8 values; one member is a single space (' ', key id 5). `null` is admitted because the field is nullable."
                   },
-                  "sevClient": {
+                  "translationCode": {
                     "type": [
-                      "object",
+                      "string",
                       "null"
                     ],
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "Client to which the relation belongs, as a sevdesk relation ({ id, objectName: 'SevClient' }). Filled automatically."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Translation code of the communication way key, e.g. 'COMM_WAY_KEY_WORK'."
                   }
                 }
               }

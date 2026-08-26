@@ -1,13 +1,51 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "tag",
   "display_name": "Tags",
-  "description": "Free-form labels attachable to many resources.",
+  "description": "Labels attached to sevdesk documents. Note on insert: sevdesk exposes no POST on the /Tag collection — a tag is created through POST /Tag/Factory/create, which REQUIRES the tag to be attached to an existing Invoice, Voucher, Order or CreditNote. A standalone tag cannot be created.",
   "operations": {
     "read": {
+      "params": {
+        "id": {
+          "in": "query",
+          "type": "number",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "ID of the tag. Declared `type: number` by the sevdesk spec."
+        },
+        "name": {
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "operators": [
+            "eq"
+          ],
+          "description": "Name of the tag."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. sevdesk accepts 1..1000 and returns HTTP 400 outside that range."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Record offset into the result set."
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Tag",
         "query": {
+          "id": {
+            "from_param": "id"
+          },
           "name": {
             "from_param": "name"
           },
@@ -19,42 +57,21 @@
           }
         }
       },
-      "params": {
-        "name": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by tag name."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -69,58 +86,70 @@
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "sevdesk wraps every list response in an `objects` array.",
           "properties": {
             "objects": {
               "type": "array",
               "items": {
                 "type": "object",
+                "description": "Model_TagResponse. Declares `create` but NO `update` field, so this resource exposes no modification watermark at all.",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "additionalInformation": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Additional free-form information stored on the tag."
+                    "description": "Id of the tag."
+                  },
+                  "objectName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Internal object name, which is 'Tag'."
+                  },
+                  "additionalInformation": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Additional information carried on the tag."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Date of tag creation."
                   },
                   "name": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the tag."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the tag belongs, as a sevdesk relation ({ id, objectName: 'SevClient' }). Filled automatically."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -131,10 +160,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Tag",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/Tag/Factory/create",
           "body": {
             "from_input": "record"
           }
@@ -143,69 +169,67 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
+            "description": "One tag to create. The /Tag collection exposes NO POST — creation goes through POST /Tag/Factory/create, which REQUIRES the tag to be attached to an existing Invoice, Voucher, Order or CreditNote via the `object` relation. A standalone tag cannot be created. The route takes the object bare (no envelope) and answers 200 with a bare Model_TagCreateResponse.",
             "properties": {
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name of the tag."
+              },
+              "object": {
+                "type": "object",
+                "description": "The existing document the tag is attached to. sevdesk relation: { id: <id of the invoice/order/voucher/creditNote>, objectName: one of 'Invoice', 'Voucher', 'Order', 'CreditNote' }. Required — sevdesk cannot create a detached tag."
               }
             },
             "required": [
-              "name"
+              "object"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Tag/{id}",
+          "path": "/Tag/{tag_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "tag_id": {
+              "from_input": "record.id"
             }
           },
-          "headers": {
-            "Content-Type": "application/json"
-          },
           "body": {
-            "from_input": "record"
+            "name": {
+              "from_input": "record.name"
+            }
           }
         },
         "input": {
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
+            "description": "One tag to update. PUT /Tag/{tagId} accepts only `name` in the body and answers 200 with a bare Model_TagResponse. `id` supplies the {tagId} URL segment and is the conflict key.",
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "Id of the tag to update. Supplies the {tagId} path segment."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The name of the tag you want to update."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
         "conflict_keys": [
@@ -213,11 +237,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "tag"
+  }
 }

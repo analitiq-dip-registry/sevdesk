@@ -1,16 +1,28 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "checkaccount",
   "display_name": "Check Accounts",
-  "description": "Bank, cash, and register accounts used for bookkeeping.",
+  "description": "Bank, cash, register and file-import accounts used for bookkeeping.",
   "operations": {
     "read": {
+      "params": {
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination"
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/CheckAccount",
         "query": {
-          "status": {
-            "from_param": "status"
-          },
           "limit": {
             "from_param": "limit"
           },
@@ -19,42 +31,21 @@
           }
         }
       },
-      "params": {
-        "status": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by status."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -67,54 +58,93 @@
           "ref": "response.body.objects"
         },
         "schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
           "properties": {
             "objects": {
               "type": "array",
+              "description": "sevdesk wraps every read response in an `objects` array.",
               "items": {
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "objectName": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Create timestamp."
-                  },
-                  "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
-                    "format": "date-time",
-                    "description": "Last update timestamp."
-                  },
-                  "sevClient": {
-                    "type": "object",
-                    "native_type": "object",
-                    "arrow_type": "Json",
-                    "description": "sevdesk client."
-                  },
-                  "name": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "type": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "online | offline | register."
+                    "description": "The check account id."
+                  },
+                  "objectName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The check account object name, always 'CheckAccount'."
+                  },
+                  "create": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date of check account creation."
+                  },
+                  "update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "format": "date-time",
+                    "description": "Date of last check account update."
+                  },
+                  "sevClient": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "native_type": "object",
+                    "arrow_type": "Json",
+                    "description": "Client to which the check account belongs; filled automatically. sevdesk relation object shaped {id, objectName}, objectName = 'SevClient'."
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Name of the check account."
+                  },
+                  "iban": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The IBAN of the account."
+                  },
+                  "type": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "enum": [
+                      "online",
+                      "offline",
+                      "register",
+                      null
+                    ],
+                    "description": "The type of the check account. Accounts with a CSV or MT940 import are regarded as online."
                   },
                   "importType": {
                     "type": [
@@ -123,7 +153,13 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Import type for online accounts not connected to a data provider: CSV | MT940 | null."
+                    "enum": [
+                      "CSV",
+                      "MT940",
+                      "None",
+                      null
+                    ],
+                    "description": "Import type, for accounts that are type 'online' but not connected to a data provider."
                   },
                   "currency": {
                     "type": [
@@ -131,7 +167,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The currency of the check account."
                   },
                   "defaultAccount": {
                     "type": [
@@ -143,41 +180,22 @@
                     "description": "Defines if this check account is the default account."
                   },
                   "baseAccount": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "1 if the account is your base account that comes with every sevdesk setup."
+                    "description": "This will be 1 if the account is your base account that comes with every sevdesk setup."
                   },
                   "priority": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8",
-                    "description": "Defines the sorting of accounts; highest is first."
-                  },
-                  "iban": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "bic": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "The BIC of the bank this account belongs to."
-                  },
-                  "bankServer": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "description": "Defines the sorting of accounts, highest is first."
                   },
                   "status": {
                     "type": [
@@ -186,7 +204,30 @@
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "0=archived, 100=active."
+                    "enum": [
+                      "0",
+                      "100",
+                      null
+                    ],
+                    "description": "Status of the check account. 0 <-> Archived, 100 <-> Active."
+                  },
+                  "balance": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The account balance as reported by PayPal or finAPI. Not set for other types of accounts."
+                  },
+                  "bankServer": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Bank server of the check account, only set if the account is connected to a data provider."
                   },
                   "autoMapTransactions": {
                     "type": [
@@ -194,17 +235,24 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Defines if transactions on this account are automatically mapped to invoices and vouchers when imported if possible."
                   },
                   "autoSyncTransactions": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "If 1, the account is automatically updated through PayPal or finAPI. Only for connected online accounts."
+                    "description": "If this is 1 the account will be automatically updated through PayPal or finAPI. Only applicable for connected online accounts."
                   },
                   "lastSync": {
-                    "type": "string",
-                    "native_type": "datetime",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "date-time",
                     "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
                     "description": "Timepoint of the last payment import through PayPal or finAPI."
@@ -215,30 +263,19 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The booking account used for this account, e.g. 1800 in SKR04 and 1200 in SKR03. Must be unique among all your CheckAccounts."
                   },
-                  "lastBalance": {
+                  "bic": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)"
-                  },
-                  "balance": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "decimal",
-                    "arrow_type": "Decimal128(18, 4)",
-                    "description": "Account balance as reported by PayPal or finAPI. Not set for other account types."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "The BIC of the bank this account belongs to."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -249,79 +286,49 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/CheckAccount",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/CheckAccount/Factory/fileImportAccount",
           "body": {
             "from_input": "record"
           }
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "properties": {
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Name of the check account."
               },
               "importType": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "enum": [
+                  "CSV",
+                  "MT940",
+                  null
+                ],
+                "description": "Import type. Transactions can be imported by this method on the check account."
               },
-              "currency": {
+              "accountingNumber": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
-              },
-              "defaultAccount": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "The booking account used for this bank account, e.g. 1800 in SKR04 and 1200 in SKR03. Must be unique among all your CheckAccounts. Omit to use a sensible default."
               },
               "iban": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "autoMapTransactions": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "accountingNumber": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "IBAN of the bank account, without spaces."
               }
-            },
-            "required": [
-              "name",
-              "type",
-              "currency"
-            ]
+            }
           }
         },
         "response": {
@@ -331,23 +338,13 @@
         }
       },
       "upsert": {
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/CheckAccount/{id}",
+          "path": "/CheckAccount/{check_account_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "check_account_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -355,71 +352,56 @@
         },
         "input": {
           "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
             "required": [
               "id"
             ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "The check account id; supplies the {checkAccountId} path segment and is the upsert conflict key."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "type": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "importType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Name of the check account."
               },
               "defaultAccount": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
-              },
-              "iban": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Defines if this check account is the default account. 0 <-> no, 1 <-> yes."
               },
               "autoMapTransactions": {
                 "type": [
-                  "string",
+                  "integer",
                   "null"
-                ]
+                ],
+                "description": "Defines if transactions on this account are automatically mapped to invoices and vouchers when imported if possible."
               },
               "accountingNumber": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The booking account used for this bank account, e.g. 1800 in SKR04 and 1200 in SKR03. Must be unique among all your CheckAccounts."
+              },
+              "iban": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "IBAN of a bank account."
+              },
+              "bic": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "BIC of the related bank."
               }
             }
           }
@@ -429,11 +411,10 @@
         ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "checkaccount"
+  }
 }

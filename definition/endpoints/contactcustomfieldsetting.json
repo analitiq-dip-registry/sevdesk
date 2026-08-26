@@ -1,34 +1,11 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
-  "display_name": "Layouts",
-  "description": "Document templates (invoice, credit-note, etc.).",
+  "endpoint_id": "contactcustomfieldsetting",
+  "display_name": "Contact Custom Field Settings",
+  "description": "Definitions of the account's custom contact fields (name, identifier, description).",
   "operations": {
     "read": {
-      "request": {
-        "method": "GET",
-        "path": "/Layout",
-        "query": {
-          "type": {
-            "from_param": "type"
-          },
-          "limit": {
-            "from_param": "limit"
-          },
-          "offset": {
-            "from_param": "offset"
-          }
-        }
-      },
       "params": {
-        "type": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by document type."
-        },
         "limit": {
           "in": "query",
           "type": "integer",
@@ -40,6 +17,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "request": {
+        "method": "GET",
+        "path": "/ContactCustomFieldSetting",
+        "query": {
+          "limit": {
+            "from_param": "limit"
+          },
+          "offset": {
+            "from_param": "offset"
+          }
         }
       },
       "pagination": {
@@ -54,7 +43,9 @@
         "offset": {
           "param": "offset",
           "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
+          "increment_by": {
+            "ref": "response.record_count"
+          }
         },
         "stop_when": {
           "empty": {
@@ -76,79 +67,80 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Id of the contact field setting."
                   },
                   "objectName": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Internal object name, which is 'ContactCustomFieldSetting'."
                   },
                   "create": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of contact field creation."
                   },
                   "update": {
-                    "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date the contact field was updated."
                   },
                   "sevClient": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Client to which the contact field setting belongs. sevdesk relation of the form {\"id\": ..., \"objectName\": \"SevClient\"}; filled automatically."
                   },
                   "name": {
-                    "type": "string",
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "type": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Document type the layout applies to."
+                    "description": "Name of the contact field."
                   },
-                  "html": {
+                  "identifier": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Layout HTML body."
+                    "description": "Unique identifier for the contact field."
                   },
-                  "css": {
+                  "description": {
                     "type": [
                       "string",
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
-                  },
-                  "isStandard": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The description of the contact field."
                   }
-                },
-                "required": [
-                  "id",
-                  "objectName"
-                ]
+                }
               }
             }
           }
@@ -159,10 +151,7 @@
       "insert": {
         "request": {
           "method": "POST",
-          "path": "/Layout",
-          "headers": {
-            "Content-Type": "application/json"
-          },
+          "path": "/ContactCustomFieldSetting",
           "body": {
             "from_input": "record"
           }
@@ -173,69 +162,43 @@
             "type": "object",
             "properties": {
               "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": "string",
+                "description": "Name of the contact field."
               },
-              "type": {
+              "description": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The description of the contact field."
               },
-              "html": {
+              "objectName": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "css": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "isStandard": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Internal object name, which is 'ContactCustomFieldSetting'."
               }
             },
             "required": [
-              "name",
-              "type"
+              "name"
             ]
           }
         },
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.objects.0.id"
           }
         }
       },
       "upsert": {
-        "conflict_keys": [
-          "id"
-        ],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
         "request": {
           "method": "PUT",
-          "path": "/Layout/{id}",
+          "path": "/ContactCustomFieldSetting/{contact_custom_field_setting_id}",
           "path_params": {
-            "id": {
-              "from_param": "id"
+            "contact_custom_field_setting_id": {
+              "from_input": "record.id"
             }
-          },
-          "headers": {
-            "Content-Type": "application/json"
           },
           "body": {
             "from_input": "record"
@@ -245,56 +208,47 @@
           "schema": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
+                "type": "string",
+                "description": "Id of the contact field setting; supplies the {contactCustomFieldSettingId} path segment."
               },
               "name": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Name of the contact field."
               },
-              "type": {
+              "description": {
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "The description of the contact field."
               },
-              "html": {
+              "objectName": {
                 "type": [
                   "string",
                   "null"
-                ]
-              },
-              "css": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "isStandard": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                ],
+                "description": "Internal object name, which is 'ContactCustomFieldSetting'."
               }
-            }
+            },
+            "required": [
+              "id"
+            ]
           }
         },
+        "conflict_keys": [
+          "id"
+        ],
         "response": {
           "generated_keys": {
-            "ref": "response.body.objects.id"
+            "ref": "response.body.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "layout"
+  }
 }

@@ -1,9 +1,35 @@
 {
   "$schema": "https://schemas.analitiq.ai/api-endpoint/latest.json",
+  "endpoint_id": "category",
   "display_name": "Categories",
-  "description": "Categories used to classify contacts and other resources.",
+  "description": "Reference data: categories used to classify parts, contact addresses and other sevdesk objects. Read-only — no write route has any evidence in the spec. Provenance: /Category has NO entry in the sevdesk OpenAPI `paths:` object; the route is grounded verbatim in first-party field descriptions — 'For all categories, send a GET to /Category?objectType=Part'. The response field list is not published anywhere in the spec and is carried forward verbatim from the released 3.0.1 endpoint document.",
   "operations": {
     "read": {
+      "params": {
+        "objectType": {
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "operators": [
+            "eq"
+          ],
+          "description": "The object type whose categories are returned. sevdesk documents /Category only as GET /Category?objectType=<X>, so this is required in practice. Documented values are 'ContactAddress' and 'Part'; the full domain is NOT enumerated anywhere in the spec, so no closed enum is declared here."
+        },
+        "limit": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Page size. sevdesk accepts 1..1000 and returns HTTP 400 outside that range."
+        },
+        "offset": {
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "controlled_by": "pagination",
+          "description": "Record offset into the result set."
+        }
+      },
       "request": {
         "method": "GET",
         "path": "/Category",
@@ -19,42 +45,21 @@
           }
         }
       },
-      "params": {
-        "objectType": {
-          "in": "query",
-          "type": "string",
-          "required": false,
-          "operators": [
-            "eq"
-          ],
-          "description": "Filter by object type."
-        },
-        "limit": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        },
-        "offset": {
-          "in": "query",
-          "type": "integer",
-          "required": false,
-          "controlled_by": "pagination"
-        }
-      },
       "pagination": {
         "type": "offset",
+        "offset": {
+          "param": "offset",
+          "initial": 0,
+          "increment_by": {
+            "ref": "response.record_count"
+          }
+        },
         "limit": {
           "param": "limit",
           "default": {
             "ref": "runtime.batch_size"
           },
           "max": 1000
-        },
-        "offset": {
-          "param": "offset",
-          "initial": 0,
-          "increment_by": { "ref": "response.record_count" }
         },
         "stop_when": {
           "empty": {
@@ -69,52 +74,57 @@
         "schema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
+          "description": "sevdesk wraps every list response in an `objects` array.",
           "properties": {
             "objects": {
               "type": "array",
               "items": {
                 "type": "object",
+                "description": "Record shape is NOT published in the sevdesk OpenAPI document; carried forward verbatim from the released 3.0.1 definition.",
                 "properties": {
                   "id": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "The category id."
                   },
                   "objectName": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Object name, which is 'Category'."
                   },
                   "create": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Create timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of category creation."
                   },
                   "update": {
                     "type": "string",
-                    "native_type": "datetime",
-                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
                     "format": "date-time",
-                    "description": "Last update timestamp."
+                    "native_type": "date-time",
+                    "arrow_type": "Timestamp(MICROSECOND, UTC)",
+                    "description": "Date of last category update. Not usable as a replication cursor: sevdesk documents no filter param on /Category (which is not even in the paths object)."
                   },
                   "sevClient": {
                     "type": "object",
                     "native_type": "object",
                     "arrow_type": "Json",
-                    "description": "sevdesk client."
+                    "description": "Client to which the category belongs, as a sevdesk relation ({ id, objectName: 'SevClient' })."
                   },
                   "name": {
                     "type": "string",
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Name of the category."
                   },
                   "objectType": {
                     "type": "string",
                     "native_type": "string",
                     "arrow_type": "Utf8",
-                    "description": "Type the category applies to (Contact, Invoice, etc.)."
+                    "description": "The object type this category applies to, e.g. 'Part' or 'ContactAddress'."
                   },
                   "code": {
                     "type": [
@@ -122,7 +132,8 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Code of the category."
                   },
                   "translationCode": {
                     "type": [
@@ -130,135 +141,24 @@
                       "null"
                     ],
                     "native_type": "string",
-                    "arrow_type": "Utf8"
+                    "arrow_type": "Utf8",
+                    "description": "Translation code of the category."
                   }
                 },
                 "required": [
                   "id",
-                  "objectName"
+                  "objectName",
+                  "create",
+                  "update",
+                  "sevClient",
+                  "name",
+                  "objectType"
                 ]
               }
             }
-          }
-        }
-      }
-    },
-    "write": {
-      "insert": {
-        "request": {
-          "method": "POST",
-          "path": "/Category",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "objectType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "name",
-              "objectType"
-            ]
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
-          }
-        }
-      },
-      "upsert": {
-        "conflict_keys": [
-          "id"
-        ],
-        "params": {
-          "id": {
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        },
-        "request": {
-          "method": "PUT",
-          "path": "/Category/{id}",
-          "path_params": {
-            "id": {
-              "from_param": "id"
-            }
-          },
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "from_input": "record"
-          }
-        },
-        "input": {
-          "schema": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "string",
-                  "integer"
-                ]
-              },
-              "name": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "objectType": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            }
-          }
-        },
-        "response": {
-          "generated_keys": {
-            "ref": "response.body.objects.id"
           }
         }
       }
     }
-  },
-  "endpoint_id": "category"
+  }
 }
