@@ -5,8 +5,14 @@
   "display_name": "sevdesk",
   "description": "Cloud-based accounting and invoicing platform for small businesses and freelancers in the DACH region.",
   "documentation_url": "https://api.sevdesk.de/",
-  "tags": ["accounting", "invoicing", "finance", "dach", "api"],
-  "version": "3.0.1",
+  "tags": [
+    "accounting",
+    "invoicing",
+    "finance",
+    "dach",
+    "api"
+  ],
+  "version": "4.0.0",
   "default_transport": "api",
   "transports": {
     "api": {
@@ -14,12 +20,16 @@
       "base_url": "https://my.sevdesk.de/api/v1",
       "headers": {
         "Accept": "application/json",
-        "Authorization": { "template": "${secrets.api_token}" }
+        "Authorization": {
+          "template": "${secrets.api_token}"
+        }
       },
       "timeout_seconds": 30
     }
   },
-  "auth": { "type": "api_key" },
+  "auth": {
+    "type": "api_key"
+  },
   "connection_contract": {
     "inputs": {
       "api_token": {

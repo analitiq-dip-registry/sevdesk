@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.0.0] - 2026-08-26
+
+### Changed
+- feat: re-author connector from the full sevdesk spec against rc23 (#16)
+
 ## [3.0.1] - 2026-08-01
 
 ### Fixed
