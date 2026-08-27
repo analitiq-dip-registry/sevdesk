@@ -294,10 +294,13 @@
                     "description": "Version of the order; useful when multiple drafts exist for the same order. Starts at 0."
                   },
                   "smallSettlement": {
-                    "type": "boolean",
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Whether the client uses the small settlement scheme. If so, the order must not contain any VAT."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the client uses the small settlement scheme. If so, the order must not contain any VAT. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "contactPerson": {
                     "type": [
@@ -435,10 +438,13 @@
                     "description": "Internal note of the customer. Contains data entered into the field 'Referenz/Bestellnummer'."
                   },
                   "showNet": {
-                    "type": "boolean",
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "If true, the net amount of each position is shown on the order; otherwise the gross amount."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "If true, the net amount of each position is shown on the order; otherwise the gross amount. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "sendType": {
                     "type": [

@@ -341,12 +341,12 @@
                   },
                   "smallSettlement": {
                     "type": [
-                      "boolean",
+                      "string",
                       "null"
                     ],
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Whether the client uses the small settlement scheme."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Whether the client uses the small settlement scheme. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "contactPerson": {
                     "type": [
@@ -646,12 +646,12 @@
                   },
                   "showNet": {
                     "type": [
-                      "boolean",
+                      "string",
                       "null"
                     ],
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "If true, net amounts per position are shown; otherwise gross."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "If true, net amounts per position are shown; otherwise gross. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "enshrined": {
                     "type": [

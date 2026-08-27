@@ -232,12 +232,12 @@
                   },
                   "optional": {
                     "type": [
-                      "boolean",
+                      "string",
                       "null"
                     ],
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Defines if the position is optional."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Defines if the position is optional. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "taxRate": {
                     "type": "string",
