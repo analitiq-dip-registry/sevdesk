@@ -167,10 +167,13 @@
                     "description": "The voucher object name — always 'Voucher'."
                   },
                   "mapAll": {
-                    "type": "boolean",
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "sevdesk internal mapping flag."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "sevdesk internal mapping flag. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "create": {
                     "type": [

@@ -162,10 +162,13 @@
                     "description": "The stock of the part."
                   },
                   "stockEnabled": {
-                    "type": "boolean",
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Defines if the stock should be enabled."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Defines if the stock should be enabled. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "unity": {
                     "type": "object",

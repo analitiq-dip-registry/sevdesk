@@ -163,19 +163,22 @@
                     "description": "Tax rate of the voucher position."
                   },
                   "net": {
-                    "type": "boolean",
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Determines whether sumNet or sumGross is regarded."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Determines whether sumNet or sumGross is regarded. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "isAsset": {
                     "type": [
-                      "boolean",
+                      "string",
                       "null"
                     ],
-                    "native_type": "boolean",
-                    "arrow_type": "Boolean",
-                    "description": "Determines whether the position is regarded as a depreciable asset."
+                    "native_type": "string",
+                    "arrow_type": "Utf8",
+                    "description": "Determines whether the position is regarded as a depreciable asset. sevdesk returns this as the string '0'/'1' on the read path even though its OpenAPI model declares type: boolean — the spec's own example for this field is a quoted string. Typed Utf8 so the value survives; the write path still takes a real boolean."
                   },
                   "sumNet": {
                     "type": "string",

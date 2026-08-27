@@ -187,6 +187,15 @@ native cannot render both `Utf8` and `Float64`, and a non-temporal format adds n
 an offset (`2024-05-10T00:00:00+02:00`, `2023-04-18T15:45:38+02:00`, `2026-01-16T12:51:22+01:00`).
 Values spelled `01.01.2020` are a reused placeholder, not a wire sample.
 
+**No read field is `Boolean`.** sevdesk's response models declare `type: boolean` on twelve fields
+(`smallSettlement`, `showNet`, `net`, `isAsset`, `optional`, `stockEnabled`, `mapAll`), but the wire
+sends the strings `"0"` / `"1"` — and the spec contradicts itself, giving those same fields quoted
+string examples (`'0'`, `'1'`, `'true'`, `'false'`). Arrow refuses `str -> bool` deterministically, so
+a `Boolean` declaration fails the read before the first batch with `CONFIG_INVALID`. All twelve are
+typed `Utf8` on the read path; the write input schemas still take real booleans, which is what
+sevdesk accepts on write. **Do not "restore" these to Boolean on the strength of the declared type —
+4.0.0 did exactly that and broke every affected stream.**
+
 **sevdesk relation fields** (`{"id": …, "objectName": "Category"}`) are opaque `Json` on the read
 path and bare `type: object` in write input schemas — no `properties` sub-schema anywhere. The
 expected `objectName` per relation lives in each field's description. Two earlier releases regressed
