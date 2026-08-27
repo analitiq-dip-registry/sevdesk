@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.0.1] - 2026-08-27
+
+### Fixed
+- fix: type read-path booleans as Utf8 — sevdesk sends 0/1 strings (#17)
+
 ## [4.0.0] - 2026-08-26
 
 ### Changed
