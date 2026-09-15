@@ -1,10 +1,46 @@
-[
-  { "match": "exact", "native": "STRING",    "canonical": "Utf8" },
-  { "match": "exact", "native": "DATE-TIME", "canonical": "Timestamp(MICROSECOND, UTC)" },
-  { "match": "exact", "native": "DATE",      "canonical": "Date32" },
-  { "match": "exact", "native": "INTEGER",   "canonical": "Int64" },
-  { "match": "exact", "native": "NUMBER",    "canonical": "Float64" },
-  { "match": "exact", "native": "BOOLEAN",   "canonical": "Boolean" },
-  { "match": "exact", "native": "OBJECT",    "canonical": "Json" },
-  { "match": "exact", "native": "ARRAY",     "canonical": "Json" }
-]
+{
+  "$schema": "https://schemas.analitiq.ai/type-map-read/latest.json",
+  "direction": "read",
+  "rules": [
+    {
+      "match": "exact",
+      "native_type": "STRING",
+      "arrow_type": "Utf8"
+    },
+    {
+      "match": "exact",
+      "native_type": "DATE-TIME",
+      "arrow_type": "Timestamp(MICROSECOND, UTC)"
+    },
+    {
+      "match": "exact",
+      "native_type": "DATE",
+      "arrow_type": "Date32"
+    },
+    {
+      "match": "exact",
+      "native_type": "INTEGER",
+      "arrow_type": "Int64"
+    },
+    {
+      "match": "exact",
+      "native_type": "NUMBER",
+      "arrow_type": "Float64"
+    },
+    {
+      "match": "exact",
+      "native_type": "BOOLEAN",
+      "arrow_type": "Boolean"
+    },
+    {
+      "match": "exact",
+      "native_type": "OBJECT",
+      "arrow_type": "Json"
+    },
+    {
+      "match": "exact",
+      "native_type": "ARRAY",
+      "arrow_type": "Json"
+    }
+  ]
+}
