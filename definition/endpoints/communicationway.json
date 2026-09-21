@@ -10,36 +10,24 @@
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "ID of the contact for which you want the communication ways."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Object name. Only needed if you also defined the ID of a contact; use 'Contact'."
         },
         "type": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Type of the communication ways you want to get. One of PHONE, EMAIL, WEB, MOBILE."
         },
         "main": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Define if you only want the main communication way. One of '0', '1'."
         },
         "limit": {
@@ -53,6 +41,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "filters": {
+        "type": {
+          "eq": {
+            "from_param": "type"
+          }
+        },
+        "main": {
+          "eq": {
+            "from_param": "main"
+          }
         }
       },
       "request": {

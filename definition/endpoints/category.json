@@ -10,9 +10,6 @@
           "in": "query",
           "type": "string",
           "required": true,
-          "operators": [
-            "eq"
-          ],
           "description": "The object type whose categories are returned. sevdesk documents /Category only as GET /Category?objectType=<X>, so this is required in practice. Documented values are 'ContactAddress' and 'Part'; the full domain is NOT enumerated anywhere in the spec, so no closed enum is declared here."
         },
         "limit": {
@@ -28,6 +25,13 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Record offset into the result set."
+        }
+      },
+      "filters": {
+        "objectType": {
+          "eq": {
+            "from_param": "objectType"
+          }
         }
       },
       "request": {

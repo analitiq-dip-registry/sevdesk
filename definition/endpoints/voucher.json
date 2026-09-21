@@ -10,63 +10,42 @@
           "in": "query",
           "type": "number",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Status of the vouchers to retrieve. One of 50 (draft), 100 (open/unpaid) or 1000 (paid)."
         },
         "creditDebit": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Return only credit (C) or only debit (D) vouchers."
         },
         "descriptionLike": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "contains"
-          ],
           "description": "Retrieve all vouchers whose description (the voucher number) matches this pattern."
         },
         "startDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "gte"
-          ],
           "description": "Unix timestamp in seconds. Retrieve all vouchers with a voucher (document) date equal or higher. This windows the document date, not the modification time, so it cannot back an incremental cursor."
         },
         "endDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "lte"
-          ],
           "description": "Unix timestamp in seconds. Retrieve all vouchers with a voucher (document) date equal or lower. This windows the document date, not the modification time, so it cannot back an incremental cursor."
         },
         "contact_id": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all vouchers for this contact. Must be provided together with contact_object_name."
         },
         "contact_object_name": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if contact_id was provided. 'Contact' should be used as the value."
         },
         "limit": {
@@ -80,6 +59,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "filters": {
+        "status": {
+          "eq": {
+            "from_param": "status"
+          }
+        },
+        "creditDebit": {
+          "eq": {
+            "from_param": "creditDebit"
+          }
         }
       },
       "request": {

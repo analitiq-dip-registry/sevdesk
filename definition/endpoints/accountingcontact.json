@@ -10,18 +10,12 @@
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "ID of the contact for which you want the accounting contact."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Object name. Only needed if you also defined the ID of a contact; use 'Contact'."
         },
         "limit": {

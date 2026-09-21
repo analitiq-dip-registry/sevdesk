@@ -10,45 +10,30 @@
           "in": "query",
           "type": "number",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all InvoicePos with this InvoicePos id."
         },
         "invoice[id]": {
           "in": "query",
           "type": "number",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all invoice positions belonging to this invoice. Must be provided together with invoice[objectName]."
         },
         "invoice[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if invoice[id] was provided. Use 'Invoice'."
         },
         "part[id]": {
           "in": "query",
           "type": "number",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all invoice positions using this part. Must be provided together with part[objectName]."
         },
         "part[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if part[id] was provided. Use 'Part'."
         },
         "limit": {
@@ -62,6 +47,13 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "filters": {
+        "id": {
+          "eq": {
+            "from_param": "id"
+          }
         }
       },
       "request": {
