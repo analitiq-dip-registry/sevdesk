@@ -10,36 +10,24 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all transactions on this check account. Must be provided together with checkAccount[objectName]."
         },
         "checkAccount[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if checkAccount[id] was provided. Use 'CheckAccount' as the value."
         },
         "isBooked": {
           "in": "query",
           "type": "boolean",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only retrieve booked transactions."
         },
         "paymtPurpose": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only retrieve transactions with this payment purpose."
         },
         "startDate": {
@@ -47,9 +35,6 @@
           "type": "string",
           "format": "date-time",
           "required": false,
-          "operators": [
-            "gte"
-          ],
           "description": "Only retrieve transactions from this date on. Windows valueDate (the transaction's document date), not modification time."
         },
         "endDate": {
@@ -57,36 +42,24 @@
           "type": "string",
           "format": "date-time",
           "required": false,
-          "operators": [
-            "lte"
-          ],
           "description": "Only retrieve transactions up to this date. Windows valueDate (the transaction's document date), not modification time."
         },
         "payeePayerName": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only retrieve transactions with this payee / payer."
         },
         "onlyCredit": {
           "in": "query",
           "type": "boolean",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only retrieve credit transactions."
         },
         "onlyDebit": {
           "in": "query",
           "type": "boolean",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only retrieve debit transactions."
         },
         "limit": {
@@ -100,6 +73,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "filters": {
+        "paymtPurpose": {
+          "eq": {
+            "from_param": "paymtPurpose"
+          }
+        },
+        "payeePayerName": {
+          "eq": {
+            "from_param": "payeePayerName"
+          }
         }
       },
       "request": {

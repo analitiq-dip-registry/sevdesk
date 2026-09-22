@@ -10,18 +10,12 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all credit note positions belonging to this credit note. Must be provided together with creditNote[objectName]."
         },
         "creditNote[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if creditNote[id] was provided. Use 'creditNote'."
         },
         "limit": {

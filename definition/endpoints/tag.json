@@ -10,18 +10,12 @@
           "in": "query",
           "type": "number",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "ID of the tag. Declared `type: number` by the sevdesk spec."
         },
         "name": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Name of the tag."
         },
         "limit": {
@@ -37,6 +31,18 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Record offset into the result set."
+        }
+      },
+      "filters": {
+        "id": {
+          "eq": {
+            "from_param": "id"
+          }
+        },
+        "name": {
+          "eq": {
+            "from_param": "name"
+          }
         }
       },
       "request": {

@@ -10,18 +10,12 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all voucher positions belonging to this voucher. Must be provided together with voucher[objectName]."
         },
         "voucher[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if voucher[id] was provided. Use 'Voucher'."
         },
         "limit": {

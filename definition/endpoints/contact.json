@@ -19,9 +19,6 @@
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all contacts with this customer number."
         },
         "updateAfter": {
@@ -44,6 +41,13 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Number of records to skip. sevdesk counts records, not pages."
+        }
+      },
+      "filters": {
+        "customerNumber": {
+          "eq": {
+            "from_param": "customerNumber"
+          }
         }
       },
       "request": {

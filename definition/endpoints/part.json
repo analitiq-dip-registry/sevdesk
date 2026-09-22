@@ -10,18 +10,12 @@
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all parts with this part number."
         },
         "name": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all parts with this name."
         },
         "limit": {
@@ -37,6 +31,18 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Record offset into the result set."
+        }
+      },
+      "filters": {
+        "partNumber": {
+          "eq": {
+            "from_param": "partNumber"
+          }
+        },
+        "name": {
+          "eq": {
+            "from_param": "name"
+          }
         }
       },
       "request": {

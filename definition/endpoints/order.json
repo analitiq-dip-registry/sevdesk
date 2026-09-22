@@ -10,54 +10,36 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Status of the order. One of 100, 200, 300, 500, 750, 1000."
         },
         "orderNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all orders with this order number."
         },
         "startDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "gte"
-          ],
           "description": "Retrieve all orders with an order date equal or higher, as epoch seconds. Windows the document date, not the modification time."
         },
         "endDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "lte"
-          ],
           "description": "Retrieve all orders with an order date equal or lower, as epoch seconds. Windows the document date, not the modification time."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all orders with this contact. Must be provided together with contact[objectName]."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if contact[id] was provided. 'Contact' should be used as value."
         },
         "limit": {
@@ -71,6 +53,18 @@
           "type": "integer",
           "required": false,
           "controlled_by": "pagination"
+        }
+      },
+      "filters": {
+        "status": {
+          "eq": {
+            "from_param": "status"
+          }
+        },
+        "orderNumber": {
+          "eq": {
+            "from_param": "orderNumber"
+          }
         }
       },
       "request": {

@@ -10,54 +10,36 @@
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Filter by invoice status (100 = draft, 200 = open, 1000 = paid)."
         },
         "invoiceNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all invoices with this invoice number."
         },
         "startDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "gte"
-          ],
           "description": "Retrieve all invoices with an invoice date equal or higher, as epoch seconds."
         },
         "endDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "lte"
-          ],
           "description": "Retrieve all invoices with an invoice date equal or lower, as epoch seconds."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all invoices of this contact. Must be sent together with contact[objectName]."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if contact[id] was provided. 'Contact' should be used as value."
         },
         "updateAfter": {
@@ -80,6 +62,18 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Number of records to skip."
+        }
+      },
+      "filters": {
+        "status": {
+          "eq": {
+            "from_param": "status"
+          }
+        },
+        "invoiceNumber": {
+          "eq": {
+            "from_param": "invoiceNumber"
+          }
         }
       },
       "request": {

@@ -40,54 +40,36 @@
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Status of the credit note: 100 (draft), 200 (open), 300, 500, 750, 1000."
         },
         "creditNoteNumber": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all credit notes with this credit note number."
         },
         "startDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "gte"
-          ],
           "description": "Lower bound on the credit note DOCUMENT date (creditNoteDate), as a Unix timestamp in seconds. Not a modification-time filter."
         },
         "endDate": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "lte"
-          ],
           "description": "Upper bound on the credit note DOCUMENT date (creditNoteDate), as a Unix timestamp in seconds. Not a modification-time filter."
         },
         "contact[id]": {
           "in": "query",
           "type": "integer",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Retrieve all credit notes for this contact. Must be sent together with contact[objectName]."
         },
         "contact[objectName]": {
           "in": "query",
           "type": "string",
           "required": false,
-          "operators": [
-            "eq"
-          ],
           "description": "Only required if contact[id] was provided. Use the value 'Contact'."
         },
         "limit": {
@@ -103,6 +85,18 @@
           "required": false,
           "controlled_by": "pagination",
           "description": "Number of records to skip. Counts records, not pages."
+        }
+      },
+      "filters": {
+        "status": {
+          "eq": {
+            "from_param": "status"
+          }
+        },
+        "creditNoteNumber": {
+          "eq": {
+            "from_param": "creditNoteNumber"
+          }
         }
       },
       "pagination": {
